@@ -1,5 +1,3 @@
-https://webframe.app/docs
-
 ## Deployment
 
 First, run this command to find out where npm expects to have auth token:

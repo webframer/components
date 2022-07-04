@@ -1,7 +1,7 @@
 {
   "name": "@webframer/components",
-  "version": "0.0.0",
-  "description": "Components library for no-code development platform webframe.app",
+  "version": "0.0.1",
+  "description": "Components library for no-code development platform",
   "license": "MIT",
   "type": "module",
   "homepage": "https://github.com/webframer/components",
@@ -22,6 +22,6 @@
     "push": "npm publish --access public"
   },
   "dependencies": {
-    "utils-pack": "0.11.5"
+    "utils-pack": "0.11.6"
   }
 }
