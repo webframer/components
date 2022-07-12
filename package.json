@@ -22,6 +22,6 @@
     "push": "npm publish --access public"
   },
   "dependencies": {
-    "utils-pack": "0.11.6"
+    "utils-pack": "0.11.7"
   }
 }
