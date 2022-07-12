@@ -23,5 +23,8 @@
   },
   "dependencies": {
     "utils-pack": "0.11.7"
+  },
+  "peerDependencies": {
+    "svelte": "*"
   }
 }
