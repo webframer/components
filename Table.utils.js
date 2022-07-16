@@ -1,4 +1,4 @@
-import { cloneDeep, Id } from 'utils-pack'
+import { cloneDeep, Id } from '@webframer/utils'
 
 /**
  *

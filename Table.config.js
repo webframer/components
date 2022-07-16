@@ -1,4 +1,4 @@
-import { interpolateString } from 'utils-pack'
+import { interpolateString } from '@webframer/utils'
 import { onAddCells, onAddHeader, onRemoveCells, onRemoveHeader, onToggleLayout } from './Table.utils.js'
 
 // Component Definition
