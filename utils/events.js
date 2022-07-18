@@ -1,4 +1,4 @@
-import { isFunction } from 'utils-pack'
+import { isFunction } from '@webframer/utils'
 
 /**
  * Spread Event Handler Props ('onClick', etc) for Svelte element
