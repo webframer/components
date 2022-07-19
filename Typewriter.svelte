@@ -1,7 +1,7 @@
 <script>
   import { cn } from '@webframer/utils/components.js'
   import { onDestroy, onMount } from 'apps/views/svelte/index.js'
-  import View from './Col.svelte' // These phrases are to be animated in turn,
+  import Col from './Col.svelte' // These phrases are to be animated in turn,
   import Text from './Text.svelte'
 
   // These phrases are to be animated in turn,
@@ -126,12 +126,12 @@
 </script>
 <div class:typewriter={true} class:row class:wrap={row} class:col={!row} {...$$restProps}>
   {#each phrases as _phrase, i}
-    <View class="max-width">
+    <Col class='max-width'>
       <Text class={cn("break-words", {invisible: !underline})} style={styleText}>{phrasePadStrings[i]}</Text>
-      <Text class="position-absolute" style={styleText}>
+      <Text class='position-absolute' style={styleText}>
         {_phrases[i]}<u class:dark>{_cursors[i]}</u>
       </Text>
-    </View>
+    </Col>
   {/each}
 </div>
 
