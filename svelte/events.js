@@ -39,7 +39,7 @@ export function onEvents (node, props, startWith = 'on') {
 }
 
 /**
- * Filter out on<Event> props - for use alongside `use:onEvents`
+ * Filter out on<Event> props - for use alongside `use:onEvents` with Svelte Components
  */
 export function removeEvents ({ ...props }, startWith = 'on') {
   for (const key in props) {

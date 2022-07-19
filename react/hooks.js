@@ -18,6 +18,5 @@ export function useInstance (initialState = {}) {
     instance.setState = (newState) => setState(state => ({...state, ...newState}))
     instance.forceUpdate = () => setState(state => ({...state}))
   }
-  console.warn('---------->')
   return instance
 }
