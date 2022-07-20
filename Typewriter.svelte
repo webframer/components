@@ -1,7 +1,7 @@
 <script>
   import { cn } from '@webframer/utils/components.js'
-  import { onDestroy, onMount } from 'apps/views/svelte/index.js'
-  import Col from './Col.svelte' // These phrases are to be animated in turn,
+  import { onDestroy, onMount } from 'svelte'
+  import Col from './Col.svelte'
   import Text from './Text.svelte'
 
   // These phrases are to be animated in turn,
