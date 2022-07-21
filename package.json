@@ -25,7 +25,8 @@
     "@webframer/utils": "workspace:*",
     "classnames": "^2.3.1",
     "prop-types": "^15.8.1",
-    "react-json-tree": "^0.17.0"
+    "react-json-tree": "^0.17.0",
+    "usehooks-ts": "^2.6.0"
   },
   "peerDependencies": {
     "svelte": "*"
