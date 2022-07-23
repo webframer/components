@@ -1,7 +1,6 @@
 <script>
 	import { onEvents, removeEvents } from './svelte/events.js'
 	// Base component should only contain templated markup and generic logic, like headless UI
-	import { dnd } from './utils/dnd'
 
 	// placeholder for compiler logic injection based on User config
 	// compiler automatically extracts variables based on placeholder position
@@ -20,7 +19,7 @@
 	<slot name='head'>
 		<tr>
 			{#each headers as header, h (header.id)}
-				<th use:dnd>
+				<th>
 					{header.label}
 					<!-- @view Header
 						@param {object} header - current header data

@@ -29,6 +29,7 @@
     "usehooks-ts": "^2.6.0"
   },
   "peerDependencies": {
+    "react": "*",
     "svelte": "*"
   }
 }

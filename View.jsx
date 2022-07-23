@@ -44,7 +44,7 @@ export function createView (defaultProp) {
       },
     )
     return (
-      <div className={className} style={style} {...typeof ref === 'function' && {ref}}>
+      <div className={className} style={style} {...isRef(ref) && {ref}}>
         <div className={cn(
           classInner, row ? 'row min-width' : 'col min-height',
           {
@@ -85,6 +85,11 @@ export function createView (defaultProp) {
   }
 
   return [View, ViewRef]
+}
+
+// Check if value is a React.useRef() object or function
+function isRef (val) {
+  return val ? (typeof val === 'function' || val.current !== void 0) : false
 }
 
 /**
