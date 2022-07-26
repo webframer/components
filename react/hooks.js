@@ -1,106 +1,103 @@
 import { debounce } from '@webframer/utils'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useEventListener, useIsomorphicLayoutEffect } from 'usehooks-ts/dist/esm/index.js'
+import { animateSize } from './animations.js'
 
 export * from 'usehooks-ts/dist/esm/index.js'
 
-/**
- * Animate Height Transitions without modifying the DOM markup with extra wrapper elements.
- * @example:
- *    function Component ({open}) {
- *      const [ref, animating] = useAnimatedHeight(open ? 'auto' : 0)
- *      return <div ref={ref}>...</div>
- *    }
- *
- * @param {number | string} height - CSS style to apply
- * @param {number} [duration] - milliseconds to animate transitions
- * @param {number} [delay] - milliseconds to delay after animation end to update state
- * @returns [ref: (node: HTMLElement) => void, animating: boolean]
- */
-export function useAnimatedHeight (height, duration = 500, delay = 200) {
-  const {current: self} = useRef({height})
-  const [animating, setAnimating] = useState(false)
-  const [actualHeight, setRef] = useElementHeight() // the current element's size
-  const ref = useCallback((node) => {
-    setRef(node)
-    self.node = node
-    self.visibility = node.style.visibility || null
-  }, [])
+export const useAnimatedHeight = hookAnimatedSize('height')
+export const useAnimatedWidth = hookAnimatedSize('width')
 
-  if (height || !self.actualHeight) {
-    // Initial collapsed state
-    if (!height && !self.actualHeight) {
-      // Hide collapsed element as soon as possible
-      if (self.node) self.node.style.visibility = 'hidden'
-      // Set height to 0 after initial element height calculation
-      if (actualHeight) self.node.style.height = 0
+/**
+ * Create a React Hook for useAnimatedHeight/Width.
+ * All height change scenarios involve layout measurement both at the start and end of animation,
+ * if the height is not a pixel number. Layout prediction is only required for the end transition.
+ *  - When collapsing, margin/padding in the direction of collapse must be 0, and overflow: hidden
+ *  - When expanding to auto, reset to initial style, other height values should have overflow: hidden
+ *
+ * @param {'width'|'height'} side - one of ['width', 'height']
+ * @returns {function} react hook
+ */
+function hookAnimatedSize (side = 'height') {
+  /**
+   * Animate Height/Width Transitions without modifying the DOM markup.
+   * @example:
+   *    function Component ({open}) {
+   *      const [ref, animating] = useAnimatedHeight(open ? 'auto' : 0)
+   *      return <div ref={ref}>...</div>
+   *    }
+   * @param {number|string} size - css value for height/width
+   * @param {{self?: object, duration?: number}} - component instance and milliseconds to animate
+   * @returns [ref: (node: HTMLElement) => void, animating: boolean]
+   */
+  function useAnimatedSize (size, {self, duration = 300} = {}) {
+    const instance = useRef({[side]: size})
+    if (!self) {
+      self = instance.current
+    } else if (!self.node) {
+      Object.assign(self, instance.current) // assign size initially
     }
-    // Store calculated height in pixels for animation later
-    self.actualHeight = actualHeight
+
+    // useRef(null).current == null on initial useEffect with React.forwardRef => use function
+    const ref = useCallback(node => self.node = node, [self])
+    const [animating, setAnimating] = useState(false)
+
+    // Skip logic for backend
+    if (typeof window === 'undefined') return [ref, animating]
+
+    // Height change
+    useEffect(() => {
+      if (self[side] === size) return
+      // Set animating state explicitly in case of force update, and to force rerender at the end
+      setAnimating(true)
+      animateSize(self.node, self[side], size, side, duration).then(() => {
+        setAnimating(false)
+      })
+      self[side] = size
+    }, [self, size, duration])
+
+    // Mark state as animating as soon as there is size change, for Expand/Collapse render logic
+    // because when closing element, the state is closed, but animating hasn't yet updated,
+    // which causes bug for animation transitions when collapsing.
+    return [ref, animating || self[side] !== size]
   }
 
-  // Animate transition when height changes
-  useEffect(() => {
-    // No height change,
-    if (self.height === height) return
-
-    const transition = `height ${duration}ms`
-    const {style} = self.node
-    const _transition = style.transition || null
-    const _overflow = style.overflow || null
-    style.transition = _transition ? [_transition, transition].join(', ') : transition
-    style.overflow = 'hidden'
-    setAnimating(true)
-    switch (height) {
-      // Collapse to 0 height
-      case 0: {
-        // First set height to original element size to guarantee animation
-        style.height = self.actualHeight + 'px'
-
-        // Then to 0 height
-        setTimeout(() => {
-          style.height = 0
-        }, 0)
-
-        // Then clear/reset transition
-        const timer = setTimeout(() => {
-          style.visibility = 'hidden'
-          style.overflow = _overflow
-          style.transition = _transition
-          self.height = height
-          setAnimating(false)
-        }, duration + delay) // extra duration for Safari to finish animation
-        return () => {
-          clearTimeout(timer)
-        }
-      }
-
-      // Expansion from 0 height to 'auto' or custom height value
-      case 'auto':
-      default: {
-        // First set height to original element size
-        style.visibility = self.visibility
-        style.height = self.actualHeight + 'px'
-
-        // Then reset to 'auto' or custom height value at the end of animation
-        const timer = setTimeout(() => {
-          style.overflow = _overflow
-          style.transition = _transition
-          style.height = height
-          self.height = height
-          setAnimating(false)
-        }, duration + delay)
-        return () => {
-          clearTimeout(timer)
-        }
-      }
-    }
-  }, [self.node, height, duration, delay])
-  return [ref, animating]
+  return useAnimatedSize
 }
 
 /**
- * Get Current Element Height
+ * Expand/Collapse Element with Animated Height.
+ *
+ * @example:
+ *    function Component ({list, ...props}) {
+ *      const [open, ref, toggleOpen, animating] = useExpandCollapse(props.open)
+ *      const hasItems = list && list.length > 0
+ *      return <>
+ *        <button onClick={toggleOpen}>{open ? 'Collapse' : 'Expand'}</button>
+ *        <div ref={ref}>
+ *          {(open || animating) && hasItems && list.map((item, i) => (...))}
+ *        </div>
+ *      </>
+ *    }
+ *
+ * @param {boolean} [isOpen] - whether expanded initially
+ * @param {number | string} [height] - CSS style for open state, default is 'auto'
+ * @returns [open: boolean, ref: (node: HTMLElement) => void, toggleOpen: function, animating: boolean]
+ */
+export function useExpandCollapse (isOpen, height = 'auto') {
+  const self = useInstance({open: isOpen})
+  const toggleOpen = useCallback(() => {
+    if (self.animating) return
+    self.setState({open: !self.state.open})
+  }, [])
+  const {open} = self.state
+  const [ref, animating] = useAnimatedHeight(open ? height : 0, {self})
+  self.animating = animating
+  return [open, ref, toggleOpen, animating]
+}
+
+/**
+ * Get Current Element Height (with window resize event update).
  * @example:
  *    function Component () {
  *      const [height, setRef] = useElementHeight()
@@ -127,31 +124,6 @@ export function useElementHeight (delay = 16) {
 }
 
 /**
- * Expand/Collapse Element with Animated Height.
- *
- * @example:
- *    function Component (props) {
- *      const [open, ref, toggleOpen] = useExpandCollapse(props.open)
- *      return <>
- *        <button onClick={toggleOpen}>{open ? 'Collapse' : 'Expand'}</button>
- *        <div ref={ref}>...</div>
- *      </>
- *    }
- *
- * @param {boolean} [isOpen] - whether expanded initially
- * @param {number | string} [height] - CSS style for open state, default is 'auto'
- * @returns [open: boolean, ref: (node: HTMLElement) => void, toggleOpen: function]
- */
-export function useExpandCollapse (isOpen, height = 'auto') {
-  const {current: self} = useRef({})
-  const [open, setOpen] = useState(isOpen)
-  const [ref, animating] = useAnimatedHeight(open ? height : 0)
-  const toggleOpen = useCallback(() => self.animating || setOpen(v => !v), [])
-  self.animating = animating
-  return [open, ref, toggleOpen]
-}
-
-/**
  * React Hook to simulate Class Component behaviors with `this` instance.
  * @example:
  *    const self = useInstance({count: 0, length: 10})
@@ -170,4 +142,19 @@ export function useInstance (initialState = {}) {
     instance.forceUpdate = () => setState(state => ({...state}))
   }
   return instance
+}
+
+/**
+ * Get Previous Value of the Component
+ * @param {any} value - to get from previous render state
+ * @returns {any|undefined} previous value - undefined initially
+ */
+export function usePreviousValue (value) {
+  const instance = useRef()
+
+  useEffect(() => {
+    instance.current = value
+  })
+
+  return instance.current
 }
