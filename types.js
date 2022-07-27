@@ -26,7 +26,9 @@ type.ListOf = PropTypes.arrayOf
 type.Method = PropTypes.func
 type.Milliseconds = PropTypes.number
 type.Mm = PropTypes.number // millimeter
-type.Node = PropTypes.object
+type.Node = PropTypes.node
+// Anything that can be rendered, such as number, string, function, DOM element, array, or fragment
+type.NodeOrFunction = PropTypes.oneOfType([PropTypes.node, PropTypes.func])
 type.Number = PropTypes.number
 type.NumberOrString = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 type.Object = PropTypes.object

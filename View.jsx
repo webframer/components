@@ -1,6 +1,6 @@
 import cn from 'classnames'
 import React from 'react'
-import { accessibilitySupport } from './react.js'
+import { accessibilitySupport, isRef } from './react.js'
 import { type } from './types.js'
 
 // @todo: test rendering without React.memo on large scene to see which is faster.
@@ -87,10 +87,7 @@ export function createView (defaultProp) {
   return [View, ViewRef]
 }
 
-// Check if value is a React.useRef() object or function
-function isRef (val) {
-  return val ? (typeof val === 'function' || val.current !== void 0) : false
-}
+export const [View, ViewRef] = createView()
 
 /**
  * View Layout - Pure Component.
@@ -107,7 +104,6 @@ function isRef (val) {
  * @param {boolean} [rtl] - whether to use right to left text direction
  * @param {object|HTMLAudioElement} [sound] - new Audio(URL) sound file
  * @param {*} props - other attributes to pass to `<div></div>`
- * @param {function} [ref] - callback(element) when component mounts, or from React.createRef()
+ * @param {function|React.MutableRefObject} [ref] - forwarding React.useRef() or React.createRef()
  */
-export const [View, ViewRef] = createView()
 export default React.memo(View)

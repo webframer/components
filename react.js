@@ -61,6 +61,11 @@ export function isClass (Component) {
   return !!Component.prototype && isFunction(Component.prototype.render)
 }
 
+// Check if value is a React.useRef() object or function
+export function isRef (val) {
+  return val ? (typeof val === 'function' || val.current !== void 0) : false
+}
+
 /**
  * Get the Original React Class from the Component wrapped by decorator/s
  * @param {Class|Function} Component - the wrapped React Component

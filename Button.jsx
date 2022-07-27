@@ -1,7 +1,7 @@
 import cn from 'classnames'
 import React from 'react'
 import Loading from './Loading.jsx'
-import { onPressHoc } from './react.js'
+import { isRef, onPressHoc } from './react.js'
 import { type } from './types.js'
 
 /**
@@ -19,7 +19,8 @@ import { type } from './types.js'
  * @param {Object} [sound] - new Audio(URL) sound file
  * @param {*} [children] - optional, content to be wrapped inside button `<button>{children}</button>`
  * @param {*} [props] - other attributes to pass
- * @returns {Object} - React component
+ * @param {function|React.MutableRefObject} [ref] - forwarding React.useRef() or React.createRef()
+ * @returns {object|JSX.Element} - React component
  */
 export function Button ({
   onClick,
@@ -33,13 +34,14 @@ export function Button ({
   sound,
   className,
   ...props
-}) {
+}, ref) {
 
   return (
     <button
       className={cn(className, 'btn', size, {circle, square, active, loading})}
       disabled={disabled || loading}
       onClick={sound ? onPressHoc(onClick, sound) : onClick}
+      {...isRef(ref) && {ref}}
       {...props}
     >
       {children}
@@ -48,10 +50,11 @@ export function Button ({
   )
 }
 
+export const ButtonRef = React.forwardRef(Button)
+
 Button.propTypes = {
   type: type.String,
   className: type.String,
   children: type.Any,
 }
-
 export default React.memo(Button)

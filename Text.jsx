@@ -13,14 +13,16 @@ import { accessibilitySupport } from './react.js'
  * @param {Boolean} [rtl] - whether to use right to left direction
  * @param {Object} [sound] - new Audio(URL) sound file
  * @param {*} props - other attributes to pass to `<div></div>`
- * @returns {Object} - React Component
+ * @returns {object|JSX.Element} - React Component
  */
 export function Text ({
   className, fill, reverse, rtl, sound, ...props
 }) {
   props = accessibilitySupport(props, sound)
   return (
-    <span className={cn(className, 'text', {fill, reverse, rtl, pointer: props.onClick})} {...props} />
+    <span className={cn(className, 'text', {fill, reverse, rtl, pointer: props.onClick})}
+          {...props}
+    />
   )
 }
 
