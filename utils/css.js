@@ -1,4 +1,24 @@
-import { CDN_URL, isFileSrc } from '@webframer/utils'
+import { CDN_URL, isFileSrc, isFunction } from '@webframer/utils'
+
+/**
+ * Apply CSS styles to Node element, with original styles extracted.
+ * @example:
+ *    const originalStyles = applyStyles(element.style, {border: '1px solid green'})
+ *    // reset back to the original styles
+ *    applyStyles(element.style, originalStyles)
+ *
+ * @param {object|CSSStyleDeclaration} style - HTMLElement.style, or React style object, to apply with css values
+ * @param {object|null|undefined|boolean|number} values - css attributes (camelCase) with their values to apply
+ * @returns {object|CSSStyleDeclaration} style - extracted old styles before new ones were applied
+ */
+export function applyStyles (style, values) {
+  const extracted = {}
+  for (const attr in values) {
+    extracted[attr] = style[attr] || null // set as null to reapply back later without check
+    style[attr] = isFunction(values[attr]) ? values[attr](style) : values[attr]
+  }
+  return extracted
+}
 
 /**
  * Compute CSS `background-image` property from given file data
