@@ -1,7 +1,7 @@
 /**
  * Animate Height/Width from/to '0', 'auto' or any valid css value, without extra Node markup.
  * @note:
- *  - This method does not mutate node.style (only during animation)
+ *  - This method does not mutate node.style (only during animation), unless `forwards = true`.
  *    => it's up to the implementation to apply the final css style when the promise resolves.
  *    => In case of Expand/Collapse, it works by only rendering content when `open` or `animating`.
  *  - Node element must have `box-sizing: border-box;` for accurate animations.
@@ -13,15 +13,17 @@
  * @param {number|string} endSize - to animate to
  * @param {'width'|'height'} [side] - the attribute to animate
  * @param {number} [duration] - milliseconds to animate
- * @returns {Promise<void>} promise - that resolves when animation finishes
+ * @param {boolean} [forwards] - whether to keep end animation state, default is false
+ * @returns [promise: Promise<void>, resetStyles: function] - that resolves when animation finishes
  */
-export function animateSize (node, startSize, endSize, side = 'height', duration = 300) {
+export function animateSize (node, startSize, endSize, side = 'height', duration = 300, forwards) {
   const stylesToReset = {}
   const mStart = side === 'width' ? 'marginLeft' : 'marginTop'
   const mEnd = side === 'width' ? 'marginRight' : 'marginBottom'
   const pStart = side === 'width' ? 'paddingLeft' : 'paddingTop'
   const pEnd = side === 'width' ? 'paddingRight' : 'paddingBottom'
   let style = node.style
+  let hasEnded
 
   // Collect all initial styles to reset at the end
   const {overflow, visibility, transitionProperty, transitionDuration} = style
@@ -40,7 +42,7 @@ export function animateSize (node, startSize, endSize, side = 'height', duration
    * @param {object} attrs - css properties to apply
    * @param {boolean} [instantUpdate]
    */
-  function setupStyle (attrs, instantUpdate) {
+  function setupStyles (attrs, instantUpdate) {
     for (const key in attrs) {
       style[key] = attrs[key]
     }
@@ -48,26 +50,28 @@ export function animateSize (node, startSize, endSize, side = 'height', duration
   }
 
   // Helper function at the end of transition/layout measurement
-  function resetStyle () {
+  function resetStyles () {
+    if (style == null) return
     for (const attr in stylesToReset) {
       style[attr] = stylesToReset[attr] || null
     }
+    if (hasEnded) style = null
   }
 
-  return new Promise(resolve => {
+  const promise = new Promise(resolve => {
 
     // End animation requires layout prediction
     if (typeof endSize !== 'number') {
-      setupStyle({[side]: endSize, visibility: 'hidden'}, true)
+      setupStyles({[side]: endSize, visibility: 'hidden'}, true)
       endSize = node.getBoundingClientRect()[side]
-      resetStyle() // reset back to existing style
+      resetStyles() // reset back to existing style
     }
 
     // Start animation requires layout measurement
     if (typeof startSize !== 'number') startSize = node.getBoundingClientRect()[side]
 
     // Prepare start-transition styles
-    setupStyle({[side]: startSize + 'px'})
+    setupStyles({[side]: startSize + 'px'})
 
     // Let initial style apply before setting end transition
     requestAnimationFrame(() => {
@@ -86,15 +90,14 @@ export function animateSize (node, startSize, endSize, side = 'height', duration
 
       setTimeout(() => {
         resolve()
+        hasEnded = true
 
         // Reset style after resolving animation first, to avoid flickering at the end,
         // because Component might not remove node from rendering fast enough,
         // causing collapsed content to expand back to initial size.
-        setTimeout(() => {
-          resetStyle()
-          style = null
-        }, 0)
+        if (!forwards) setTimeout(resetStyles, 0)
       }, duration)
     })
   })
+  return [promise, resetStyles]
 }

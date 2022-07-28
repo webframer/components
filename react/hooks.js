@@ -27,10 +27,10 @@ function hookAnimatedSize (side = 'height') {
    *      return <div ref={ref}>...</div>
    *    }
    * @param {number|string} size - css value for height/width
-   * @param {{self?: object, duration?: number}} - component instance and milliseconds to animate
-   * @returns [ref: (node: HTMLElement) => void, animating: boolean]
+   * @param {{self?: object, duration?: number, forwards?: boolean}} - component instance to animate
+   * @returns [ref: (node: HTMLElement) => void, animating: boolean, resetStyles: function]
    */
-  function useAnimatedSize (size, {self, duration = 300} = {}) {
+  function useAnimatedSize (size, {self, duration = 300, forwards} = {}) {
     const instance = useRef({[side]: size})
     if (!self) {
       self = instance.current
@@ -40,26 +40,27 @@ function hookAnimatedSize (side = 'height') {
 
     // useRef(null).current == null on initial useEffect with React.forwardRef => use function
     const ref = useCallback(node => self.node = node, [self])
+    const resetStyles = useCallback(() => self.resetStyles && self.resetStyles(), [self])
     const [animating, setAnimating] = useState(false)
 
     // Skip logic for backend
-    if (typeof window === 'undefined') return [ref, animating]
+    if (typeof window === 'undefined') return [ref, animating, resetStyles]
 
     // Height change
     useEffect(() => {
       if (self[side] === size) return
       // Set animating state explicitly in case of force update, and to force rerender at the end
       setAnimating(true)
-      animateSize(self.node, self[side], size, side, duration).then(() => {
-        setAnimating(false)
-      })
+      const [promise, resetStyles] = animateSize(self.node, self[side], size, side, duration, forwards)
+      promise.then(() => setAnimating(false))
+      self.resetStyles = resetStyles
       self[side] = size
-    }, [self, size, duration])
+    }, [self, size, duration, forwards])
 
     // Mark state as animating as soon as there is size change, for Expand/Collapse render logic
     // because when closing element, the state is closed, but animating hasn't yet updated,
     // which causes bug for animation transitions when collapsing.
-    return [ref, animating || self[side] !== size]
+    return [ref, animating || self[side] !== size, resetStyles]
   }
 
   return useAnimatedSize
@@ -91,7 +92,8 @@ export function useExpandCollapse (isOpen, height = 'auto') {
     self.setState({open: !self.state.open})
   }, [])
   const {open} = self.state
-  const [ref, animating] = useAnimatedHeight(open ? height : 0, {self})
+  const [ref, animating, resetStyles] = useAnimatedHeight(open ? height : 0, {self, forwards: true})
+  useEffect(() => {animating || resetStyles()}, [animating, resetStyles])
   self.animating = animating
   return [open, ref, toggleOpen, animating]
 }
