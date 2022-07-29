@@ -1,7 +1,8 @@
 import cn from 'classnames'
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { accessibilitySupport, isRef } from './react.js'
 import { type } from './types.js'
+import { applyStyles } from './utils/css.js'
 
 // @todo: test rendering without React.memo on large scene to see which is faster.
 /**
@@ -16,45 +17,80 @@ export function createView (defaultProp) {
     ...props
   }, ref) {
     props = accessibilitySupport(props, sound)
-
-    // Ordinary View
-    if (!scroll) {
-      props.className = cn(
-        className,
-        {
-          col, row, fill, reverse, rtl,
-          left, right, top, bottom, center, middle,
-          pointer: props.onClick,
-        },
-      )
-      if (typeof ref === 'function') props.ref = ref
-      return <div {...props} />
-    }
-
-    // Scrollable View
-    const {style, classInner, styleInner, ..._props} = props
     className = cn(
-      className, 'scroll',
-      row ? 'row max-width' : 'col max-height',
-      {
-        fill, rtl,
-        center: center && !row,
-        middle: middle && !col,
+      className, {
+        col, row, fill, reverse, rtl,
+        left, right, top, bottom, center, middle,
         pointer: props.onClick,
       },
     )
+
+    if (isRef(ref)) props.ref = ref
+
+    // Ordinary View
+    if (!scroll) return <div className={className} {...props} />
+
+    // Scrollable View
+    let propsWrap
+    let {classWrap, styleWrap, ..._props} = props
+    if (_props._id !== void 0) {
+      propsWrap = {_id: _props._id, _nodrop: ''}
+      _props._nodrag = ''
+    }
+
+    // // @archive: position absolute version
+    // // CSS styles required:
+    // // .col > .scrollable,
+    // // .row > .scrollable {
+    // //   flex: 1;
+    // // }
+    // // ```
+    // classWrap = cn(classWrap, 'scrollable', {col, row, fill, rtl})
+    // className = cn({'position-fill': scroll})
+
+    // @Flexbox version
+    classWrap = cn(
+      classWrap, 'scrollable', {
+        col, row, fill, rtl,
+        center: center && !row,
+        middle: middle && !col,
+      },
+      // 'max-size' class is to be extended inside _layout.less to reduce html footprint
+      // 'max-size', // row ? 'max-width' : 'max-height', // a scroll can overflow in any direction
+    )
+    className = cn(
+      className, row ? 'min-width' : 'min-height', {
+        'margin-auto-h': center, // when layout is row and inner div is smaller than outer
+        'margin-auto-v': middle, // when layout is col and inner div is smaller than outer
+      },
+    )
+
+    // @experimental: max-height/width calculation for direct parent element
+    const refWrap = useRef(null)
+    const {current: self} = useRef({})
+    self.direction = row ? 'row' : 'column'
+    useEffect(() => {
+      if (!refWrap.current.parentElement) return
+      let attr = maxSizeScrollOffset(refWrap.current.parentElement, self.direction)
+      if (attr) {
+        return () => {
+          let {current: node} = refWrap
+          // Only reset parent style if no other scrollables exist for the same direction
+          if (node.parentElement && node.parentElement[attr]) {
+            if (!hasScrollElement(node.parentElement, node, self.direction)) {
+              applyStyles(node.parentElement.style, node.parentElement[attr])
+              delete node.parentElement[attr]
+            }
+          }
+          node = null
+        }
+      }
+    })
+
+    // Scroll View
     return (
-      <div className={className} style={style} {...isRef(ref) && {ref}}>
-        <div className={cn(
-          classInner, row ? 'row min-width' : 'col min-height',
-          {
-            fill, reverse, rtl,
-            left, right, top, bottom,
-            'margin-auto-h': center, // when layout is row and inner div is smaller than outer
-            'margin-auto-v': middle, // when layout is col and inner div is smaller than outer
-            pointer: props.onClick,
-          },
-        )} style={styleInner} {..._props} />
+      <div className={classWrap} style={styleWrap} ref={refWrap} {...propsWrap} >
+        <div className={className} {..._props} />
       </div>
     )
   }
@@ -80,8 +116,8 @@ export function createView (defaultProp) {
     className: type.String,
     // Scroll View only
     scroll: type.Boolean,
-    classInner: type.String,
-    styleInner: type.Object,
+    classWrap: type.String,
+    styleWrap: type.Object,
   }
 
   return [View, ViewRef]
@@ -107,3 +143,72 @@ export const [View, ViewRef] = createView()
  * @param {function|React.MutableRefObject} [ref] - forwarding React.useRef() or React.createRef()
  */
 export default React.memo(View)
+
+/**
+ * Check whether given Node element contains a Scroll component by its className
+ * @param {object|HTMLElement} parentElement - element to check
+ * @param {object|HTMLElement} [scrollElement] - the node to exclude from check
+ * @param {'row'|'column'} direction - scroll flex direction without `-reverse` part
+ * @param {string} className - to identify the Scroll component
+ * @returns {boolean} true - if node contains at least once Scroll component
+ */
+export function hasScrollElement (
+  parentElement, scrollElement = null, direction = 'column', className = 'scrollable',
+) {
+  for (const child of parentElement.children) {
+    if (child === scrollElement) continue
+    if (
+      child.className.split(/\s+/).indexOf(className) >= 0 &&
+      getComputedStyle(child).getPropertyValue('flex-direction').indexOf(direction) >= 0
+    ) return true
+  }
+  return false
+}
+
+/**
+ * Set CSS max-height/width offset style for direct Parent element of a flex Scroll component
+ * to prevent clipping of content when Scroll overflows the Parent.
+ * @param {object|HTMLElement} parentElement - direct parent node to offset scroll
+ * @param {'row'|'column'} direction - scroll flex direction without `-reverse` part
+ * @param {string} [className] - to identify the Scroll component
+ * @returns {string|void} attribute - modified style attribute that was attached to parentElement
+ */
+export function maxSizeScrollOffset (parentElement, direction = 'column', className = 'scrollable') {
+  if (parentElement === document.body) return
+  // Scroll offset style only works when set to the parent or higher up nested grandparents.
+  // The offset must be in the direction of the scroll, not the parent.
+  // Offset amount must be accumulated from parent siblings, grandparent siblings, and so on...
+  // Offset should not take in account `absolute` and `fixed` sibling elements.
+  let attr = direction === 'row' ? 'offsetWidth' : 'offsetHeight'
+  let offset = 0, grandParent
+  let self = parentElement
+  while (self.parentElement) {
+    grandParent = self.parentElement
+    if (getComputedStyle(grandParent).getPropertyValue('flex-direction').indexOf(direction) >= 0) {
+      for (const sibling of grandParent.children) {
+        if (sibling === self) continue // skip the direct ancestor
+        if (sibling.className.split(/\s+/).indexOf(className) >= 0) continue // skip scrollables
+        if (scrollOffsetExclude[getComputedStyle(sibling).getPropertyValue('position')]) continue
+        offset += sibling[attr]
+      }
+    }
+    if (grandParent === document.body) break
+    self = grandParent
+  }
+  self = null
+  if (!offset) return
+  attr = attr.replace('offset', 'max')
+
+  // Set new parent max size every time to maximize the chances of correct layout
+  let style = applyStyles(parentElement.style, {[attr]: `calc(100% - ${offset}px)`})
+  attr = '@' + attr
+
+  // Only save original parent style once, because there could multiple scrollables
+  if (!parentElement[attr]) parentElement[attr] = style
+  return attr
+}
+
+const scrollOffsetExclude = {
+  'absolute': true,
+  'fixed': true,
+}
