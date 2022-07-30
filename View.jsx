@@ -67,17 +67,15 @@ export function createView (defaultProp) {
 
     // @experimental: max-height/width calculation for direct parent element
     const refWrap = useRef(null)
-    const {current: self} = useRef({})
-    self.direction = row ? 'row' : 'column'
     useEffect(() => {
       if (!refWrap.current.parentElement) return
-      let attr = maxSizeScrollOffset(refWrap.current.parentElement, self.direction)
+      let attr = maxSizeScrollOffset(refWrap.current.parentElement)
       if (attr) {
         return () => {
           let {current: node} = refWrap
-          // Only reset parent style if no other scrollables exist for the same direction
+          // Only reset parent style if no other scrollables exist
           if (node.parentElement && node.parentElement[attr]) {
-            if (!hasScrollElement(node.parentElement, node, self.direction)) {
+            if (!hasScrollElement(node.parentElement, node)) {
               applyStyles(node.parentElement.style, node.parentElement[attr])
               delete node.parentElement[attr]
             }
@@ -131,12 +129,12 @@ export const [View, ViewRef] = createView()
  * (to replace browser's `<div>` with a platform-agnostic component for React Native, etc.)
  *
  * @param {boolean} [scroll] - whether to make the view scrollable
- * @param {boolean} [col] - whether to use column layout, true if `row` is falsy
+ * @param {boolean} [col] - whether to use column layout, true if `row` is falsy by default
  * @param {boolean} [row] - whether to use row layout, false by default
  * @param {string} [className] - optional css class
  * @param {function} [onClick] - callback to fire on click or Enter press (if `onKeyPress` not given)
  * @param {boolean} [fill] - whether to make the view fill up available height and width
- * @param {boolean} [reverse] - whether to reverse order of rendering
+ * @param {boolean} [reverse] - whether to reverse the order of rendering
  * @param {boolean} [rtl] - whether to use right to left text direction
  * @param {object|HTMLAudioElement} [sound] - new Audio(URL) sound file
  * @param {*} props - other attributes to pass to `<div></div>`
@@ -148,19 +146,13 @@ export default React.memo(View)
  * Check whether given Node element contains a Scroll component by its className
  * @param {object|HTMLElement} parentElement - element to check
  * @param {object|HTMLElement} [scrollElement] - the node to exclude from check
- * @param {'row'|'column'} direction - scroll flex direction without `-reverse` part
- * @param {string} className - to identify the Scroll component
+ * @param {string} [className] - to identify the Scroll component
  * @returns {boolean} true - if node contains at least once Scroll component
  */
-export function hasScrollElement (
-  parentElement, scrollElement = null, direction = 'column', className = 'scrollable',
-) {
+export function hasScrollElement (parentElement, scrollElement = null, className = 'scrollable') {
   for (const child of parentElement.children) {
     if (child === scrollElement) continue
-    if (
-      child.className.split(/\s+/).indexOf(className) >= 0 &&
-      getComputedStyle(child).getPropertyValue('flex-direction').indexOf(direction) >= 0
-    ) return true
+    if (child.className.split(/\s+/).indexOf(className) >= 0) return true
   }
   return false
 }
@@ -169,27 +161,39 @@ export function hasScrollElement (
  * Set CSS max-height/width offset style for direct Parent element of a flex Scroll component
  * to prevent clipping of content when Scroll overflows the Parent.
  * @param {object|HTMLElement} parentElement - direct parent node to offset scroll
- * @param {'row'|'column'} direction - scroll flex direction without `-reverse` part
  * @param {string} [className] - to identify the Scroll component
+ * @param {string} [attr] - attribute key to store the original parentElement.style for reset later
  * @returns {string|void} attribute - modified style attribute that was attached to parentElement
  */
-export function maxSizeScrollOffset (parentElement, direction = 'column', className = 'scrollable') {
+export function maxSizeScrollOffset (parentElement, className = 'scrollable', attr = '@scrollReset') {
   if (parentElement === document.body) return
+
   // Scroll offset style only works when set to the parent or higher up nested grandparents.
   // The offset must be in the direction of the scroll, not the parent.
   // Offset amount must be accumulated from parent siblings, grandparent siblings, and so on...
   // Offset should not take in account `absolute` and `fixed` sibling elements.
-  let attr = direction === 'row' ? 'offsetWidth' : 'offsetHeight'
-  let offset = 0, grandParent
+  let directions = ['column', 'row']
+  let offsetBy = {
+    [directions[0]]: 0,
+    [directions[1]]: 0,
+  }
+  let attrBy = {
+    [directions[0]]: 'offsetHeight',
+    [directions[1]]: 'offsetWidth',
+  }
+  let offset = 0
+  let direction
+  let grandParent
   let self = parentElement
   while (self.parentElement) {
     grandParent = self.parentElement
-    if (getComputedStyle(grandParent).getPropertyValue('flex-direction').indexOf(direction) >= 0) {
+    direction = getComputedStyle(grandParent).getPropertyValue('flex-direction').replace('-reverse', '')
+    if (directions.indexOf(direction) >= 0) {
       for (const sibling of grandParent.children) {
         if (sibling === self) continue // skip the direct ancestor
         if (sibling.className.split(/\s+/).indexOf(className) >= 0) continue // skip scrollables
         if (scrollOffsetExclude[getComputedStyle(sibling).getPropertyValue('position')]) continue
-        offset += sibling[attr]
+        offset += (offsetBy[direction] += sibling[attrBy[direction]])
       }
     }
     if (grandParent === document.body) break
@@ -197,13 +201,17 @@ export function maxSizeScrollOffset (parentElement, direction = 'column', classN
   }
   self = null
   if (!offset) return
-  attr = attr.replace('offset', 'max')
+
+  let style = {}
+  for (const direction in offsetBy) {
+    offset = offsetBy[direction]
+    style[attrBy[direction].replace('offset', 'max')] = offset ? `calc(100% - ${offset}px)` : null
+  }
 
   // Set new parent max size every time to maximize the chances of correct layout
-  let style = applyStyles(parentElement.style, {[attr]: `calc(100% - ${offset}px)`})
-  attr = '@' + attr
+  style = applyStyles(parentElement.style, style)
 
-  // Only save original parent style once, because there could multiple scrollables
+  // Only save original parent style once, because there could be multiple scrollables
   if (!parentElement[attr]) parentElement[attr] = style
   return attr
 }
