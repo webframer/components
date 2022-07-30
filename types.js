@@ -61,7 +61,7 @@ type.Definition = type.Of({
 })
 
 // set of localised definitions (example: LANGUAGE object)
-type.DefinitionSet = type.ObjectOf(type.Definition.isRequired)
+type.DefinitionMap = type.ObjectOf(type.Definition.isRequired)
 
 type.FileInput = type.Of({
   src: type.UrlOrBase64, // file source URL or base64 encoded string

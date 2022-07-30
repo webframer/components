@@ -13,7 +13,7 @@ import React, { PureComponent } from 'react'
  *    8. Nested option category (options grouped into categories)
  *    9. Text literal with variables suggestion (prefixed with `$`).
  */
-export class Combobox extends PureComponent {
+export default class Combobox extends PureComponent {
   render () {
     return (
       null
