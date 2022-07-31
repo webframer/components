@@ -1,5 +1,5 @@
 <script>
-	import { onEvents, removeEvents } from './svelte/events.js'
+	import { onEvents, removeEvents } from './events.js'
 	// Base component should only contain templated markup and generic logic, like headless UI
 
 	// placeholder for compiler logic injection based on User config

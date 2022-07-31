@@ -32,7 +32,7 @@ type.NodeOrFunction = PropTypes.oneOfType([PropTypes.node, PropTypes.func])
 type.Number = PropTypes.number
 type.NumberOrString = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 type.Object = PropTypes.object
-type.ObjectOf = PropTypes.objectOf
+type.ObjectOf = type.MapOf = PropTypes.objectOf
 type.Of = PropTypes.shape
 type.OneOf = (...types) => PropTypes.oneOfType(types)
 type.Promise = PropTypes.shape({

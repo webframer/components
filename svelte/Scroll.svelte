@@ -1,5 +1,5 @@
 <script>
-  import { cn } from '@webframer/utils/components.js'
+  import { cn } from '@webframer/utils/component.js'
 
   export let row, fill, rtl, reverse, center, classInner, styleInner
   let className

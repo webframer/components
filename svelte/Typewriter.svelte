@@ -1,5 +1,5 @@
 <script>
-  import { cn } from '@webframer/utils/components.js'
+  import { cn } from '@webframer/utils/component.js'
   import { onDestroy, onMount } from 'svelte'
   import Col from './Col.svelte'
   import Text from './Text.svelte'
