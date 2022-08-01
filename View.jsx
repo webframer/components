@@ -73,6 +73,8 @@ export function createView (defaultProp) {
       if (attr) {
         return () => {
           let {current: node} = refWrap
+          if (!node) return
+          
           // Only reset parent style if no other scrollables exist
           if (node.parentElement && node.parentElement[attr]) {
             if (!hasScrollElement(node.parentElement, node)) {
@@ -184,22 +186,25 @@ export function maxSizeScrollOffset (parentElement, className = 'scrollable', at
   let offset = 0
   let direction
   let grandParent
-  let self = parentElement
-  while (self.parentElement) {
-    grandParent = self.parentElement
-    direction = getComputedStyle(grandParent).getPropertyValue('flex-direction').replace('-reverse', '')
-    if (directions.indexOf(direction) >= 0) {
-      for (const sibling of grandParent.children) {
-        if (sibling === self) continue // skip the direct ancestor
-        if (sibling.className.split(/\s+/).indexOf(className) >= 0) continue // skip scrollables
-        if (scrollOffsetExclude[getComputedStyle(sibling).getPropertyValue('position')]) continue
-        offset += (offsetBy[direction] += sibling[attrBy[direction]])
+  let parent = parentElement
+  while (parent.parentElement) {
+    grandParent = parent.parentElement
+    // Skip offset calculation if the ancestor does not affect layout flow of its siblings, like Modal
+    if (!scrollOffsetExclude[getComputedStyle(parent).getPropertyValue('position')]) {
+      direction = getComputedStyle(grandParent).getPropertyValue('flex-direction').replace('-reverse', '')
+      if (directions.indexOf(direction) >= 0) {
+        for (const sibling of grandParent.children) {
+          if (sibling === parent) continue // skip the direct ancestor
+          if (sibling.className.split(/\s+/).indexOf(className) >= 0) continue // skip scrollables
+          if (scrollOffsetExclude[getComputedStyle(sibling).getPropertyValue('position')]) continue
+          offset += (offsetBy[direction] += sibling[attrBy[direction]])
+        }
       }
     }
     if (grandParent === document.body) break
-    self = grandParent
+    parent = grandParent
   }
-  self = null
+  parent = null
   if (!offset) return
 
   let style = {}
