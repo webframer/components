@@ -149,7 +149,7 @@ export function useInstance (initialState = {}) {
 /**
  * Get Previous Value of the Component
  * @param {any} value - to get from previous render state
- * @returns {any|undefined} previous value - undefined initially
+ * @returns {any|void} previous value - undefined initially
  */
 export function usePreviousValue (value) {
   const instance = useRef()
@@ -159,4 +159,127 @@ export function usePreviousValue (value) {
   })
 
   return instance.current
+}
+
+/**
+ * Instagram/Pinterest Style Route as Modal.
+ * Logic: changes route when Modal opens and goes back one route when Modal closes.
+ *
+ * @example:
+ * function App (props) {
+ *   const hasChangedRoutes = useRouteChange(props)
+ *   const [children, modal] = useModalRoute(props, hasChangedRoutes)
+ *   const [ref] = useScrollToElement(hasChangedRoutes[0])
+ *    return (
+ *     <View className='app'>
+ *       <div ref={ref} />
+ *       {children}
+ *       {modal && renderModal(props)}
+ *     </View>
+ *   )
+ * }
+ *
+ * // Change routes:
+ *   // option 1:
+ *     import { Link } from 'react-router'; // using CRA browser router
+ *     // or
+ *     import Link from '@webframer/kit/router/next/Link.jsx' // using Next.js
+ *
+ *     <Link to={{ pathname: '/login', state: { isModal: true, classModal: 'bg-transparent' } }}>
+ *
+ *   // option 2:
+ *     import history from 'history' // using CRA browser router
+ *     // or
+ *     import history from '@webframer/kit/router/history.js' // using Next.js
+ *
+ *     history.push({ pathname: '/login', state: { isModal: true } })
+ */
+export function useModalRoute (
+  props, [hasChangedRoute, prevChildren, prevLocation] = useRouteChange(props),
+) {
+  // re-render may cause the previous prop to change, while still in Modal state.
+  // The logic should be:
+  //  a) detect the first route transition => store previous children + cache isModal state
+  //  b) when route changes again, re-calculate isModal state + clear/store previous children
+  const {current: self} = useRef({})
+
+  // Initial app load cannot have Modal because there is no previous children
+  if (hasChangedRoute === void 0) return [props.children]
+
+  // Return cached state if no route change detected
+  if (hasChangedRoute === false) {
+    // Only update current route children to the latest
+    if (self.isModal) {
+      self.modal = props.children
+    } else {
+      self.content = props.children
+    }
+    return [self.content, self.modal, self.previousLocation]
+  }
+
+  // Update cached state
+  self.isModal = props.location.state && props.location.state.isModal
+
+  // Save the previous children and location to display under
+  if (self.isModal) {
+    self.content = prevChildren
+    self.modal = props.children
+    self.previousLocation = prevLocation
+  }
+  // Reset to no Modal state
+  else {
+    self.content = props.children
+    self.modal = null
+    self.previousLocation = null
+  }
+
+  return [self.content, self.modal, self.previousLocation]
+}
+
+/**
+ * Check whether the app has just changed routes
+ * @param {object} props - of the Component
+ * @param {object} [self] - Component instance
+ * @returns [hasChangedRoutes?: boolean, previousChildren?, previousLocation?] true -
+ *    if route changed, else false, void initially
+ */
+export function useRouteChange (props, self = useRef({}).current) {
+  const prevProps = usePreviousValue(props)
+  if (!prevProps) return []
+
+  // Detect if route has just changed
+  const {history, location, routes} = prevProps
+  const hasChangedRoute = history && location && props.location && (
+    /**
+     * A next.js app may contain an SPA inside it using 'react-router'.
+     * `routes` and  `location.key` are 'react-router' only specific implementation.
+     * => A route has only changed if one of these conditions is met:
+     *    1. It is not a browser router (!routes) and location.pathname changed
+     *    2. It is a browser router and location.key changed (location.pathname may change
+     *       even for the same route, so compare with location.key instead)
+     */
+    (!routes && props.location.pathname !== location.pathname) ||
+    (routes && props.location.key !== location.key)
+  )
+
+  // Cache previous props, because Component may re-render without changing routes
+  if (hasChangedRoute) {
+    self.prevChildren = prevProps.children
+    self.prevLocation = prevProps.location
+  }
+
+  return [hasChangedRoute, self.prevChildren, self.prevLocation]
+}
+
+/**
+ * Scroll to the given ref element on render (example: scroll to top when route changes).
+ *
+ * @param {boolean} shouldScroll - whether to scroll to the ref element
+ * @param {object} options
+ * @returns [ref: MutableRefObject<null>] ref - to assign to the element to scroll to
+ */
+export function useScrollToElement (shouldScroll, options = {behavior: 'auto'}) {
+  const ref = useRef(null)
+  if (ref.current && shouldScroll) ref.current.scrollIntoView(options)
+  return [ref]
 }
