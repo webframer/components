@@ -1,6 +1,6 @@
 import cn from 'classnames'
 import React from 'react'
-import JsonTree from 'react-json-tree' // do not use react-json-view because it breaks with recursive JSON and in Node.js
+import { JSONTree } from 'react-json-tree' // do not use react-json-view because it breaks with recursive JSON and in Node.js
 import defaultTheme from './JsonView.themes.js'
 import { type } from './types.js'
 import View from './View.jsx'
@@ -22,7 +22,7 @@ export function JsonView ({data, dark, open, theme, className, style, fill, ...p
   if (open) props.shouldExpandNode = expandNode
   return (
     <View className={cn('json-tree', className, {fill})} style={style}>
-      <JsonTree hideRoot invertTheme={!dark} theme={theme} data={data} {...props} />
+      <JSONTree hideRoot invertTheme={!dark} theme={theme} data={data} {...props} />
     </View>
   )
 }
