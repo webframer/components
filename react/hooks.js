@@ -319,7 +319,7 @@ export function useRouteChange (props, self = useRef({}).current) {
      *       even for the same route, so compare with location.key instead)
      */
     (!routes && props.location.pathname !== location.pathname) ||
-    (routes && props.location.key !== location.key)
+    (!!routes && props.location.key !== location.key)
   )
 
   // Cache previous props, because Component may re-render without changing routes
