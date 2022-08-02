@@ -5,6 +5,7 @@
   "license": "MIT",
   "type": "module",
   "homepage": "https://github.com/webframer/views",
+  "sideEffects": false,
   "repository": {
     "type": "git",
     "url": "https://github.com/webframer/views.git"
