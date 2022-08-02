@@ -1,4 +1,4 @@
-import { debounce } from '@webframer/utils'
+import { debounce, subscribeTo, unsubscribeFrom } from '@webframer/utils'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useEventListener, useIsomorphicLayoutEffect } from 'usehooks-ts/dist/esm/index.js'
 import { animateSize } from './animations.js'
@@ -39,28 +39,28 @@ function hookAnimatedSize (side = 'height') {
     }
 
     // useRef(null).current == null on initial useEffect with React.forwardRef => use function
-    const ref = useCallback(node => self.node = node, [self])
-    const resetStyles = useCallback(() => self.resetStyles && self.resetStyles(), [self])
-    const [animating, setAnimating] = useState(false)
+    if (!self.ref) self.ref = node => self.node = node
+    if (!self.resetStyles) self.resetStyles = () => self._resetStyles && self._resetStyles()
 
     // Skip logic for backend
-    if (typeof window === 'undefined') return [ref, animating, resetStyles]
+    if (typeof window === 'undefined') return [self.ref, false, self.resetStyles]
 
     // Height change
+    const [animating, setAnimating] = useState(false)
     useEffect(() => {
       if (self[side] === size) return
       // Set animating state explicitly in case of force update, and to force rerender at the end
       setAnimating(true)
       const [promise, resetStyles] = animateSize(self.node, self[side], size, side, duration, forwards)
       promise.then(() => setAnimating(false))
-      self.resetStyles = resetStyles
+      self._resetStyles = resetStyles
       self[side] = size
     }, [self, size, duration, forwards])
 
     // Mark state as animating as soon as there is size change, for Expand/Collapse render logic
     // because when closing element, the state is closed, but animating hasn't yet updated,
     // which causes bug for animation transitions when collapsing.
-    return [ref, animating || self[side] !== size, resetStyles]
+    return [self.ref, animating || self[side] !== size, self.resetStyles]
   }
 
   return useAnimatedSize
@@ -86,16 +86,15 @@ function hookAnimatedSize (side = 'height') {
  * @returns [open: boolean, ref: (node: HTMLElement) => void, toggleOpen: function, animating: boolean]
  */
 export function useExpandCollapse (isOpen, height = 'auto') {
-  const self = useInstance({open: isOpen})
-  const toggleOpen = useCallback(() => {
+  const [self, {open}] = useInstance({open: isOpen})
+  if (!self.toggleOpen) self.toggleOpen = () => {
     if (self.animating) return
     self.setState({open: !self.state.open})
-  }, [])
-  const {open} = self.state
+  }
   const [ref, animating, resetStyles] = useAnimatedHeight(open ? height : 0, {self, forwards: true})
   useEffect(() => {animating || resetStyles()}, [animating, resetStyles])
   self.animating = animating
-  return [open, ref, toggleOpen, animating]
+  return [open, ref, self.toggleOpen, animating]
 }
 
 /**
@@ -126,24 +125,32 @@ export function useElementHeight (delay = 16) {
 }
 
 /**
- * React Hook to simulate Class Component behaviors with `this` instance.
+ * React Hook to simulate Class Component behaviors with `this` instance (self).
  * @example:
- *    const self = useInstance({count: 0, length: 10})
- *    self.setState({count: 1}) >>> self.state == {count: 1, length: 10}
- *    self.forceUpdate() >>> re-renders the component
+ *    const [self, state] = useInstance({count: 0, length: 10})
+ *
+ *    // Declare instance method
+ *    if (!self.method) self.method = () => {...} // more performant than useCallback pattern
+ *
+ *    // Set State similar to Class Component
+ *    self.setState({count: 1})
+ *    >>> self.state == {count: 1, length: 10}
+ *
+ *    // Force Component re-render
+ *    self.forceUpdate()
  *
  * @param {object} [initialState]
- * @returns {object} instance - that persists for the entire component existence
+ * @returns [self: object, state: object] instance - that persists for the entire component existence
  */
 export function useInstance (initialState = {}) {
-  const {current: instance} = useRef({})
+  const {current: self} = useRef({})
   const [state, setState] = useState(initialState)
-  instance.state = state
-  if (!instance.setState) {
-    instance.setState = (newState) => setState(state => ({...state, ...newState}))
-    instance.forceUpdate = () => setState(state => ({...state}))
+  self.state = state
+  if (!self.setState) {
+    self.setState = (newState) => setState(state => ({...state, ...newState}))
+    self.forceUpdate = () => setState(state => ({...state}))
   }
-  return instance
+  return [self, self.state]
 }
 
 /**
@@ -159,6 +166,59 @@ export function usePreviousValue (value) {
   })
 
   return instance.current
+}
+
+/**
+ * UIContext state provider
+ * @example:
+ *   // App.js
+ *   const [state] = useUIState()
+ *   //...
+ *   <UIContext.Provider value={state}>
+ *     <View>...</View>
+ *   </>
+ * @param {object} [initialState]
+ * @returns [state: {
+ *       isMobile: boolean,
+ *       isTablet: boolean,
+ *       isComputer: boolean,
+ *       isDesktop: boolean,
+ *       isWidescreen: boolean,
+ *       isFHD: boolean,
+ *       screenRatio: number,
+ *       screenWidth: number,
+ *       screenHeight: number,
+ *     }] state - for UIContext.Provider
+ */
+export function useUIState (initialState = getUIState()) {
+  const [self, state] = useInstance(initialState)
+  if (!self.resize) self.resize = debounce(() => self.setState(getUIState()))
+  useEffect(() => {
+    subscribeTo('resize', self.resize)
+    return () => {unsubscribeFrom('resize', self.resize)}
+  }, [])
+  return [state, self.setState]
+}
+
+// Get state for UIContext Provider
+export function getUIState () {
+  if (typeof window !== 'undefined') {
+    const {innerWidth, innerHeight} = window
+    return {
+      isMobile: innerWidth < 768,
+      isTablet: innerWidth >= 768 && innerWidth < 1024,
+      isComputer: innerWidth >= 1024 && innerWidth < 1200,
+      isDesktop: innerWidth >= 1200 && innerWidth < 1366,
+      isWidescreen: innerWidth >= 1366 && innerWidth <= 1680,
+      isFHD: innerWidth > 1680 && innerWidth <= 1920,
+      isQHD: innerWidth > 1920 && innerWidth <= 2560,
+      screenRatio: innerWidth / innerHeight,
+      screenWidth: innerWidth,
+      screenHeight: innerHeight,
+    }
+  } else {
+    return {}
+  }
 }
 
 /**
