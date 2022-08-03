@@ -154,7 +154,28 @@ export function useInstance (initialState = {}) {
 }
 
 /**
- * Get Previous Value of the Component
+ * Get previous prop of the Component, similar to class.componentWillReceiveProps
+ * @param {any} value - to get from previous Component props
+ * @returns {any|void} previous prop - undefined initially
+ */
+export function usePreviousProp (value) {
+  const {current: self} = useRef({})
+  self.hasChanged = value !== self.lastValue
+
+  useEffect(() => {
+    // Cache value for the next render cycle if prop changed
+    if (self.hasChanged) {
+      self.prevValue = self.lastValue // the cached value before the last value to restore
+      self.lastValue = value
+    }
+  })
+
+  return self.hasChanged ? self.lastValue : self.prevValue
+}
+
+/**
+ * Get previous value of the Component during the last render.
+ * (can be the same as current if forceUpdate - see usePreviousProp hook for changed props only).
  * @param {any} value - to get from previous render state
  * @returns {any|void} previous value - undefined initially
  */
