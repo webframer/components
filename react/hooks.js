@@ -1,4 +1,4 @@
-import { debounce, subscribeTo, unsubscribeFrom } from '@webframer/utils'
+import { debounce, isEqualJSON, isFunction, subscribeTo, unsubscribeFrom } from '@webframer/utils'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useEventListener, useIsomorphicLayoutEffect } from 'usehooks-ts/dist/esm/index.js'
 import { animateSize } from './animations.js'
@@ -147,8 +147,12 @@ export function useInstance (initialState = {}) {
   const [state, setState] = useState(initialState)
   self.state = state
   if (!self.setState) {
-    self.setState = (newState) => setState(state => ({...state, ...newState}))
     self.forceUpdate = () => setState(state => ({...state}))
+    self.setState = (newState) => {
+      if (isFunction(newState)) return setState(newState)
+      if (isEqualJSON(newState, self.state)) return
+      setState(state => ({...state, ...newState}))
+    }
   }
   return [self, self.state]
 }
@@ -156,10 +160,10 @@ export function useInstance (initialState = {}) {
 /**
  * Get previous prop of the Component, similar to class.componentWillReceiveProps
  * @param {any} value - to get from previous Component props
+ * @param {object} [self] - Component instance
  * @returns {any|void} previous prop - undefined initially
  */
-export function usePreviousProp (value) {
-  const {current: self} = useRef({})
+export function usePreviousProp (value, self = useRef({}).current) {
   self.hasChanged = value !== self.lastValue
 
   useEffect(() => {

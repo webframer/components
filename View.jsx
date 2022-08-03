@@ -1,6 +1,7 @@
 import cn from 'classnames'
 import React, { useEffect, useRef } from 'react'
 import { accessibilitySupport, isRef } from './react.js'
+import { useTooltip } from './Tooltip.jsx'
 import { type } from './types.js'
 import { applyStyles } from './utils/css.js'
 
@@ -11,11 +12,29 @@ import { applyStyles } from './utils/css.js'
  * @return {function[]} React function component and forwardRef component
  */
 export function createView (defaultProp) {
+  /**
+   * View Layout - Pure Component.
+   * With default `display: flex` in column/row style
+   * (to replace browser's `<div>` with a platform-agnostic component for React Native, etc.)
+   *
+   * @param {boolean} [scroll] - whether to make the view scrollable
+   * @param {boolean} [col] - whether to use column layout, true if `row` is falsy by default
+   * @param {boolean} [row] - whether to use row layout, false by default
+   * @param {string} [className] - optional css class
+   * @param {function} [onClick] - callback to fire on click or Enter press (if `onKeyPress` not given)
+   * @param {boolean} [fill] - whether to make the view fill up available height and width
+   * @param {boolean} [reverse] - whether to reverse the order of rendering
+   * @param {boolean} [rtl] - whether to use right to left text direction
+   * @param {object|HTMLAudioElement} [sound] - new Audio(URL) sound file
+   * @param {*} props - other attributes to pass to `<div></div>`
+   * @param {function|React.MutableRefObject} [ref] - forwarding React.useRef() or React.createRef()
+   */
   function View ({
     className, scroll, row, col = !row, fill, reverse, rtl,
     left, right, top, bottom, center, middle, sound,
-    ...props
+    children, ...props
   }, ref) {
+    const [tooltip] = useTooltip(props)
     props = accessibilitySupport(props, sound)
     className = cn(
       className, {
@@ -28,7 +47,7 @@ export function createView (defaultProp) {
     if (isRef(ref)) props.ref = ref
 
     // Ordinary View
-    if (!scroll) return <div className={className} {...props} />
+    if (!scroll) return <div className={className} {...props}>{children}{tooltip}</div>
 
     // Scrollable View
     let propsWrap
@@ -74,7 +93,7 @@ export function createView (defaultProp) {
         return () => {
           let {current: node} = refWrap
           if (!node) return
-          
+
           // Only reset parent style if no other scrollables exist
           if (node.parentElement && node.parentElement[attr]) {
             if (!hasScrollElement(node.parentElement, node)) {
@@ -90,7 +109,8 @@ export function createView (defaultProp) {
     // Scroll View
     return (
       <div className={classWrap} style={styleWrap} ref={refWrap} {...propsWrap} >
-        <div className={className} {..._props} />
+        <div className={className} {..._props}>{children}</div>
+        {tooltip}
       </div>
     )
   }
@@ -124,24 +144,6 @@ export function createView (defaultProp) {
 }
 
 export const [View, ViewRef] = createView()
-
-/**
- * View Layout - Pure Component.
- * With default `display: flex` in column/row style
- * (to replace browser's `<div>` with a platform-agnostic component for React Native, etc.)
- *
- * @param {boolean} [scroll] - whether to make the view scrollable
- * @param {boolean} [col] - whether to use column layout, true if `row` is falsy by default
- * @param {boolean} [row] - whether to use row layout, false by default
- * @param {string} [className] - optional css class
- * @param {function} [onClick] - callback to fire on click or Enter press (if `onKeyPress` not given)
- * @param {boolean} [fill] - whether to make the view fill up available height and width
- * @param {boolean} [reverse] - whether to reverse the order of rendering
- * @param {boolean} [rtl] - whether to use right to left text direction
- * @param {object|HTMLAudioElement} [sound] - new Audio(URL) sound file
- * @param {*} props - other attributes to pass to `<div></div>`
- * @param {function|React.MutableRefObject} [ref] - forwarding React.useRef() or React.createRef()
- */
 export default React.memo(View)
 
 /**
