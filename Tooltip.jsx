@@ -1,4 +1,12 @@
-import { debounce, isObject, subscribeTo, toUniqueListFast, trimSpaces, unsubscribeFrom } from '@webframer/utils'
+import {
+  debounce,
+  isFunction,
+  isObject,
+  subscribeTo,
+  toUniqueListFast,
+  trimSpaces,
+  unsubscribeFrom,
+} from '@webframer/utils'
 import cn from 'classnames'
 import React, { useEffect, useRef } from 'react'
 import { useInstance } from './react/hooks.js'
@@ -15,7 +23,7 @@ export function Tooltip ({
   align = (position === 'left' || position === 'right') ? 'middle' : 'center',
   className, row, col = !row, fill, reverse, rtl,
   left, right, top, bottom, center, middle,
-  ...props
+  children, ...props
 }) {
   const ref = useRef(null)
   const [self, state] = useInstance({open, position})
@@ -119,7 +127,9 @@ export function Tooltip ({
           'pointer': props.onClick,
           'invisible': !self.mounted || !open, // tailwind only recognizes text literal
           [animation]: self.mounted && open,
-        })} {...props} />
+        })} {...props}>
+          {isFunction(children) ? children(self) : children}
+        </span>
       </span>
     </span>
   )
@@ -149,6 +159,21 @@ let ToolTip
 export default ToolTip = React.memo(Tooltip)
 
 /**
+ * Convert `tooltip` prop of any type into props for Tooltip rendering.
+ *
+ * @param {any} tooltip - prop
+ * @param {object|null} [defaultProps] - to use for Tooltip
+ * @returns {object|null} props - ready for use with Tooltip component
+ */
+export function tooltipProps (tooltip, defaultProps) {
+  if (tooltip == null) return null
+  if (React.isValidElement(tooltip) || isFunction(tooltip)) return {...defaultProps, children: tooltip}
+  if (isObject(tooltip)) return defaultProps ? {...defaultProps, ...tooltip} : tooltip
+  // Tooltip is a primitive value
+  return {...defaultProps, children: String(tooltip)}
+}
+
+/**
  * Extend a Component with `tooltip` prop.
  * @example:
  *    const [tooltip] = useTooltip(props)
@@ -157,26 +182,18 @@ export default ToolTip = React.memo(Tooltip)
  *    return <div>{children}{tooltip}</div>
  *
  * @param {object|{tooltip?: any}} props - copy of the Component with optional `tooltip` prop
- * @returns [tooltip: JSX.Element|null]
+ * @param {object|null} [defaultProps] - to use for Tooltip
+ * @returns [tooltip: JSX.Element|null] - tooltip variable for inserting into markup
  */
-export function useTooltip (props) {
+export function useTooltip (props, defaultProps) {
   if (props.tooltip == null) return [null]
-  const {tooltip} = props
+  const tooltip = tooltipProps(props.tooltip, defaultProps)
   delete props.tooltip
-
-  if (React.isValidElement(tooltip)) // noinspection JSValidateTypes
-    return [<ToolTip>{tooltip}</ToolTip>]
-
-  if (isObject(tooltip)) // noinspection JSValidateTypes
-    return [<ToolTip {...tooltip} />]
-
-  // Tooltip is a primitive value
-  // noinspection JSValidateTypes
-  return [<ToolTip>{String(tooltip)}</ToolTip>]
+  return [<ToolTip {...tooltip} />]
 }
 
 // Render Tooltip as fixed position initially to measure its desired width/height
-const styleFixed = {position: 'fixed', left: 0, top: 0}
+const styleFixed = {position: 'fixed', right: 0, bottom: 0, visibility: 'hidden'}
 const styleTooltip = {zIndex: 99, pointerEvents: 'auto'}
 const noPointerEvents = {pointerEvents: 'none'}
 

@@ -23,7 +23,7 @@ type.Id = PropTypes.string
 type.Int = PropTypes.number
 type.List = PropTypes.array
 type.ListOf = PropTypes.arrayOf
-type.Method = PropTypes.func
+type.Function = PropTypes.func
 type.Milliseconds = PropTypes.number
 type.Mm = PropTypes.number // millimeter
 type.Node = PropTypes.node
@@ -47,7 +47,7 @@ type.Timestamp = PropTypes.number
 type.Url = PropTypes.string
 type.UrlOrBase64 = type.String
 type.UrlOrBase64OrPreview = type.OneOf(type.String, type.Object) // `preview` is new String() object
-type.UrlOrNode = type.OneOf(type.String, type.Object, type.Method)
+type.UrlOrNode = type.OneOf(type.String, type.Object, type.Function)
 type.UrlOrObject = type.OneOf(type.String, type.Object)
 
 /* Component Types */
@@ -95,3 +95,20 @@ type.Option = type.OneOf(
   }),
 )
 type.Options = type.ListOf(type.Option.isRequired)
+
+// Tooltip Props
+type.Tooltip = type.OneOf(
+  type.String,
+  type.Number,
+  type.Node,
+  type.Function,
+  type.Of({
+    children: type.Any.isRequired,
+    position: type.String,
+    on: type.String,
+    open: type.Boolean,
+    delay: type.Milliseconds,
+    animation: type.String,
+    theme: type.String,
+  }),
+)
