@@ -1,5 +1,5 @@
 <script>
-  import { cn } from '@webframer/utils/component.js'
+  import cn from 'classnames'
 
   export let fill, reverse, rtl, left, right, top, bottom, center, middle
   let className

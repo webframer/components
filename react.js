@@ -1,4 +1,4 @@
-import { Active, isFunction, SOUND } from '@webframer/utils'
+import { Active, isFunction, SOUND } from '@webframer/js'
 import React from 'react'
 
 /**

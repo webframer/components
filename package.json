@@ -1,5 +1,5 @@
 {
-  "name": "@webframer/views",
+  "name": "@webframer/ui",
   "version": "0.0.1",
   "description": "Components library for no-code development platform",
   "license": "MIT",
@@ -23,7 +23,7 @@
     "push": "npm publish --access public"
   },
   "dependencies": {
-    "@webframer/utils": "workspace:*",
+    "@webframer/js": "workspace:*",
     "classnames": "^2.3.1",
     "prop-types": "^15.8.1",
     "react-json-tree": "^0.17.0",

@@ -1,4 +1,4 @@
-import { debounce, isEqualJSON, isFunction, subscribeTo, unsubscribeFrom } from '@webframer/utils'
+import { debounce, isEqualJSON, isFunction, subscribeTo, unsubscribeFrom } from '@webframer/js'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useEventListener, useIsomorphicLayoutEffect } from 'usehooks-ts/dist/esm/index.js'
 import { animateSize } from './animations.js'

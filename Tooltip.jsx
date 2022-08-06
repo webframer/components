@@ -6,7 +6,7 @@ import {
   toUniqueListFast,
   trimSpaces,
   unsubscribeFrom,
-} from '@webframer/utils'
+} from '@webframer/js'
 import cn from 'classnames'
 import React, { useEffect, useRef } from 'react'
 import { useInstance } from './react/hooks.js'

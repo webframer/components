@@ -1,4 +1,4 @@
-import { cloneDeep, Id } from '@webframer/utils'
+import { cloneDeep, Id } from '@webframer/js'
 
 /**
  *

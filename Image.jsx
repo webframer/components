@@ -1,4 +1,4 @@
-import { FILE, fileNameWithoutExt } from '@webframer/utils'
+import { FILE, fileNameWithoutExt } from '@webframer/js'
 import cn from 'classnames'
 import React from 'react'
 import { type } from './types'

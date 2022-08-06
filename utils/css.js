@@ -1,4 +1,4 @@
-import { CDN_URL, isFileSrc, isFunction } from '@webframer/utils'
+import { CDN_URL, isFileSrc, isFunction } from '@webframer/js'
 
 /**
  * Apply CSS styles to Node element, with original styles extracted.
