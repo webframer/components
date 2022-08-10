@@ -1,4 +1,4 @@
-import { debounce, isEqualJSON, isFunction, subscribeTo, unsubscribeFrom } from '@webframer/js'
+import { debounce, Id, isEqualJSON, isFunction, subscribeTo, unsubscribeFrom } from '@webframer/js'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useEventListener, useIsomorphicLayoutEffect } from 'usehooks-ts/dist/esm/index.js'
 import { animateSize } from './animations.js'
@@ -122,6 +122,19 @@ export function useElementHeight (delay = 16) {
   useIsomorphicLayoutEffect(handleSize, [element])
 
   return [height, setRef]
+}
+
+/**
+ * Create a globally unique ID string for the entire Component's lifetime.
+ * For SSR rendering, use built-in `useId` method provided by React.
+ *
+ * @param {string} [id] - the unique ID to use, defaults to generating a new one on the first render
+ * @returns {string} uid - globally unique ID
+ */
+export function useUId (id) {
+  const {current: self} = useRef({id})
+  if (!self.id) self.id = Id({caseSensitive: true})
+  return self.id
 }
 
 /**
