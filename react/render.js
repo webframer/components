@@ -1,4 +1,4 @@
-import { isFunction, isObject } from '@webframer/js'
+import { isCollection, isFunction } from '@webframer/js'
 import React from 'react'
 import Text from '../Text.jsx'
 
@@ -14,7 +14,7 @@ import Text from '../Text.jsx'
 export function resolveChildren (children, instance) {
   if (isFunction(children)) {
     return children(instance)
-  } else if (!isObject(children)) { // React element is also an object
+  } else if (!isCollection(children)) { // React element is also an object[]
     return <Text>{children}</Text> // wrap primitives inside Text for editing and React Native
   }
   return children

@@ -1,11 +1,11 @@
 import { isFunction } from '@webframer/js'
 import cn from 'classnames'
-import React, { useContext, useId } from 'react'
+import React, { useContext, useId, useRef } from 'react'
 import { Button } from './Button.jsx'
-import { useInstance, usePreviousProp } from './react/hooks.js'
+import { useExpandCollapse } from './react/hooks.js'
 import { resolveChildren } from './react/render.js'
 import { type } from './types.js'
-import { View } from './View.jsx'
+import { View, ViewRef } from './View.jsx'
 
 const ExpandInstance = React.createContext({})
 const ExpandState = React.createContext({})
@@ -14,31 +14,31 @@ const ExpandState = React.createContext({})
  * Expand/Collapse - Pure Component.
  * Multiple ExpandTab and ExpandPanel can be used to create an Accordion.
  * Unlike Tabs, Expand does not have controlled/uncontrolled state - it has a hybrid state.
- * If `open` prop passed, it will be used as initial state. When `open` prop changes, it will update.
+ * If `open` prop passed, it will be used as initial state.
+ * When `open` prop changes, it will update (todo).
  */
 export function Expand ({
-  id = useId(), open, onChange, duration, forceRender, children, className, ...props
+  id = useId(), open: o, onChange, duration, forceRender, children, className, ...props
 }) {
-  const opened = usePreviousProp(open)
-  const [self, state] = useInstance({id, open})
-  if (opened !== open) state.open = !!open // update state when prop changes
+  const {current: self} = useRef({})
+  const [{open, animating}, toggleOpen, ref] = useExpandCollapse(o, {duration})
 
   // Handle Expand change
   self.onChange = onChange
   if (!self.toggleOpen) self.toggleOpen = (event) => {
     const open = !self.state.open
-    self.setState({open})
+    toggleOpen()
     if (self.onChange) self.onChange(open, self.state.id, event)
   }
 
   // Force state update on every render
-  self.expandState = {duration, forceRender, ...state}
-  self.renderProps = {...self, ...self.expandState}
+  self.state = {id, duration, forceRender, open, animating, ref}
+  self.renderProps = {...self, ...self.state}
 
   return (
     <ExpandInstance.Provider value={self}>
-      <ExpandState.Provider value={self.expandState}>
-        <View className={cn(className, 'expandable')} {...props}>
+      <ExpandState.Provider value={self.state}>
+        <View className={cn(className, 'expand')} {...props}>
           {isFunction(children) ? children(self.renderProps) : children}
         </View>
       </ExpandState.Provider>
@@ -108,13 +108,14 @@ ExpandTab.defaultProps = {
  */
 export function ExpandPanel ({className, forceRender, ...props}) {
   const self = useContext(ExpandInstance)
-  const {open, id, forceRender: f} = useContext(ExpandState)
-  if (!open && !(forceRender = forceRender || f)) return null
+  const {open, animating, id, ref, forceRender: f} = useContext(ExpandState)
+  const hidden = !open && !animating
+  if (hidden && !(forceRender = forceRender || f)) return null
 
   // Accessibility
   props.id = `panel_${id}`
   props['aria-labelledby'] = `tab_${id}`
-  if (forceRender && !open) {
+  if (forceRender && hidden) {
     props['aria-expanded'] = 'false'
     props.hidden = true // must be boolean because this is native attribute
   } else {
@@ -124,9 +125,10 @@ export function ExpandPanel ({className, forceRender, ...props}) {
 
   // Resolve children
   props.children = resolveChildren(props.children, self.renderProps)
+  props.ref = ref
 
   // Do not use Scroll here so user can have a choice of explicitly passing `scroll` attribute
-  return <View className={cn(className, 'expand__panel')} {...props} />
+  return <ViewRef className={cn(className, 'expand__panel')} {...props} />
 }
 
 ExpandPanel.propTypes = {

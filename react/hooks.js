@@ -71,7 +71,7 @@ function hookAnimatedSize (side = 'height') {
  *
  * @example:
  *    function Component ({list, ...props}) {
- *      const [open, ref, toggleOpen, animating] = useExpandCollapse(props.open)
+ *      const [{open, animating}, toggleOpen, ref] = useExpandCollapse(props.open)
  *      const hasItems = list && list.length > 0
  *      return <>
  *        <button onClick={toggleOpen}>{open ? 'Collapse' : 'Expand'}</button>
@@ -82,19 +82,20 @@ function hookAnimatedSize (side = 'height') {
  *    }
  *
  * @param {boolean} [isOpen] - whether expanded initially
+ * @param {number} [duration] - animation duration in milliseconds
  * @param {number | string} [height] - CSS style for open state, default is 'auto'
- * @returns [open: boolean, ref: (node: HTMLElement) => void, toggleOpen: function, animating: boolean]
+ * @returns [{open: boolean, animating: boolean}, toggleOpen: function, ref: (node: HTMLElement) => void]
  */
-export function useExpandCollapse (isOpen, height = 'auto') {
+export function useExpandCollapse (isOpen, {height = 'auto', duration} = {}) {
   const [self, {open}] = useInstance({open: isOpen})
   if (!self.toggleOpen) self.toggleOpen = () => {
     if (self.animating) return
     self.setState({open: !self.state.open})
   }
-  const [ref, animating, resetStyles] = useAnimatedHeight(open ? height : 0, {self, forwards: true})
+  const [ref, animating, resetStyles] = useAnimatedHeight(open ? height : 0, {self, duration, forwards: true})
   useEffect(() => {animating || resetStyles()}, [animating, resetStyles])
   self.animating = animating
-  return [open, ref, self.toggleOpen, animating]
+  return [{open, animating}, self.toggleOpen, ref]
 }
 
 /**
