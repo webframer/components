@@ -229,7 +229,11 @@ export function TabPanel ({id, className, forceRender, mustRender, ...props}) {
   props.id = `panel_${id}_${tabsId}`
   props['aria-labelledby'] = `tab_${id}_${tabsId}`
   if (forceRender && activeId !== id) {
+    props['aria-expanded'] = 'false'
     props.hidden = true // must be boolean because this is native attribute
+  } else {
+    props['aria-expanded'] = 'true'
+    props.hidden = false
   }
 
   // Resolve children

@@ -66,14 +66,16 @@ Expand.defaultProps = {
 }
 
 /**
- * Expand Label Header -----------------------------------------------------------------------------
+ * Expand Tab Header -------------------------------------------------------------------------------
  */
-export function ExpandLabel ({className, onClick, ...props}) {
+export function ExpandTab ({className, onClick, ...props}) {
   const self = useContext(ExpandInstance)
   const {open, id, animating} = useContext(ExpandState)
+
   // Accessibility
-  props.id = `label_${id}`
+  props.id = `tab_${id}`
   props['aria-controls'] = `panel_${id}`
+  props['aria-selected'] = open ? 'true' : 'false'
 
   // Expand Props
   if (!animating) props.onClick = !onClick ? self.toggleOpen : (e) => {
@@ -87,14 +89,14 @@ export function ExpandLabel ({className, onClick, ...props}) {
   return <Button className={cn(className, 'expand__label', {open})} {...props} />
 }
 
-ExpandLabel.propTypes = {
+ExpandTab.propTypes = {
   // Expand header (see example)
   children: type.NodeOrFunction.isRequired,
   // Callback(event: Event, id: string | number, open: boolean) when `open` state changes
   onClick: type.Function,
 }
 
-ExpandLabel.defaultProps = {
+ExpandTab.defaultProps = {
   role: 'tab',
   _nodrag: '',
 }
@@ -109,9 +111,13 @@ export function ExpandPanel ({className, forceRender, ...props}) {
 
   // Accessibility
   props.id = `panel_${id}`
-  props['aria-labelledby'] = `label_${id}`
+  props['aria-labelledby'] = `tab_${id}`
   if (forceRender && !open) {
+    props['aria-expanded'] = 'false'
     props.hidden = true // must be boolean because this is native attribute
+  } else {
+    props['aria-expanded'] = 'true'
+    props.hidden = false
   }
 
   // Resolve children
