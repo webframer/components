@@ -43,9 +43,10 @@ export function Tabs ({
 
   // Handle Tab change
   self.onChange = onChange
-  if (!self.setTab) self.setTab = (activeId) => {
+  if (!self.setTab) self.setTab = (activeId, event) => {
+    let lastId = self.tabState.activeId
     self.setState({activeId})
-    if (self.onChange) self.onChange(activeId)
+    if (self.onChange) self.onChange(activeId, lastId, event)
   }
 
   // Controlled state
@@ -79,7 +80,7 @@ Tabs.propTypes = {
   defaultId: type.OneOf(type.String, type.Number),
   // Tab content (see example)
   children: type.NodeOrFunction.isRequired,
-  // Callback(activeId: string) whenever tab changes, where activeId could be an index as string
+  // Callback(activeId: string, lastId: string, event) whenever tab changes, where ids could be indices
   onChange: type.Function,
   // Whether to use Right-to-Left direction
   rtl: type.Boolean,
@@ -119,7 +120,7 @@ export function Tab ({id, className, onClick, ...props}) {
   if (id == null) id = String(index) // if `id` is undefined, fallback to using index
 
   // Set defaultId to the first Tab when none set because `id` could be key string
-  if (activeId == null && index === 0) self.tabState.activeId = activeId = id
+  if (activeId == null) self.tabState.activeId = activeId = id
 
   // Accessibility
   props.id = `tab_${id}_${tabsId}`
@@ -131,8 +132,8 @@ export function Tab ({id, className, onClick, ...props}) {
     props.disabled = true
   } else {
     props.onClick = (event) => {
-      self.setTab(id)
-      if (onClick) onClick(event)
+      self.setTab(id, event)
+      if (onClick) onClick(event, id)
     }
   }
   return <Button className={cn(className, '_tabs__tab')} {...props} />
@@ -141,6 +142,8 @@ export function Tab ({id, className, onClick, ...props}) {
 Tab.propTypes = {
   // Tab key string to pair with TabPanel, defaults to using Tab index
   id: type.String,
+  // Callback(event, id)
+  onClick: type.Function,
 }
 
 Tab.defaultProps = {
@@ -180,6 +183,8 @@ TabPanel.propTypes = {
   // Whether to always render the Tab Panel (useful for SEO indexing)
   // @see https://www.semrush.com/blog/html-hide-element/
   forceRender: type.Boolean,
+  // Whether to make Tab Panel scrollable
+  scroll: type.Boolean,
 }
 
 TabPanel.defaultProps = {
