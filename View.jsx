@@ -36,22 +36,23 @@ export function createView (defaultProp) {
   }, ref) {
     const [tooltip] = useTooltip(props)
     props = accessibilitySupport(props, sound)
-    className = cn(
-      className, {
-        col, row, fill, reverse, rtl,
-        left, right, top, bottom, center, middle,
-        pointer: props.onClick,
-      },
-    )
-
     if (isRef(ref)) props.ref = ref
 
     // Ordinary View
-    if (!scroll) return <div className={className} {...props}>{children}{tooltip}</div>
+    if (!scroll) {
+      className = cn(
+        className, {
+          col, row, fill, reverse, rtl,
+          left, right, top, bottom, center, middle,
+          pointer: props.onClick,
+        },
+      )
+      return <div className={className} {...props}>{children}{tooltip}</div>
+    }
 
     // Scrollable View
     let propsWrap
-    let {classWrap, styleWrap, ..._props} = props
+    let {classScroll, styleScroll, style, ..._props} = props
     if (_props._id !== void 0) {
       propsWrap = {_id: _props._id, _nodrop: ''}
       _props._nodrag = ''
@@ -64,12 +65,12 @@ export function createView (defaultProp) {
     // //   flex: 1;
     // // }
     // // ```
-    // classWrap = cn(classWrap, 'scrollable', {col, row, fill, rtl})
-    // className = cn({'position-fill': scroll})
+    // className = cn(className, 'scrollable', {col, row, fill, rtl})
+    // classScroll = cn({'position-fill': scroll})
 
     // @Flexbox version
-    classWrap = cn(
-      classWrap, 'scrollable', {
+    className = cn( // outer div container
+      className, 'scrollable', {
         col, row, fill, rtl,
         center: center && !row,
         middle: middle && !col,
@@ -77,8 +78,11 @@ export function createView (defaultProp) {
       // 'max-size' class is to be extended inside _layout.less to reduce html footprint
       // 'max-size', // row ? 'max-width' : 'max-height', // a scroll can overflow in any direction
     )
-    className = cn(
-      className, row ? 'min-width' : 'min-height', {
+    classScroll = cn( // inner div directly wrapping the children
+      classScroll, row ? 'min-width' : 'min-height', {
+        col, row, fill, reverse, rtl,
+        left, right, top, bottom, center, middle,
+        pointer: props.onClick,
         'margin-auto-h': center, // when layout is row and inner div is smaller than outer
         'margin-auto-v': middle, // when layout is col and inner div is smaller than outer
       },
@@ -108,8 +112,8 @@ export function createView (defaultProp) {
 
     // Scroll View
     return (
-      <div className={classWrap} style={styleWrap} ref={refWrap} {...propsWrap} >
-        <div className={className} {..._props}>{children}</div>
+      <div className={className} style={style} ref={refWrap} {...propsWrap} >
+        <div className={classScroll} style={styleScroll} {..._props}>{children}</div>
         {tooltip}
       </div>
     )
@@ -136,14 +140,20 @@ export function createView (defaultProp) {
     className: type.String,
     // Scroll View only
     scroll: type.Boolean,
-    classWrap: type.String,
-    styleWrap: type.Object,
+    classScroll: type.String,
+    styleScroll: type.Object,
   }
 
   return [View, ViewRef]
 }
 
 export const [View, ViewRef] = createView()
+
+/**
+ * Components, like View will be faster without memoization, whereas Text should be memoized.
+ * This is because whenever parent component re-renders, a View component wrapping other components
+ * will have its `children` prop changed. Thus, it will generally be slower when memoized.
+ */
 export default React.memo(View)
 
 /**
