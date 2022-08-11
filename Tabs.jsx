@@ -84,10 +84,10 @@ export function Tabs ({
   // HMR for some reason remounts TabPanel with new id, so flush ids on every render to fix it
   self.tabState = {panelIds: [], tabIds: [], vertical, forceRender, ...state}
 
-  return (
+  return ( // Tailwind has 'tabs' class styled, so avoid that
     <TabInstance.Provider value={self}>
       <TabState.Provider value={self.tabState}>
-        <View className={cn(className, '_tabs')} row={vertical} {...props}>
+        <View className={cn(className, 'tabs__wrap')} row={vertical} {...props}>
           {items && (<>
             <TabList>{items.map(renderTab)}</TabList>
             {renderPanel(items, self)}
@@ -155,7 +155,7 @@ export default React.memo(Tabs)
  */
 export function TabList ({className, ...props}) {
   const {vertical} = useContext(TabState)
-  return <Scroll className={cn(className, '_tabs__list no-scrollbar')} row={!vertical} {...props} />
+  return <Scroll className={cn(className, 'tabs__list no-scrollbar')} row={!vertical} {...props} />
 }
 
 TabList.defaultProps = {
@@ -194,7 +194,7 @@ export function Tab ({id, className, onClick, ...props}) {
       if (onClick) onClick(event, id)
     }
   }
-  return <Button className={cn(className, '_tabs__tab', {active})} {...props} />
+  return <Button className={cn(className, 'tabs__tab', {active})} {...props} />
 }
 
 Tab.propTypes = {
@@ -240,7 +240,7 @@ export function TabPanel ({id, className, forceRender, mustRender, ...props}) {
   }
 
   // Do not use Scroll here so user can have a choice of explicitly passing `scroll` attribute
-  return <View className={cn(className, '_tabs__panel')} {...props} />
+  return <View className={cn(className, 'tabs__panel')} {...props} />
 }
 
 TabPanel.propTypes = {
