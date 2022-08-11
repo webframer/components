@@ -15,6 +15,8 @@ const TabState = React.createContext({})
 
 /**
  * Tabs --------------------------------------------------------------------------------------------
+ * @todo: improve accessibility - set tabIndex={-1} for Tab to enable TAB focus on panel
+ *    https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/tabpanel_role
  * @example:
  *    // Uncontrolled state (Tab must be before TabPanel)
  *    <Tabs vertical defaultId={1}>

@@ -12,6 +12,7 @@ const ExpandState = React.createContext({})
 
 /**
  * Expand/Collapse - Pure Component.
+ * Multiple ExpandTab and ExpandPanel can be used to create an Accordion.
  * Unlike Tabs, Expand does not have controlled/uncontrolled state - it has a hybrid state.
  * If `open` prop passed, it will be used as initial state. When `open` prop changes, it will update.
  */
@@ -37,7 +38,7 @@ export function Expand ({
   return (
     <ExpandInstance.Provider value={self}>
       <ExpandState.Provider value={self.expandState}>
-        <View className={cn(className, 'expand__wrap')} {...props}>
+        <View className={cn(className, 'expandable')} {...props}>
           {isFunction(children) ? children(self.renderProps) : children}
         </View>
       </ExpandState.Provider>
@@ -63,6 +64,7 @@ Expand.propTypes = {
 
 Expand.defaultProps = {
   role: 'tablist',
+  'aria-multiselectable': 'true',
 }
 
 /**

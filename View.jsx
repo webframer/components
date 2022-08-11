@@ -70,7 +70,7 @@ export function createView (defaultProp) {
 
     // @Flexbox version
     className = cn( // outer div container
-      className, 'scrollable', {
+      className, 'scroll', {
         col, row, fill, rtl,
         center: center && !row,
         middle: middle && !col,
@@ -163,7 +163,7 @@ export default React.memo(View)
  * @param {string} [className] - to identify the Scroll component
  * @returns {boolean} true - if node contains at least once Scroll component
  */
-export function hasScrollElement (parentElement, scrollElement = null, className = 'scrollable') {
+export function hasScrollElement (parentElement, scrollElement = null, className = 'scroll') {
   for (const child of parentElement.children) {
     if (child === scrollElement) continue
     if (child.className.split(/\s+/).indexOf(className) >= 0) return true
@@ -179,7 +179,7 @@ export function hasScrollElement (parentElement, scrollElement = null, className
  * @param {string} [attr] - attribute key to store the original parentElement.style for reset later
  * @returns {string|void} attribute - modified style attribute that was attached to parentElement
  */
-export function maxSizeScrollOffset (parentElement, className = 'scrollable', attr = '@scrollReset') {
+export function maxSizeScrollOffset (parentElement, className = 'scroll', attr = '@scrollReset') {
   if (parentElement === document.body) return
 
   // Scroll offset style only works when set to the parent or higher up nested grandparents.
