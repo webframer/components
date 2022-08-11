@@ -1,9 +1,12 @@
-import { isFunction } from '@webframer/js'
+import { isFunction, isObject } from '@webframer/js'
 import cn from 'classnames'
 import React, { useContext, useEffect, useId } from 'react'
 import { Button } from './Button.jsx'
+import Icon from './Icon.jsx'
 import { useInstance } from './react/hooks.js'
 import Scroll from './Scroll.jsx'
+import Space from './Space.jsx'
+import Text from './Text.jsx'
 import { type } from './types.js'
 import View from './View.jsx'
 
@@ -13,7 +16,7 @@ const TabState = React.createContext({})
 /**
  * Tabs --------------------------------------------------------------------------------------------
  * @example:
- *    // Uncontrolled state
+ *    // Uncontrolled state (Tab must be before TabPanel)
  *    <Tabs vertical defaultId={1}>
  *      <TabList>
  *        <Tab>Tab 1</Tab>
@@ -34,9 +37,28 @@ const TabState = React.createContext({})
  *      <TabPanel id='b'>{() => 'Panel B'}</TabPanel>
  *      <TabPanel id='a'>{() => 'Panel A'}</TabPanel>
  *    </Tabs>
+ *
+ *    // Using `items` array
+ *    <Tabs items={[
+ *         {
+ *           tab: {
+ *             icon: 'plus',
+ *             text: 'Item 1',
+ *           },
+ *           panel: 'Panel 1 Text',
+ *         },
+ *         {
+ *           tab: 'Item 2',
+ *           panel: () => <Text>Panel 2 Function</Text>,
+ *         },
+ *         {
+ *           tab: <><Icon name='globe' />Item 3</>,
+ *           panel: <Text>Panel 3 Node</Text>,
+ *         },
+ *       ]} />
  */
 export function Tabs ({
-  activeId, defaultId, children, className, onChange, vertical, forceRender, ...props
+  activeId, defaultId, children, className, onChange, vertical, forceRender, items, ...props
 }) {
   const tabsId = useId()
   const [self, state] = useInstance({tabsId})
@@ -66,6 +88,10 @@ export function Tabs ({
     <TabInstance.Provider value={self}>
       <TabState.Provider value={self.tabState}>
         <View className={cn(className, '_tabs')} row={vertical} {...props}>
+          {items && (<>
+            <TabList>{items.map(renderTab)}</TabList>
+            {renderPanel(items, self)}
+          </>)}
           {isFunction(children) ? children(this) : children}
         </View>
       </TabState.Provider>
@@ -79,7 +105,7 @@ Tabs.propTypes = {
   // Default selected tab index number or key string (for uncontrolled state to load initially)
   defaultId: type.OneOf(type.String, type.Number),
   // Tab content (see example)
-  children: type.NodeOrFunction.isRequired,
+  children: type.NodeOrFunction,
   // Callback(activeId: string, lastId: string, event) whenever tab changes, where ids could be indices
   onChange: type.Function,
   // Whether to use Right-to-Left direction
@@ -89,6 +115,37 @@ Tabs.propTypes = {
   // Whether to always render all Tab Panels - can be set individually (useful for SEO indexing)
   // @see https://www.semrush.com/blog/html-hide-element/
   forceRender: type.Boolean,
+  // Alternative way to define Tabs and Panels as a single array
+  items: type.ListOf(type.Of({
+    // Optional unique identifier for the Tab and Panel
+    id: type.String,
+    // Tab Label - clickable buttons
+    tab: type.OneOf(
+      type.String,
+      type.Number,
+      type.Node,
+      type.Of({
+        text: type.String.isRequired,
+        icon: type.OneOf(
+          type.String,
+          type.Of({
+            // Icon name and other ...props
+            name: type.String.isRequired,
+            className: type.String,
+            style: type.Object,
+          }),
+        ),
+      }),
+    ).isRequired,
+    // Tab Content
+    panel: type.OneOf(
+      type.NodeOrFunction,
+      type.Of({
+        // Child node(s) and other props to pass to TabPanel
+        children: type.NodeOrFunction.isRequired,
+      }),
+    ).isRequired,
+  })),
 }
 
 export default React.memo(Tabs)
@@ -121,14 +178,15 @@ export function Tab ({id, className, onClick, ...props}) {
 
   // Set defaultId to the first Tab when none set because `id` could be key string
   if (activeId == null) self.tabState.activeId = activeId = id
+  const active = activeId === id
 
   // Accessibility
   props.id = `tab_${id}_${tabsId}`
   props['aria-controls'] = `panel_${id}_${tabsId}`
-  props['aria-selected'] = activeId === id ? 'true' : 'false'
+  props['aria-selected'] = active ? 'true' : 'false'
 
   // Tab props
-  if (activeId === id) {
+  if (active) {
     props.disabled = true
   } else {
     props.onClick = (event) => {
@@ -136,7 +194,7 @@ export function Tab ({id, className, onClick, ...props}) {
       if (onClick) onClick(event, id)
     }
   }
-  return <Button className={cn(className, '_tabs__tab')} {...props} />
+  return <Button className={cn(className, '_tabs__tab', {active})} {...props} />
 }
 
 Tab.propTypes = {
@@ -155,8 +213,9 @@ Tab.defaultProps = {
 /**
  * Tab Panel ---------------------------------------------------------------------------------------
  */
-export function TabPanel ({id, className, forceRender, ...props}) {
+export function TabPanel ({id, className, forceRender, mustRender, ...props}) {
   const panelId = useId()
+  const self = useContext(TabInstance)
   const {activeId, panelIds, tabsId, forceRender: f} = useContext(TabState) // must use state to re-render
   useEffect(() => () => {panelIds.splice(panelIds.indexOf(panelId), 1)}, [])
 
@@ -164,13 +223,20 @@ export function TabPanel ({id, className, forceRender, ...props}) {
   let index = panelIds.indexOf(panelId)
   if (index === -1) index = panelIds.push(panelId) - 1
   if (id == null) id = String(index) // if `id` is undefined, fallback to using index
-  if (activeId !== id && !(forceRender = forceRender || f)) return null
+  if (activeId !== id && !(forceRender = forceRender || f) && !mustRender) return null
 
   // Accessibility
   props.id = `panel_${id}_${tabsId}`
   props['aria-labelledby'] = `tab_${id}_${tabsId}`
   if (forceRender && activeId !== id) {
     props.hidden = true // must be boolean because this is native attribute
+  }
+
+  // Resolve children
+  if (isFunction(props.children)) {
+    props.children = props.children(self)
+  } else if (!isObject(props.children)) { // React element is also an object
+    props.children = <Text>{props.children}</Text> // wrap primitives inside Text for editing and React Native
   }
 
   // Do not use Scroll here so user can have a choice of explicitly passing `scroll` attribute
@@ -180,6 +246,8 @@ export function TabPanel ({id, className, forceRender, ...props}) {
 TabPanel.propTypes = {
   // Tab key string to pair with TabPanel, defaults to using Tab index
   id: type.String,
+  // Tab content
+  children: type.NodeOrFunction,
   // Whether to always render the Tab Panel (useful for SEO indexing)
   // @see https://www.semrush.com/blog/html-hide-element/
   forceRender: type.Boolean,
@@ -190,6 +258,39 @@ TabPanel.propTypes = {
 TabPanel.defaultProps = {
   role: 'tabpanel',
   _nodrag: '',
+}
+
+/**
+ * Tab Helpers -------------------------------------------------------------------------------------
+ */
+
+// Render Tab component from `items` prop
+function renderTab ({id, tab}, i) {
+  let children = tab
+  // React rendered node can also be an object
+  if (typeof tab === 'object' && tab.text != null) {
+    children = tab.text
+    const {icon} = tab
+    if (icon) children = <>
+      <Icon {...isObject(icon) ? icon : {name: icon}} /><Space smaller />{children}
+    </>
+  }
+  return <Tab key={id != null ? id : i} id={id}>{children}</Tab>
+}
+
+// Render TabPanel component from `items` prop
+function renderPanel (items, self) {
+  // React first renders all Tabs if they are defined before Panels, with or without TabPanels wrapper.
+  // Thus, the activeId should be set. But when defined as function, renderPanel renders first.
+  // => use the first index when `activeId == null`
+  const {activeId} = self.tabState
+  const index = Math.max(items.findIndex(({id}, i) => activeId === (id != null ? id : String(i))), 0)
+  const {id = String(index), panel} = items[index] || {}
+  const props = {id, ...(isObject(panel) && panel.children) ? panel : {children: panel}}
+
+  // Pass the `id` as index (if undefined) so that it matches active Tab index for Accessibility,
+  // because when mounted TabPanel will try to get index based on it's rendering order.
+  return <TabPanel {...props} />
 }
 
 // Make sure activeId can not be negative number

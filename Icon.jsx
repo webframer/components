@@ -1,3 +1,4 @@
+import cn from 'classnames'
 import React from 'react'
 import { isRef } from './react.js'
 import { type } from './types.js'
@@ -6,9 +7,9 @@ function createIcon () {
   /**
    * Icon - Pure Component
    */
-  function Icon (props, ref) {
+  function Icon ({name, className, ...props}, ref) {
     if (isRef(ref)) props.ref = ref
-    return <span className='icon-tbd' {...props} />
+    return <span className={cn(className, `icon-${name}`)} {...props} />
   }
 
   const IconRef = React.forwardRef(Icon)
