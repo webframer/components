@@ -153,6 +153,7 @@ Tooltip.defaultProps = {
   open: false,
   position: 'top',
   theme: 'dark',
+  role: 'tooltip',
 }
 
 let ToolTip

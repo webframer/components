@@ -4,9 +4,9 @@ import React, { useContext, useEffect, useId } from 'react'
 import { Button } from './Button.jsx'
 import Icon from './Icon.jsx'
 import { useInstance } from './react/hooks.js'
+import { resolveChildren } from './react/render.js'
 import Scroll from './Scroll.jsx'
 import Space from './Space.jsx'
-import Text from './Text.jsx'
 import { type } from './types.js'
 import View from './View.jsx'
 
@@ -233,11 +233,7 @@ export function TabPanel ({id, className, forceRender, mustRender, ...props}) {
   }
 
   // Resolve children
-  if (isFunction(props.children)) {
-    props.children = props.children(self)
-  } else if (!isObject(props.children)) { // React element is also an object
-    props.children = <Text>{props.children}</Text> // wrap primitives inside Text for editing and React Native
-  }
+  props.children = resolveChildren(props.children, self)
 
   // Do not use Scroll here so user can have a choice of explicitly passing `scroll` attribute
   return <View className={cn(className, 'tabs__panel')} {...props} />
