@@ -3,7 +3,7 @@ import React from 'react'
 import { JSONTree } from 'react-json-tree' // do not use react-json-view because it breaks with recursive JSON and in Node.js
 import defaultTheme from './JsonView.themes.js'
 import { type } from './types.js'
-import View from './View.jsx'
+import { View } from './View.jsx'
 
 /**
  * Json nested Object Renderer - Pure Component.

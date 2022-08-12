@@ -1,11 +1,11 @@
 import cn from 'classnames'
 import React from 'react'
-import Button from './Button.jsx'
+import { Button } from './Button.jsx'
 import Icon from './Icon.jsx'
 import Text from './Text.jsx'
 import { tooltipProps } from './Tooltip.jsx'
 import { type } from './types.js'
-import View from './View.jsx'
+import { View } from './View.jsx'
 
 /**
  * Group of Buttons, similar to Tabs in Buttoned Style with support for Tooltips
