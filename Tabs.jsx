@@ -89,7 +89,7 @@ export function Tabs ({
   return ( // Tailwind has 'tabs' class styled, so avoid that
     <TabInstance.Provider value={self}>
       <TabState.Provider value={self.tabState}>
-        <View className={cn(className, 'tabs__wrap')} row={vertical} {...props}>
+        <View className={cn(className, 'tabs')} row={vertical} {...props}>
           {items && (<>
             <TabList>{items.map(renderTab)}</TabList>
             {renderPanel(items, self)}
