@@ -11,14 +11,27 @@ const ExpandInstance = React.createContext({})
 const ExpandState = React.createContext({})
 
 /**
- * Expand/Collapse - Pure Component.
- * Multiple ExpandTab and ExpandPanel can be used to create an Accordion.
+ * Expand/Collapse - Accessible Component.
+ * Multiple Expand Components can be used to create an Accordion.
+ * @example:
+ *     import { Expand, ExpandPanel, ExpandTab } from '@webframer/ui/Expand.jsx'
+ *
+ *     <Expand onChange={warn}>
+ *       <ExpandTab>{({open}) => open ? 'Collapse' : 'Expand'}</ExpandTab>
+ *       <ExpandPanel><Text>Expandable Panel</Text></ExpandPanel>
+ *     </Expand>
+ *
+ *     <Expand forceRender id='unique_id'>
+ *       <ExpandTab>Toggle Expand/Collapse</ExpandTab>
+ *       <ExpandPanel>{() => <Text>Expandable Function</Text>}</ExpandPanel>
+ *     </Expand>
+ *
  * Unlike Tabs, Expand does not have controlled/uncontrolled state - it has a hybrid state.
  * If `open` prop passed, it will be used as initial state.
- * When `open` prop changes, it will update (todo).
+ * When `open` prop changes, it will update accordingly.
  */
 export function Expand ({
-  id = useId(), open: o, onChange, duration, forceRender, children, className, ...props
+  id = useId(), index, open: o, onChange, duration, forceRender, children, className, ...props
 }) {
   const {current: self} = useRef({})
   const [{open, animating}, toggleOpen, ref] = useExpandCollapse(o, {duration})
@@ -28,11 +41,11 @@ export function Expand ({
   if (!self.toggleOpen) self.toggleOpen = (event) => {
     const open = !self.state.open
     toggleOpen()
-    if (self.onChange) self.onChange(open, self.state.id, event)
+    if (self.onChange) self.onChange(open, self.state.id, index, event)
   }
 
   // Force state update on every render
-  self.state = {id, duration, forceRender, open, animating, ref}
+  self.state = {id, index, duration, forceRender, open, animating, ref}
   self.renderProps = {...self, ...self.state}
 
   return (
@@ -51,11 +64,13 @@ Expand.propTypes = {
   children: type.NodeOrFunction.isRequired,
   // Expand/Collapse animation duration in milliseconds
   duration: type.Milliseconds,
-  // Optional identifier or index, will be passed to `onChange`, default is React.useId() string
-  id: type.OneOf(type.String, type.Number),
-  // Callback(open: boolean, id: string | number, event: Event) when `open` state changes
+  // Optional unique identifier, will be passed to `onChange`, default is React.useId() string
+  id: type.String,
+  // Optional index identifier, will be passed to `onChange` (used by Accordion)
+  index: type.Number,
+  // Callback(open: boolean, id: string, index?: number, event: Event) when `open` state changes
   onChange: type.Function,
-  // Whether to expand ExpandPanel content initially
+  // Whether to expand ExpandPanel content
   open: type.Boolean,
   // Whether to always render ExpandPanel content (useful for SEO indexing)
   // @see https://www.semrush.com/blog/html-hide-element/
@@ -64,7 +79,7 @@ Expand.propTypes = {
 
 Expand.defaultProps = {
   role: 'tablist',
-  'aria-multiselectable': 'true',
+  // 'aria-multiselectable': 'true',
 }
 
 /**
@@ -88,7 +103,7 @@ export function ExpandTab ({className, onClick, ...props}) {
   // Resolve children
   props.children = resolveChildren(props.children, self.renderProps)
 
-  return <Button className={cn(className, 'expand__label', {open})} {...props} />
+  return <Button className={cn(className, 'expand__tab', {open})} {...props} />
 }
 
 ExpandTab.propTypes = {

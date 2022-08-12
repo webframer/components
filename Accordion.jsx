@@ -35,7 +35,7 @@ export function Accordion ({
 }) {
   const opened = usePreviousProp(open)
   const [self, state] = useInstance({openAll: open, openById: {}})
-  if (opened != null && open != null && opened !== open) state.openAll = open // update when prop changes
+  if (opened != null && open != null && opened !== open) state.openAll = open // update prop changes
 
   // Handle Accordion change
   self.multiple = multiple

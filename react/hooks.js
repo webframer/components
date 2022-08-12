@@ -30,8 +30,8 @@ function hookAnimatedSize (side = 'height') {
    * @param {{self?: object, duration?: number, forwards?: boolean}} - component instance to animate
    * @returns [ref: (node: HTMLElement) => void, animating: boolean, resetStyles: function]
    */
-  function useAnimatedSize (size, {self, duration = 300, forwards} = {}) {
-    const instance = useRef({[side]: size})
+  function useAnimatedSize (size, {self, duration = 400, forwards} = {}) {
+    const instance = useRef({[side]: size, timerById: {}})
     if (!self) {
       self = instance.current
     } else if (!self.node) {
@@ -49,10 +49,21 @@ function hookAnimatedSize (side = 'height') {
     const [animating, setAnimating] = useState(false)
     useEffect(() => {
       if (self[side] === size) return
+
       // Set animating state explicitly in case of force update, and to force rerender at the end
       setAnimating(true)
       const [promise, resetStyles] = animateSize(self.node, self[side], size, side, duration, forwards)
-      promise.then(() => setAnimating(false))
+
+      // Note: when user clicks too fast, Component may not finish expanding before it collapses,
+      // setting `animating: false` before the collapse animation finishes, causing flicker.
+      // This behavior can be tested with the Accordion example using slow animation duration.
+      const timerId = Id()
+      self.timerById[timerId] = true
+      promise.then(() => {
+        delete self.timerById[timerId]
+        if (Object.keys(self.timerById).length === 0) setAnimating(false)
+      })
+
       self._resetStyles = resetStyles
       self[side] = size
     }, [self, size, duration, forwards])
@@ -81,13 +92,17 @@ function hookAnimatedSize (side = 'height') {
  *      </>
  *    }
  *
- * @param {boolean} [isOpen] - whether expanded initially
+ * @param {boolean|null} [isOpen] - whether expanded initially, will update state if changes
  * @param {number} [duration] - animation duration in milliseconds
  * @param {number | string} [height] - CSS style for open state, default is 'auto'
  * @returns [{open: boolean, animating: boolean}, toggleOpen: function, ref: (node: HTMLElement) => void]
  */
 export function useExpandCollapse (isOpen, {height = 'auto', duration} = {}) {
-  const [self, {open}] = useInstance({open: isOpen})
+  const opened = usePreviousProp(isOpen)
+  const [self, state] = useInstance({open: isOpen})
+  if (opened != null && isOpen != null && opened !== isOpen) state.open = isOpen // update prop changes
+  const {open} = state
+
   if (!self.toggleOpen) self.toggleOpen = () => {
     if (self.animating) return
     self.setState({open: !self.state.open})
