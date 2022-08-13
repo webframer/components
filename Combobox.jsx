@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react'
+import { View } from './View.jsx'
 
 /**
  * Dropdown List of Searchable Select Options and Nested Category Hierarchy
@@ -13,10 +14,11 @@ import React, { PureComponent } from 'react'
  *    8. Nested option category (options grouped into categories)
  *    9. Text literal with variables suggestion (prefixed with `$`).
  */
-export default class Combobox extends PureComponent {
+export class Combobox extends PureComponent {
   render () {
-    return (
-      null
-    )
+    const props = this.props
+    return <View {...props} />
   }
 }
+
+export default Combobox

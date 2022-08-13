@@ -51,7 +51,7 @@ export function inlineSvg (svgString, x = 0, y = 0) {
  * @param {String|Object} preview - type.UrlOrBase64OrPreview
  * @param {String} [size] - one of thumb/medium/large/etc.
  * @param {String} [prefix] - url prefix (defaults to CDN url, if set in .env variable REACT_APP_CDN_URL)
- * @returns {String|Object} preview src ready for consumption by Components
+ * @returns {String|Object|any} preview src ready for consumption by Components
  */
 export function previewSize (preview, size = 'thumb',
   prefix = ((typeof preview === 'string' && (preview.indexOf('blob:') === 0 || preview.indexOf('http') === 0)) ? '' : CDN_URL)) {
