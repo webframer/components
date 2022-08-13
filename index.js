@@ -20,6 +20,10 @@ export * from './Text.jsx'
 export * from './Tooltip.jsx'
 export * from './View.jsx'
 
+// Utilities
+export { default as cn } from 'classnames'
+export * from './types.js'
+
 /**
  * Notes:
  *  - Next.js production bundle will tree shake unused exports.
