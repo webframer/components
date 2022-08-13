@@ -2,17 +2,17 @@ import cn from 'classnames'
 import React from 'react'
 import { type } from './types.js'
 
-function createSpace () {
+function createSpacer () {
   /**
-   * Space - Pure Component
+   * Spacer - Dumb Component
    */
-  function Space ({small, smaller, smallest, large, larger, largest, className, ...props}) {
+  function Spacer ({small, smaller, smallest, large, larger, largest, className, ...props}) {
     let size = cn({small, smaller, smallest, large, larger, largest})
     if (size) size = '-' + size
     return <span className={cn(className, 'space' + size)} {...props} />
   }
 
-  Space.propTypes = {
+  Spacer.propTypes = {
     small: type.Boolean,
     smaller: type.Boolean,
     smallest: type.Boolean,
@@ -21,8 +21,8 @@ function createSpace () {
     largest: type.Boolean,
   }
 
-  return [Space]
+  return [Spacer]
 }
 
-export const [Space] = createSpace()
-export default React.memo(Space)
+export const [Spacer] = createSpacer()
+export default React.memo(Spacer)

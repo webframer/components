@@ -6,7 +6,7 @@ import Icon from './Icon.jsx'
 import { useInstance } from './react/hooks.js'
 import { resolveChildren } from './react/render.js'
 import Scroll from './Scroll.jsx'
-import Space from './Space.jsx'
+import Spacer from './Spacer.jsx'
 import { type } from './types.js'
 import View from './View.jsx'
 
@@ -274,7 +274,7 @@ function renderTab ({id, tab}, i) {
     children = tab.text
     const {icon} = tab
     if (icon) children = <>
-      <Icon {...isObject(icon) ? icon : {name: icon}} /><Space smaller />{children}
+      <Icon {...isObject(icon) ? icon : {name: icon}} /><Spacer smaller />{children}
     </>
   }
   return <Tab key={id != null ? id : i} id={id}>{children}</Tab>
