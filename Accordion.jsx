@@ -9,8 +9,7 @@ import { View } from './View.jsx'
  * Accordion of Expandable/Collapsible content sections
  * @see: Expand docs for documentation.
  * @example:
- *    import { Accordion } from '@webframer/ui/Accordion.jsx'
- *    import { Expand, ExpandPanel, ExpandTab } from '@webframer/ui/Expand.jsx'
+ *    import { Accordion, Expand, ExpandPanel, ExpandTab } from '@webframer/ui'
  *
  *    <Accordion>
  *

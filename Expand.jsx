@@ -1,4 +1,3 @@
-import { isFunction } from '@webframer/js'
 import cn from 'classnames'
 import React, { useContext, useId, useRef } from 'react'
 import { Button } from './Button.jsx'
@@ -14,16 +13,23 @@ const ExpandState = React.createContext({})
  * Expand/Collapse - Accessible Component.
  * Multiple Expand Components can be used to create an Accordion.
  * @example:
- *     import { Expand, ExpandPanel, ExpandTab } from '@webframer/ui/Expand.jsx'
+ *     import { Expand, ExpandPanel, ExpandTab } from '@webframer/ui'
  *
+ *     // Using render props
  *     <Expand onChange={warn}>
  *       <ExpandTab>{({open}) => open ? 'Collapse' : 'Expand'}</ExpandTab>
  *       <ExpandPanel><Text>Expandable Panel</Text></ExpandPanel>
  *     </Expand>
  *
- *     <Expand forceRender id='unique_id'>
+ *     // Always render ExpandPanel content
+ *     <Expand forceRender id='optional_id'>
  *       <ExpandTab>Toggle Expand/Collapse</ExpandTab>
  *       <ExpandPanel>{() => <Text>Expandable Function</Text>}</ExpandPanel>
+ *     </Expand>
+ *
+ *     // Without ExpandTab and controlled `open` state
+ *     <Expand asPanel open={true}>
+ *       This expanded content will be wrapped with <ExpandPanel> implicitly
  *     </Expand>
  *
  * Unlike Tabs, Expand does not have controlled/uncontrolled state - it has a hybrid state.
@@ -31,7 +37,7 @@ const ExpandState = React.createContext({})
  * When `open` prop changes, it will update accordingly.
  */
 export function Expand ({
-  id = useId(), index, open: o, onChange, duration, forceRender, children, className, ...props
+  id = useId(), index, open: o, onChange, duration, forceRender, className, asPanel, ...props
 }) {
   const {current: self} = useRef({})
   const [{open, animating}, toggleOpen, ref] = useExpandCollapse(o, {duration})
@@ -48,12 +54,14 @@ export function Expand ({
   self.state = {id, index, duration, forceRender, open, animating, ref}
   self.renderProps = {...self, ...self.state}
 
+  // Resolve children
+  props.children = resolveChildren(props.children, self.renderProps)
+  if (asPanel) props.children = <ExpandPanel>{props.children}</ExpandPanel>
+
   return (
     <ExpandInstance.Provider value={self}>
       <ExpandState.Provider value={self.state}>
-        <View className={cn(className, 'expand')} {...props}>
-          {isFunction(children) ? children(self.renderProps) : children}
-        </View>
+        <View className={cn(className, 'expand')} {...props} />
       </ExpandState.Provider>
     </ExpandInstance.Provider>
   )
@@ -75,6 +83,8 @@ Expand.propTypes = {
   // Whether to always render ExpandPanel content (useful for SEO indexing)
   // @see https://www.semrush.com/blog/html-hide-element/
   forceRender: type.Boolean,
+  // Whether to wrap given `children` prop with <ExpandPanel> component (for use without ExpandTab)
+  asPanel: type.Boolean,
 }
 
 Expand.defaultProps = {
@@ -125,7 +135,10 @@ export function ExpandPanel ({className, forceRender, ...props}) {
   const self = useContext(ExpandInstance)
   const {open, animating, id, ref, forceRender: f} = useContext(ExpandState)
   const hidden = !open && !animating
-  if (hidden && !(forceRender = forceRender || f)) return null
+
+  // Animation with initial `open` state and forwardRef requires ref to always stay on,
+  // else on subsequent open, it will not animate because the ref does not exist on initial render.
+  if (hidden && !(forceRender = forceRender || f)) delete props.children
 
   // Accessibility
   props.id = `panel_${id}`
