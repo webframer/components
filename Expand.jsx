@@ -137,7 +137,11 @@ export function ExpandPanel ({className, forceRender, ...props}) {
 
   // Animation with initial `open` state and forwardRef requires ref to always stay on,
   // else on subsequent open, it will not animate because the ref does not exist on initial render.
-  if (hidden && !(forceRender = forceRender || f)) delete props.children
+  if (hidden && !(forceRender = forceRender || f)) {
+    props = {} // remove all props to collapse fully
+    className = null // also remove CSS classes to prevent layout bugs + enable transition on open
+    // then keep accessibility props below
+  }
 
   // Accessibility
   props.id = `panel_${id}`
@@ -146,7 +150,7 @@ export function ExpandPanel ({className, forceRender, ...props}) {
     props['aria-expanded'] = 'false'
     props.hidden = true // must be boolean because this is native attribute
   } else {
-    props['aria-expanded'] = 'true'
+    props['aria-expanded'] = open ? 'true' : 'false'
     props.hidden = false
   }
 

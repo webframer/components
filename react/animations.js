@@ -26,8 +26,7 @@ export function animateSize (node, startSize, endSize, side = 'height', duration
   let hasEnded
 
   // Collect all initial styles to reset at the end
-  const {overflow, visibility, transitionProperty, transitionDuration} = style
-  stylesToReset[side] = style[side]
+  const {width, height, overflow, flex, visibility, transitionProperty, transitionDuration} = style
   stylesToReset[mStart] = style[mStart]
   stylesToReset[mEnd] = style[mEnd]
   stylesToReset[pStart] = style[pStart]
@@ -36,6 +35,11 @@ export function animateSize (node, startSize, endSize, side = 'height', duration
   stylesToReset.visibility = visibility
   stylesToReset.transitionProperty = transitionProperty
   stylesToReset.transitionDuration = transitionDuration
+
+  // Ensure that 'fill' CSS class does not overrule fixed dimensions by setting both width/height
+  stylesToReset.height = height
+  stylesToReset.width = width
+  stylesToReset.flex = flex
 
   /**
    * Helper function at the start of transition
@@ -68,10 +72,14 @@ export function animateSize (node, startSize, endSize, side = 'height', duration
     }
 
     // Start animation requires layout measurement
-    if (typeof startSize !== 'number') startSize = node.getBoundingClientRect()[side]
+    if (typeof startSize !== 'number') setupStyles({[side]: startSize}, true)
 
     // Prepare start-transition styles
-    setupStyles({[side]: startSize + 'px'})
+    const {width: w, height: h, [side]: startPx} = node.getBoundingClientRect()
+    if (typeof startSize !== 'number') startSize = startPx // convert startSize to fixed pixel value
+
+    // Set start-transition with fixed width and height because 'flex: unset' can cause layout shift
+    setupStyles({width: w + 'px', height: h + 'px', [side]: startSize + 'px', flex: 'unset'})
 
     // Let initial style apply before setting end transition
     requestAnimationFrame(() => {

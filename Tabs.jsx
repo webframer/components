@@ -224,16 +224,19 @@ export function TabPanel ({id, className, forceRender, mustRender, ...props}) {
   let index = panelIds.indexOf(panelId)
   if (index === -1) index = panelIds.push(panelId) - 1
   if (id == null) id = String(index) // if `id` is undefined, fallback to using index
-  if (activeId !== id && !(forceRender = forceRender || f) && !mustRender) return null
+
+  // Skip rendering if not active
+  const active = activeId === id
+  if (!active && !(forceRender = forceRender || f) && !mustRender) return null
 
   // Accessibility
   props.id = `panel_${id}_${tabsId}`
   props['aria-labelledby'] = `tab_${id}_${tabsId}`
-  if (forceRender && activeId !== id) {
+  if (forceRender && !active) {
     props['aria-expanded'] = 'false'
     props.hidden = true // must be boolean because this is native attribute
   } else {
-    props['aria-expanded'] = 'true'
+    props['aria-expanded'] = (active || mustRender) ? 'true' : 'false'
     props.hidden = false
   }
 
