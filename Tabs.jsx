@@ -4,7 +4,6 @@ import React, { useContext, useEffect, useId } from 'react'
 import Icon from './Icon.jsx'
 import { useInstance } from './react/hooks.js'
 import { resolveChildren } from './react/render.js'
-import Scroll from './Scroll.jsx'
 import Spacer from './Spacer.jsx'
 import { type } from './types.js'
 import View from './View.jsx'
@@ -156,7 +155,9 @@ export default React.memo(Tabs)
  */
 export function TabList ({className, ...props}) {
   const {vertical} = useContext(TabState)
-  return <Scroll className={cn(className, 'tabs__list no-scrollbar')} row={!vertical} {...props} />
+  
+  // Do not use Scroll here to avoid potential bugs with parent offset, let user set `scroll`
+  return <View className={cn(className, 'tabs__list no-scrollbar')} row={!vertical} {...props} />
 }
 
 TabList.defaultProps = {

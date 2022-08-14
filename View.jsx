@@ -201,6 +201,9 @@ export function maxSizeScrollOffset (parentElement, className = 'scroll', attr =
   let parent = parentElement
 
   while (parent.parentElement) {
+    // Escape hatch to manually prevent Scroll offset on parents when inside another Scroll view
+    if (parent.getAttribute('_no_scroll_offset') != null) break
+
     grandParent = parent.parentElement
     // Skip offset calculation if the ancestor does not affect layout flow of its siblings, like Modal
     if (!scrollOffsetExclude[getComputedStyle(parent).getPropertyValue('position')]) {
