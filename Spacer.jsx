@@ -9,7 +9,7 @@ function createSpacer () {
   function Spacer ({small, smaller, smallest, large, larger, largest, className, ...props}) {
     let size = cn({small, smaller, smallest, large, larger, largest})
     if (size) size = '-' + size
-    return <span className={cn(className, 'space' + size)} {...props} />
+    return <span className={cn(className, 'spacer' + size)} {...props} />
   }
 
   Spacer.propTypes = {
