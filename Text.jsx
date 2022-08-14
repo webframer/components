@@ -19,13 +19,17 @@ function createText () {
    * @returns {object|JSX.Element} - React Component
    */
   function Text ({
-    className, fill, reverse, rtl, sound, children, ...props
+    small, smaller, smallest, large, larger, largest,
+    className, fill, reverse, rtl, sound, children,
+    ...props
   }) {
     const [tooltip] = useTooltip(props)
     props = accessibilitySupport(props, sound)
     return (
-      <span className={cn(className, 'text', {fill, reverse, rtl, pointer: props.onClick})}
-            {...props}>{children}{tooltip}</span>
+      <span className={cn(className, 'text', {
+        small, smaller, smallest, large, larger, largest,
+        fill, reverse, rtl, pointer: props.onClick,
+      })} {...props}>{children}{tooltip}</span>
     )
   }
 
