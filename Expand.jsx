@@ -1,6 +1,5 @@
 import cn from 'classnames'
 import React, { useContext, useId, useRef } from 'react'
-import { Button } from './Button.jsx'
 import { useExpandCollapse } from './react/hooks.js'
 import { resolveChildren } from './react/render.js'
 import { type } from './types.js'
@@ -113,7 +112,7 @@ export function ExpandTab ({className, onClick, ...props}) {
   // Resolve children
   props.children = resolveChildren(props.children, self.renderProps)
 
-  return <Button className={cn(className, 'expand__tab', {open})} {...props} />
+  return <View className={cn(className, 'expand__tab', {open})} {...props} />
 }
 
 ExpandTab.propTypes = {

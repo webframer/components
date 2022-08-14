@@ -1,7 +1,6 @@
 import { isFunction, isObject } from '@webframer/js'
 import cn from 'classnames'
 import React, { useContext, useEffect, useId } from 'react'
-import { Button } from './Button.jsx'
 import Icon from './Icon.jsx'
 import { useInstance } from './react/hooks.js'
 import { resolveChildren } from './react/render.js'
@@ -196,7 +195,7 @@ export function Tab ({id, className, onClick, ...props}) {
       if (onClick) onClick(event, id)
     }
   }
-  return <Button className={cn(className, 'tabs__tab', {active})} {...props} />
+  return <View className={cn(className, 'tabs__tab', {active})} {...props} />
 }
 
 Tab.propTypes = {
