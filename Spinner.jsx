@@ -1,8 +1,8 @@
 import cn from 'classnames'
 import PropTypes from 'prop-types'
 import React from 'react'
-import View from './Col.jsx'
 import { type } from './types.js'
+import View from './View.jsx'
 
 /**
  * Spinner - Pure Component

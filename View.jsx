@@ -197,19 +197,27 @@ export function maxSizeScrollOffset (parentElement, className = 'scroll', attr =
   }
   let offset = 0
   let direction
-  let grandParent
+  let grandParent, grandParentStyle
   let parent = parentElement
+
   while (parent.parentElement) {
     grandParent = parent.parentElement
     // Skip offset calculation if the ancestor does not affect layout flow of its siblings, like Modal
     if (!scrollOffsetExclude[getComputedStyle(parent).getPropertyValue('position')]) {
-      direction = getComputedStyle(grandParent).getPropertyValue('flex-direction').replace('-reverse', '')
-      if (directions.indexOf(direction) >= 0) {
-        for (const sibling of grandParent.children) {
-          if (sibling === parent) continue // skip the direct ancestor
-          if (sibling.className.split(/\s+/).indexOf(className) >= 0) continue // skip scrollables
-          if (scrollOffsetExclude[getComputedStyle(sibling).getPropertyValue('position')]) continue
-          offset += (offsetBy[direction] += sibling[attrBy[direction]])
+      grandParentStyle = getComputedStyle(grandParent)
+
+      // Also skip offset siblings if grandParent has 'flex-wrap: wrap'
+      if (grandParentStyle.getPropertyValue('flex-wrap') !== 'wrap') {
+        direction = grandParentStyle.getPropertyValue('flex-direction').replace('-reverse', '')
+
+        // Offset in the direction of grandParent
+        if (directions.indexOf(direction) >= 0) {
+          for (const sibling of grandParent.children) {
+            if (sibling === parent) continue // skip the direct ancestor
+            if (sibling.className.split(/\s+/).indexOf(className) >= 0) continue // skip scrollables
+            if (scrollOffsetExclude[getComputedStyle(sibling).getPropertyValue('position')]) continue
+            offset += (offsetBy[direction] += sibling[attrBy[direction]])
+          }
         }
       }
     }
