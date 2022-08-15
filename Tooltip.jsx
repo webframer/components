@@ -106,7 +106,7 @@ export function Tooltip ({
 
   return ( // Outer div is required to take full size of the parent element for positioning
     <span className={cn(
-      '_tooltip row', `theme-${theme}`,
+      'tooltip row', `theme-${theme}`,
       self.mounted && `from-${position} ${alignClass(align, position)} position-fill`,
     )} ref={ref} style={self.mounted ? noPointerEvents : styleFixed}>
       {/**
