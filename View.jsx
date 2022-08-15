@@ -79,7 +79,7 @@ export function createView (defaultProp) {
       // 'max-size', // row ? 'max-width' : 'max-height', // a scroll can overflow in any direction
     )
     classScroll = cn( // inner div directly wrapping the children
-      classScroll, row ? 'min-width' : 'min-height', {
+      classScroll, row ? 'min-width no-max-width' : 'min-height no-max-height', {
         col, row, fill, reverse, rtl,
         left, right, top, bottom, center, middle,
         pointer: props.onClick,

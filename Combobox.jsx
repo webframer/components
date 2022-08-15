@@ -17,7 +17,7 @@ import { View } from './View.jsx'
 export class Combobox extends PureComponent {
   render () {
     const props = this.props
-    return <View {...props} />
+    return <View />
   }
 }
 
