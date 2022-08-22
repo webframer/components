@@ -1,4 +1,4 @@
-import classNames from 'classnames'
+import cn from 'classnames'
 import React from 'react'
 import Spinner from './Spinner.jsx'
 import Text from './Text.jsx'
@@ -17,7 +17,7 @@ import View from './View.jsx'
  * @param {*} props - other attributes to pass to spinner
  * @returns {object} - React Component
  */
-export function Loading ({
+export function Loader ({
   loading = true,
   size = 'larger',  // Enum
   className,
@@ -27,18 +27,18 @@ export function Loading ({
   ...props
 }) {
   return (loading &&
-    <View className={classNames('app__loading', className, {transparent})}>
+    <View className={cn(className, 'loader', {transparent})}>
       <Spinner className={classIcon} size={size} {...props} />
       {children && <Text className='h4 blink'>{children}</Text>}
     </View>
   )
 }
 
-Loading.propTypes = {
+Loader.propTypes = {
   loading: type.Boolean,
   size: type.ListOf(type.String),
   className: type.String,
   classIcon: type.String,
 }
 
-export default React.memo(Loading)
+export default React.memo(Loader)

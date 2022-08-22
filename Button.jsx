@@ -1,6 +1,6 @@
 import cn from 'classnames'
 import React from 'react'
-import Loading from './Loading.jsx'
+import Loader from './Loader.jsx'
 import { isRef, onPressHoc } from './react.js'
 import { useTooltip } from './Tooltip.jsx'
 import { type } from './types.js'
@@ -49,7 +49,7 @@ function createButton () {
         {...props}
       >
         {children}
-        {loading && <Loading loading />}
+        {loading && <Loader loading size={size || 'smallest'} />}
         {tooltip}
       </button>
     )
@@ -58,6 +58,7 @@ function createButton () {
   const ButtonRef = React.forwardRef(Button)
 
   Button.propTypes = {
+    size: type.Enum(['largest', 'larger', 'large', 'base', 'small', 'smaller', 'smallest']),
     type: type.String,
     className: type.String,
     children: type.Any,

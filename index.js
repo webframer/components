@@ -10,7 +10,7 @@ export * from './Image.jsx'
 export * from './ImageSwatch.jsx'
 export * from './JsonView.jsx' // 'react-json-tree' is tree shaked if not used
 export * from './Label.jsx'
-export * from './Loading.jsx'
+export * from './Loader.jsx'
 export * from './Modal.jsx'
 export * from './Row.jsx'
 export * from './Scroll.jsx'
