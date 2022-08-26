@@ -9,7 +9,7 @@
 <div class={cn(
        className, 'overflow-scroll',
        row ? 'row max-width' : 'col max-height',
-       {fill, rtl, center: center && !row},
+       {fill, rtl, center: center && !(row)},
      )} {...$$restProps}>
   <div
     class={cn(

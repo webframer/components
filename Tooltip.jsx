@@ -21,7 +21,7 @@ import { type } from './types.js'
 export function Tooltip ({
   position, on, open, delay, animation, theme,
   align = (position === 'left' || position === 'right') ? 'middle' : 'center',
-  className, row, col = !row, fill, reverse, rtl,
+  className, row, col = !(row), fill, reverse, rtl,
   left, right, top, bottom, center, middle,
   children, ...props
 }) {

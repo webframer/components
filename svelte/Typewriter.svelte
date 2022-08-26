@@ -124,7 +124,7 @@
   })
 
 </script>
-<div class:typewriter={true} class:row class:wrap={row} class:col={!row} {...$$restProps}>
+<div class:typewriter={true} class:row class:wrap={row} class:col={!(row)} {...$$restProps}>
   {#each phrases as _phrase, i}
     <Col class='max-width'>
       <Text class={cn("break-words", {invisible: !underline})} style={styleText}>{phrasePadStrings[i]}</Text>

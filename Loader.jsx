@@ -29,7 +29,7 @@ export function Loader ({
   return (loading &&
     <View className={cn(className, 'loader', {transparent})}>
       <Spinner className={classIcon} size={size} {...props} />
-      {children && <Text className='h4 blink'>{children}</Text>}
+      {children && <Text className='h4 animate-blink'>{children}</Text>}
     </View>
   )
 }

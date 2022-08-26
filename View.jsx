@@ -30,7 +30,7 @@ export function createView (defaultProp) {
    * @param {function|React.MutableRefObject} [ref] - forwarding React.useRef() or React.createRef()
    */
   function View ({
-    className, scroll, row, col = !row, fill, reverse, rtl,
+    className, scroll, row, col = !(row), fill, reverse, rtl,
     left, right, top, bottom, center, middle, sound,
     children, ...props
   }, ref) {
@@ -39,7 +39,7 @@ export function createView (defaultProp) {
     if (isRef(ref)) props.ref = ref
 
     // Ordinary View
-    if (!scroll) {
+    if (!(scroll)) {
       className = cn(
         className, {
           col, row, fill, reverse, rtl,
@@ -72,8 +72,8 @@ export function createView (defaultProp) {
     className = cn( // outer div container
       className, 'scroll', {
         col, row, fill, rtl,
-        center: center && !row,
-        middle: middle && !col,
+        center: center && !(row), // avoid Tailwind bug by negation with brackets
+        middle: middle && !(col),
       },
       // 'max-size' class is to be extended inside _layout.less to reduce html footprint
       // 'max-size', // row ? 'max-width' : 'max-height', // a scroll can overflow in any direction
