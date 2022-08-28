@@ -19,7 +19,7 @@ import View from './View.jsx'
  */
 export function Loader ({
   loading = true,
-  size = 'larger',  // Enum
+  size = 'base',  // Enum
   className,
   classIcon,
   transparent = false,
