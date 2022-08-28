@@ -1,0 +1,42 @@
+/* spacer.css */
+.spacer {
+    display: inline-flex;
+    min-width: var(--margin);
+    min-height: var(--margin);
+}
+
+.spacer-small {
+    display: inline-flex;
+    min-width: var(--margin-small);
+    min-height: var(--margin-small);
+}
+
+.spacer-smaller {
+    display: inline-flex;
+    min-width: var(--margin-smaller);
+    min-height: var(--margin-smaller);
+}
+
+.spacer-smallest {
+    display: inline-flex;
+    min-width: var(--margin-smallest);
+    min-height: var(--margin-smallest);
+}
+
+.spacer-large {
+    display: inline-flex;
+    min-width: var(--margin-large);
+    min-height: var(--margin-large);
+}
+
+.spacer-larger {
+    display: inline-flex;
+    min-width: var(--margin-larger);
+    min-height: var(--margin-larger);
+}
+
+.spacer-largest {
+    display: inline-flex;
+    min-width: var(--margin-largest);
+    min-height: var(--margin-largest);
+}

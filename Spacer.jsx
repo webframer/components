@@ -1,5 +1,6 @@
 import cn from 'classnames'
 import React from 'react'
+import './spacer.css'
 import { type } from './types.js'
 
 function createSpacer () {
