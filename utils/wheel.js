@@ -3,13 +3,17 @@
  * Example of browser wheel events: pinch, zoom, rotate and two finger swipe.
  * @reference: https://danburzo.ro/dom-gestures/
  * @example:
- *    function onWheelChange ({origin, translation, scale}) {
+ *    function onWheelChange ({
+ *      // Incremental deltas for scale, x, y
+ *      ds, dx, dy,
+ *      // Absolute values (accumulative transforms since event start)
+ *      origin, translation, scale
+ *    }) {
  *      // your pan/zoom logic
  *    }
  *
  *    const onWheel = onWheelHandler(onWheelChange)
- *
- *    <div onwheel={onWheel}>...</div>
+ *    subscribeTo('wheel', onWheel, {passive: false}, HTMLElement)
  *
  * @param {function({
  *   ds: number|null,

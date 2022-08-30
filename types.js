@@ -40,6 +40,8 @@ type.Int = PropTypes.number
 type.List = PropTypes.array
 // Array of values
 type.ListOf = PropTypes.arrayOf
+// A floating number that is to be multiplied with
+type.Multiplier = PropTypes.number
 // Method
 type.Function = PropTypes.func
 // Time duration which is 1/1000th of a second
