@@ -1,4 +1,4 @@
-import { debounce, Id, isEqualJSON, isFunction, subscribeTo, unsubscribeFrom } from '@webframer/js'
+import { debounce, Id, isEqualJSON, isFunction, objChanges, subscribeTo, unsubscribeFrom } from '@webframer/js'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useEventListener, useIsomorphicLayoutEffect } from 'usehooks-ts/dist/esm/index.js'
 import { animateSize } from './animations.js'
@@ -151,6 +151,24 @@ export function useUId (id) {
   const {current: self} = useRef({id})
   if (!self.id) self.id = Id({caseSensitive: true})
   return self.id
+}
+
+/**
+ * React Hook to update Component state when props change
+ * @example:
+ *    const {current: self} = useRef({})
+ *    self.state = useControlledState(props, self.state)
+ *
+ * @param {object} props - initial or new props to sync state with
+ * @param {object|null|void} [state] - the current state
+ * @returns {object|null|void} state - new object with partially updated `props` that changed,
+ *    or existing state if nothing changed
+ */
+export function useSyncedState (props, state) {
+  const prevProps = usePreviousProp(props)
+  if (!prevProps) return props
+  if (prevProps && isEqualJSON(prevProps, props)) return state
+  return Object.assign({}, state, objChanges(state, props))
 }
 
 /**
