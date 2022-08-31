@@ -149,7 +149,7 @@ export function useElementHeight (delay = 16) {
  */
 export function useUId (id) {
   const {current: self} = useRef({id})
-  if (!self.id) self.id = Id({caseSensitive: true})
+  if (!self.id) self.id = Id()
   return self.id
 }
 
