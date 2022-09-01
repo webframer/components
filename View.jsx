@@ -26,17 +26,19 @@ export function createView (defaultProp) {
    * @param {boolean} [reverse] - whether to reverse the order of rendering
    * @param {boolean} [rtl] - whether to use right to left text direction
    * @param {object|HTMLAudioElement} [sound] - new Audio(URL) sound file
+   * @param {function|React.MutableRefObject} [_ref] - from React.useRef() or React.createRef()
    * @param {*} props - other attributes to pass to `<div></div>`
    * @param {function|React.MutableRefObject} [ref] - forwarding React.useRef() or React.createRef()
    */
   function View ({
     className, scroll, row, col = !(row), fill, reverse, rtl,
     left, right, top, bottom, center, middle, sound,
-    children, ...props
+    children, _ref, ...props
   }, ref) {
     const [tooltip] = useTooltip(props)
     props = accessibilitySupport(props, sound)
-    if (isRef(ref)) props.ref = ref
+    if (isRef(ref)) props.ref = ref // forwarded ref may not exist on mount
+    else if (_ref) props.ref = _ref // preferred way to ensure ref exists on mount
 
     // Ordinary View
     if (!(scroll)) {

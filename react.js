@@ -66,6 +66,11 @@ export function isRef (val) {
   return val ? (typeof val === 'function' || val.current !== void 0) : false
 }
 
+// Set ref Function or object from React.useRef() with given node HTMLElement
+export function assignRef (ref, node) {
+  if (ref) (typeof ref === 'function' ? ref(node) : (ref.current = node))
+}
+
 /**
  * Get the Original React Class from the Component wrapped by decorator/s
  * @param {Class|Function} Component - the wrapped React Component
