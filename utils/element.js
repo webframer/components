@@ -38,6 +38,16 @@ export function placeAtIndex (parent, index, node) {
 }
 
 /**
+ * Replace node element and remove the old one
+ * @param {Element} oldNode - to remove
+ * @param {Element} newNode - to replace `oldNode`
+ */
+export function replaceElement (oldNode, newNode) {
+  oldNode.parentElement.insertBefore(newNode, oldNode)
+  oldNode.remove()
+}
+
+/**
  * Get Computed CSS property to animate for inserting/removing child nodes
  * @param {Element} node - the parent element to get property from
  * @returns {string} side - can be 'width' or 'height'
