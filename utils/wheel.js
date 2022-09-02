@@ -42,8 +42,15 @@ export function onWheelHandler (
    * @param {WheelEvent} e
    */
   return function onWheel (e) {
-    if (e.cancelable !== false) e.preventDefault();
+    // Comment this out to enable onscroll event because onwheel gets called first.
+    // Let the implementation determine whether to stop event propagation and default.
+    // if (e.cancelable !== false) e.preventDefault();
     [dx, dy] = normalizeWheel(e)
+
+    // Browsers will only treat the event as scroll if it were at the start,
+    // but it's not possible to tell if a wheel event is scrolling over element.
+    // The detection logic should be inside Scroll component.
+    // isScroll = !!e.deltaY && !e.deltaX && !e.deltaZ
 
     // Gesture Start
     if (!gesture) {
@@ -85,7 +92,8 @@ export function onWheelHandler (
           },
         },
         ds: null,
-        dx, dy,
+        dx,
+        dy,
       }
     }
 

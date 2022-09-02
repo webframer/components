@@ -5,7 +5,6 @@ import { useTooltip } from './Tooltip.jsx'
 import { type } from './types.js'
 import { applyStyles } from './utils/css.js'
 
-// @todo: test rendering without React.memo on large scene to see which is faster.
 /**
  * Create a React View - Pure Component
  * @param {string} [defaultProp] - the prop to make true by default
