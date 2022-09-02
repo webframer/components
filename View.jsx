@@ -160,8 +160,8 @@ export default React.memo(View)
 
 /**
  * Check whether given Node element contains a Scroll component by its className
- * @param {object|HTMLElement} parentElement - element to check
- * @param {object|HTMLElement} [scrollElement] - the node to exclude from check
+ * @param {Element} parentElement - element to check
+ * @param {Element} [scrollElement] - the node to exclude from check
  * @param {string} [className] - to identify the Scroll component
  * @returns {boolean} true - if node contains at least once Scroll component
  */
@@ -176,7 +176,7 @@ export function hasScrollElement (parentElement, scrollElement = null, className
 /**
  * Set CSS max-height/width offset style for direct Parent element of a flex Scroll component
  * to prevent clipping of content when Scroll overflows the Parent.
- * @param {object|HTMLElement} parentElement - direct parent node to offset scroll
+ * @param {Element} parentElement - direct parent node to offset scroll
  * @param {string} [className] - to identify the Scroll component
  * @param {string} [attr] - attribute key to store the original parentElement.style for reset later
  * @returns {string|void} attribute - modified style attribute that was attached to parentElement

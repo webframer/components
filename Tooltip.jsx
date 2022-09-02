@@ -228,7 +228,7 @@ function alignClass (align, position) {
 
 /**
  * Compute correct Tooltip position to try to fit it within viewport
- * @param {object|HTMLElement} node - the Tooltip outer div element
+ * @param {Element} node - the Tooltip outer div element
  * @param {string} position - desired initially
  * @param {number} [offset] - to account for Tooltip offset position and pointer
  * @returns {string} position - for optimum placement

@@ -1,6 +1,6 @@
 /**
  * Make DOM element take no space
- * @param {object|HTMLElement} node - to collapse
+ * @param {Element} node - to collapse
  */
 export function collapseElement (node) {
   node.style.width = '0'
@@ -19,7 +19,7 @@ export function collapseElement (node) {
 
 /**
  * Get index of current Node element within its direct parent element
- * @param {object|HTMLElement} node
+ * @param {Element} node
  * @returns {number} index
  */
 export function indexOfElement (node) {
@@ -28,10 +28,10 @@ export function indexOfElement (node) {
 
 /**
  * Place a node element at given index inside a parent node element
- * @param {object|HTMLElement} parent
+ * @param {Element} parent
  * @param {number} index - to place at
- * @param {object|HTMLElement} node - to place
- * @returns {object|HTMLElement}
+ * @param {Element} node - to place
+ * @returns {Element}
  */
 export function placeAtIndex (parent, index, node) {
   return parent.insertBefore(node, parent.children[index])
@@ -39,7 +39,7 @@ export function placeAtIndex (parent, index, node) {
 
 /**
  * Get Computed CSS property to animate for inserting/removing child nodes
- * @param {object|HTMLElement} node - the parent element to get property from
+ * @param {Element} node - the parent element to get property from
  * @returns {string} side - can be 'width' or 'height'
  */
 export function sideToAnimate (node) {

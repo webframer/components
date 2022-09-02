@@ -8,7 +8,7 @@
  *  - element.offsetWidth/Height or .getBoundingClientRect() do not require requestAnimationFrame()
  *    to update, unless the layout reflow of surrounding elements needs to be updated as well.
  *
- * @param {object|HTMLElement} node - to animate
+ * @param {Element} node - to animate
  * @param {number|string} startSize - to animate from
  * @param {number|string} endSize - to animate to
  * @param {'width'|'height'} [side] - the attribute to animate
