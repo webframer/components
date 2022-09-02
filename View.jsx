@@ -33,7 +33,7 @@ export function createView (defaultProp) {
   function View ({
     className, scroll, row, col = !(row), fill, reverse, rtl,
     left, right, top, bottom, center, middle, sound,
-    children, _ref, ...props
+    children, _ref, wrapProps, ...props
   }, ref) {
     const [tooltip] = useTooltip(props)
     props = accessibilitySupport(props, sound)
@@ -53,11 +53,12 @@ export function createView (defaultProp) {
     }
 
     // Scrollable View
-    let propsWrap
+    const propsWrap = {...wrapProps}
     let {classScroll, styleScroll, style, ..._props} = props
     if (_props._id !== void 0) {
-      propsWrap = {_id: _props._id, _nodrop: ''}
-      _props._nodrag = ''
+      const {_nodrag} = _props
+      if (_props._nodrag == null) _props._nodrag = ''
+      Object.assign(propsWrap, {_id: _props._id, _nodrop: '', _nodrag})
     }
 
     // // @archive: position absolute version
@@ -144,6 +145,7 @@ export function createView (defaultProp) {
     scroll: type.Boolean,
     classScroll: type.String,
     styleScroll: type.Object,
+    wrapProps: type.Object,
   }
 
   return [View, ViewRef]
