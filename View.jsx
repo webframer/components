@@ -141,9 +141,9 @@ export function createView (defaultProp) {
 
   const ViewRef = React.forwardRef(View)
 
-  if (defaultProp) View.defaultProps = {[defaultProp]: true}
+  if (defaultProp) View.defaultProps = ViewRef.defaultProps = {[defaultProp]: true}
 
-  View.propTypes = {
+  View.propTypes = ViewRef.propTypes = {
     col: type.Boolean,
     row: type.Boolean,
     fill: type.Boolean,
