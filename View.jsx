@@ -81,6 +81,24 @@ export function createView (defaultProp) {
       // 'max-size', // row ? 'max-width' : 'max-height', // a scroll can overflow in any direction
     )
     classScroll = cn( // inner div directly wrapping the children
+      // @note: this will not prevent overflow in the other direction (ex. Row inside Scroll column)
+      // The only way to prevent that is with overflow-x: hidden, but applied to the outer div.
+      // If applied to inner div, it makes this inner div restrict itself within the outer div's
+      // height (i.e. min-height has no effect anymore).
+      // This in turn causes another inner scroll in the same direction to shrink as if this Scroll
+      // component was just a View.
+      // Questions:
+      //    - Should overflow-x be applied to the outer div? or let it overflow,
+      //      so users can reach the hidden components and fix it themselves?
+      //      Let it overflow - pros and cons:
+      //        + Layout issues are visible immediately.
+      //        + User can easily reach overflowed element and delete it.
+      //        + User does not need to worry about choosing the Scroll direction correctly.
+      //        + When left unfixed, overflowed content is accessible.
+      //        => this approach is chosen because of benefits above.
+      //
+      //    - Warn users when there are two nested scroll components with the same direction?
+      //      Because that use-case is not valid anyway?
       classScroll, row ? 'min-width no-max-width' : 'min-height no-max-height', {
         col, row, fill, reverse, rtl,
         left, right, top, bottom, center, middle,
