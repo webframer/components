@@ -29,3 +29,15 @@ export function offsetFrom (event, rectangle) {
   // @see: https://stackoverflow.com/questions/27169534/in-google-chrome-getboundingclientrect-x-is-undefined/29741969
   return {x: event.clientX - rectangle.left, y: event.clientY - rectangle.top}
 }
+
+/**
+ * Create `on<Event>` handler function that stops event propagation
+ * @param {function} [func] - callback to wrap
+ * @returns {(function(*): void)|*} callback - that stops event propagation before calling given `func`
+ */
+export function onEventStopPropagation (func) {
+  return function (e) {
+    e.stopPropagation()
+    if (func) return func.apply(this, arguments)
+  }
+}
