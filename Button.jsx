@@ -22,6 +22,7 @@ function createButton () {
    * @param {Boolean} [square] - whether to add `square` css class with even padding
    * @param {Object} [sound] - new Audio(URL) sound file
    * @param {*} [children] - optional, content to be wrapped inside button `<button>{children}</button>`
+   * @param {function|React.MutableRefObject} [_ref] - from React.useRef() or React.createRef()
    * @param {*} [props] - other attributes to pass
    * @param {function|React.MutableRefObject} [ref] - forwarding React.useRef() or React.createRef()
    * @returns {object|JSX.Element} - React component
@@ -37,15 +38,17 @@ function createButton () {
     size,
     sound,
     className,
+    _ref,
     ...props
   }, ref) {
     const [tooltip] = useTooltip(props)
+    if (isRef(ref)) props.ref = ref
+    else if (_ref) props.ref = _ref
     return (
       <button
         className={cn(className, 'btn', size, {circle, square, active, loading})}
         disabled={disabled || loading}
         onClick={sound ? onPressHoc(onClick, sound) : onClick}
-        {...isRef(ref) && {ref}}
         {...props}
       >
         {children}
@@ -57,11 +60,12 @@ function createButton () {
 
   const ButtonRef = React.forwardRef(Button)
 
-  Button.propTypes = {
+  Button.propTypes = ButtonRef.propTypes = {
     size: type.Enum(['largest', 'larger', 'large', 'base', 'small', 'smaller', 'smallest']),
     type: type.String,
     className: type.String,
     children: type.Any,
+    _ref: type.Ref,
   }
 
   return [Button, ButtonRef]

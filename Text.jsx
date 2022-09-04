@@ -15,16 +15,18 @@ function createText () {
    * @param {Boolean} [reverse] - whether to reverse order of rendering
    * @param {Boolean} [rtl] - whether to use right to left direction
    * @param {Object} [sound] - new Audio(URL) sound file
+   * @param {function|React.MutableRefObject} [_ref] - from React.useRef() or React.createRef()
    * @param {*} props - other attributes to pass to `<div></div>`
    * @returns {object|JSX.Element} - React Component
    */
   function Text ({
     small, smaller, smallest, large, larger, largest,
-    className, fill, reverse, rtl, sound, children,
+    className, fill, reverse, rtl, sound, children, _ref,
     ...props
   }) {
     const [tooltip] = useTooltip(props)
     props = accessibilitySupport(props, sound)
+    if (_ref) props.ref = _ref
     return (
       <span className={cn(className, 'text', {
         small, smaller, smallest, large, larger, largest,

@@ -158,6 +158,7 @@ export function createView (defaultProp) {
     sound: type.Object,
     children: type.Any,
     className: type.String,
+    _ref: type.Ref,
     // Scroll View only
     scroll: type.Boolean,
     classScroll: type.String,

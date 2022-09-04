@@ -69,6 +69,8 @@ type.Promise = PropTypes.shape({
 // Pixel screen unit
 type.Px = PropTypes.number
 type.PrimitiveOrObject = PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.object])
+// Function or the Object created by React.useRef() or React.createRef()
+type.Ref = type.OneOf(type.Function, type.Of({current: type.any}))
 // String primitive value
 type.String = PropTypes.string
 type.StringOrNumber = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
