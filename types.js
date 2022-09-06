@@ -56,6 +56,7 @@ type.NodeOrFunction = PropTypes.oneOfType([PropTypes.node, PropTypes.func])
 type.Number = PropTypes.number
 type.NumberOrString = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 type.Object = PropTypes.object
+// `key` -> `value` Map of objects
 type.ObjectOf = type.MapOf = PropTypes.objectOf
 // Object containing given keys. Example: type.Of({key: type.Any})
 type.Of = PropTypes.shape
