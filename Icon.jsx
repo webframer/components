@@ -1,7 +1,7 @@
 import { alphaNumIdPattern, FILE } from '@webframer/js'
 import cn from 'classnames'
 import React from 'react'
-import { isRef } from './react.js'
+import { accessibilitySupport, isRef } from './react.js'
 import { type } from './types.js'
 
 function createIcon () {
@@ -9,6 +9,7 @@ function createIcon () {
    * Icon - Pure Component
    */
   function Icon ({name, className, font, path = FILE.PATH_ICONS, _ref, ...props}, ref) {
+    props = accessibilitySupport(props) // ensures correct focus behavior on click
     if (isRef(ref)) props.ref = ref
     else if (_ref) props.ref = _ref
 

@@ -1,5 +1,6 @@
 import cn from 'classnames'
 import React from 'react'
+import { accessibilitySupport } from './react.js'
 import './spacer.css'
 import { type } from './types.js'
 
@@ -8,6 +9,7 @@ function createSpacer () {
    * Spacer - Dumb Component
    */
   function Spacer ({small, smaller, smallest, large, larger, largest, className, ...props}) {
+    props = accessibilitySupport(props) // ensures correct focus behavior on click
     let size = cn({small, smaller, smallest, large, larger, largest})
     if (size) size = '-' + size
     return <span className={cn(className, 'spacer' + size)} {...props} />
