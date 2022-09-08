@@ -54,7 +54,7 @@ export function createView (defaultProp) {
 
     // Scrollable View -----------------------------------------------------------------------------
     // The wrapper should get rest props by default, because that's the expected behavior
-    let {classScroll, styleScroll, style, ..._props} = props
+    let {classScroll, styleScroll, style, noOffset, ..._props} = props
     scrollProps = {...scrollProps}
     if (hasProp(_props, '_id')) {
       Object.assign(_props, {_nodrop: ''})
@@ -119,6 +119,7 @@ export function createView (defaultProp) {
     _props.ref = self.ref
 
     useEffect(() => {
+      if (noOffset) return
       if (!self.node.parentElement) return
       let attr = maxSizeScrollOffset(self.node.parentElement)
       if (attr) {
@@ -172,6 +173,8 @@ export function createView (defaultProp) {
     classScroll: type.String,
     styleScroll: type.Object,
     scrollProps: type.Object,
+    // Whether to prevent Scroll from setting offset style to parent element
+    noOffset: type.Boolean,
   }
 
   return [View, ViewRef]
