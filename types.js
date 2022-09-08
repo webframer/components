@@ -121,7 +121,7 @@ type.FieldForList = type.ListOf(type.Of({
 // One of @withForm() value getters
 type.FormValueType = type.Enum(['changedValues', 'registeredValues', 'formValues'])
 
-// Combobox option
+// Select option
 type.Option = type.OneOf(
   type.String,
   type.Number,
@@ -134,7 +134,7 @@ type.Option = type.OneOf(
     children: type.Any,
   }),
 )
-// Combobox options
+// Select options
 type.Options = type.ListOf(type.Option.isRequired)
 
 // Tag entry

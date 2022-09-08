@@ -14,11 +14,11 @@ import { View } from './View.jsx'
  *    8. Nested option category (options grouped into categories)
  *    9. Text literal with variables suggestion (prefixed with `$`).
  */
-export class Combobox extends PureComponent {
+export class Select extends PureComponent {
   render () {
     const props = this.props
     return <View />
   }
 }
 
-export default Combobox
+export default Select
