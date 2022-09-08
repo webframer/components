@@ -1,6 +1,7 @@
+import { hasProp } from '@webframer/js'
 import cn from 'classnames'
 import React, { useEffect, useRef } from 'react'
-import { accessibilitySupport, isRef } from './react.js'
+import { accessibilitySupport, assignRef, isRef } from './react.js'
 import { useTooltip } from './Tooltip.jsx'
 import { type } from './types.js'
 import { applyStyles } from './utils/css.js'
@@ -32,7 +33,7 @@ export function createView (defaultProp) {
   function View ({
     className, scroll, row, col = !(row), fill, reverse, rtl,
     left, right, top, bottom, center, middle, sound,
-    children, _ref, wrapProps, ...props
+    children, _ref, scrollProps, ...props
   }, ref) {
     const [tooltip] = useTooltip(props)
     props = accessibilitySupport(props, sound)
@@ -51,13 +52,13 @@ export function createView (defaultProp) {
       return <div className={className} {...props}>{children}{tooltip}</div>
     }
 
-    // Scrollable View
-    const propsWrap = {...wrapProps}
+    // Scrollable View -----------------------------------------------------------------------------
+    // The wrapper should get rest props by default, because that's the expected behavior
     let {classScroll, styleScroll, style, ..._props} = props
-    if (_props._id !== void 0) {
-      const {_nodrag} = _props
-      if (_props._nodrag == null) _props._nodrag = ''
-      Object.assign(propsWrap, {_id: _props._id, _nodrop: '', _nodrag})
+    scrollProps = {...scrollProps}
+    if (hasProp(_props, '_id')) {
+      Object.assign(_props, {_nodrop: ''})
+      Object.assign(scrollProps, {_id: _props._id, _nodrag: ''})
     }
 
     // // @archive: position absolute version
@@ -109,13 +110,20 @@ export function createView (defaultProp) {
     )
 
     // @experimental: max-height/width calculation for direct parent element
-    const refWrap = useRef(null)
+    const {current: self} = useRef({})
+    if (!self.ref) self.ref = function (node) {
+      if (self._ref) assignRef.apply(this, [self._ref, ...arguments])
+      self.node = node
+    }
+    self._ref = props.ref
+    _props.ref = self.ref
+
     useEffect(() => {
-      if (!refWrap.current.parentElement) return
-      let attr = maxSizeScrollOffset(refWrap.current.parentElement)
+      if (!self.node.parentElement) return
+      let attr = maxSizeScrollOffset(self.node.parentElement)
       if (attr) {
         return () => {
-          let {current: node} = refWrap
+          let {node} = self
           if (!node) return
 
           // Only reset parent style if no other scrollables exist
@@ -132,8 +140,8 @@ export function createView (defaultProp) {
 
     // Scroll View
     return (
-      <div className={className} style={style} ref={refWrap} {...propsWrap} >
-        <div className={classScroll} style={styleScroll} {..._props}>{children}</div>
+      <div className={className} style={style} {..._props} >
+        <div className={classScroll} style={styleScroll} {...scrollProps}>{children}</div>
         {tooltip}
       </div>
     )
@@ -163,7 +171,7 @@ export function createView (defaultProp) {
     scroll: type.Boolean,
     classScroll: type.String,
     styleScroll: type.Object,
-    wrapProps: type.Object,
+    scrollProps: type.Object,
   }
 
   return [View, ViewRef]
