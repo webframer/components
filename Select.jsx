@@ -1,6 +1,6 @@
 // noinspection JSValidateTypes,JSCheckFunctionSignatures
 
-import { isObject, warn } from '@webframer/js'
+import { isObject } from '@webframer/js'
 import cn from 'classnames'
 import React from 'react'
 import { assignRef, useExpandCollapse, useInstance } from './react.js'
@@ -30,73 +30,56 @@ import { type } from './types.js'
  *      => `.select__options` class must have `max-height` set to explicit unit, such as `px`
  */
 export function Select ({
-  options, defaultOpen, compact, forceRender, noFixedOptions, upward,
-  childBefore, childAfter, className, ...props
+  options, defaultOpen, compact, forceRender, noFixedOptions, upward, addOption,
+  childBefore, childAfter, className,
+  multiple, onChange, onSearch, onSelect, onAddOption,
+  ...props
 }) {
   const [self, state] = useInstance()
   const [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
-  Object.assign(self, props)
+  Object.assign(self, {multiple, onChange, onSearch, onSelect, onAddOption}, props)
   self.open = open
-  self.desiredPosition = upward ? 'top' : 'bottom'
+
+  // Node Handlers ---------------------------------------------------------------------------------
   if (!self.ref) self.ref = (node) => self.node = node
   if (!self.ref2) self.ref2 = function (node) {
     self.options = node
     return assignRef.apply(this, [ref, ...arguments])
   }
   if (!self.scrollProps) self.scrollProps = {ref: (node) => self.scrollNode = node}
-  if (!self.getOptionsPosition) self.getOptionsPosition = function () {
-    if (!self.node || !self.options || !self.scrollNode) return
-    const {top: topAvail, bottom: top, width, height} = self.node.getBoundingClientRect()
-    const {height: actualHeight} = self.scrollNode.getBoundingClientRect()
-    let maxHeight = +getComputedStyle(self.options).getPropertyValue('max-height').replace('px', '')
-    if (!maxHeight) throw Error('Select options must have explicit max-height!')
-    maxHeight = Math.min(actualHeight, maxHeight)
-    const bottom = window.innerHeight - topAvail
-    const bottomAvail = window.innerHeight - topAvail - height
-    return {
-      canBeUpward: topAvail - maxHeight > 0,
-      canBeDownward: bottomAvail > maxHeight,
-      optimalPosition: bottomAvail > topAvail ? {top} : {bottom}, // where there is more space
-      bottom, // upward placement bottom position
-      top, // downward placement top position
-      width,
-    }
-  }
-  if (!self.getFixedOptionsStyle) self.getFixedOptionsStyle = function (optionsPosition) {
-    if (!optionsPosition) return
-    const {canBeUpward, canBeDownward, optimalPosition, bottom, top, width} = optionsPosition
-
-    function getStyle () {
-      switch (self.desiredPosition) {
-        case 'top':
-          if (canBeUpward) return {bottom} // place upwards
-          if (canBeDownward) return {top} // place downwards
-          return optimalPosition
-        case 'bottom':
-        default: // try to put options downwards, if there is enough space in viewport
-          if (canBeDownward) return {top} // place downwards
-          if (canBeUpward) return {bottom} // place upwards
-          return optimalPosition
-      }
-    }
-    return {position: 'fixed', width, top: 'auto', bottom: 'auto', ...getStyle()}
-  }
+  if (!self.getOptionsPosition) self.getOptionsPosition = getOptionsPosition
+  if (!self.getOptStyle) self.getOptStyle = getFixedOptionsStyle
 
   // Event Handlers --------------------------------------------------------------------------------
   if (!self.focus) self.focus = function (e) {
+    self.hasFocus = true
     if (!self.open) toggleOpen.apply(this, arguments)
     if (self.onFocus) return self.onFocus.apply(this, arguments)
   }
-  if (!self.blur) self.blur = function (e) {
-    if (self.open) toggleOpen.apply(this, arguments)
+  if (!self.focusOption) self.focusOption = function () {
+    self.hasFocus = true
+    if (self.onSelect) return self.onSelect.apply(this, arguments)
+  }
+  if (!self.blur) self.blur = function () {
+    self.hasFocus = false
+    if (self.open) setTimeout(() => !self.hasFocus && toggleOpen.apply(this, arguments), 0)
     if (self.onBlur) return self.onBlur.apply(this, arguments)
+  }
+  if (!self.blurOption) self.blurOption = function () {
+    self.hasFocus = false
+    if (self.open) setTimeout(() => !self.hasFocus && toggleOpen.apply(this, arguments), 0)
+  }
+  if (!self.change) self.change = function () {
+    self.hasFocus = self.multiple
+    if (self.open) setTimeout(() => !self.hasFocus && toggleOpen.apply(this, arguments), 0)
+    if (self.onChange) return self.onChange.apply(this, arguments)
   }
 
   // Accessibility ---------------------------------------------------------------------------------
   const optPos = self.getOptionsPosition()
   const listBox = {
     role: 'listbox', 'aria-expanded': open,
-    style: (defaultOpen || noFixedOptions) ? null : self.getFixedOptionsStyle(optPos),
+    style: (defaultOpen || noFixedOptions) ? null : self.getOptStyle(optPos, upward ? 'top' : 'bottom'),
     scrollProps: self.scrollProps,
   }
   upward = upward && (optPos && (optPos.canBeUpward || optPos.optimalPosition.bottom > 0))
@@ -111,7 +94,8 @@ export function Select ({
       <Scroll _ref={self.ref2} noOffset className={cn('select__options', {open, upward})}
               {...listBox}>
         {(forceRender || open || animating) &&
-          <Options items={options} onSelect={warn} onChange={warn} />}
+          <Options items={options}
+                   onFocus={self.focusOption} onBlur={self.blurOption} onChange={self.change} />}
       </Scroll>
     </Row>
   )
@@ -132,11 +116,11 @@ Select.propTypes = {
       key: type.Any,
     }),
   )),
-  // Handler(value(s), name, event) when selected value changes
+  // Handler(value: string | number | object, name, event) when selected value changes
   onChange: type.Function,
   // Handler(value, name, event) when search input value changes
   onSearch: type.Function,
-  // Handler(value: string | number | object, name, event) when an option gets focus
+  // Handler(value: string | number | object, event) when an option gets focus
   onSelect: type.Function,
   // Handler(value, name) when a new option is added
   onAddOption: type.Function,
@@ -165,7 +149,7 @@ Select.propTypes = {
 
 export default React.memo(Select)
 
-function SelectOptions ({items, onSelect, onChange, ...props}) {
+function SelectOptions ({items, onFocus, onBlur, onChange, ...props}) {
   return (<>
     {items.map((item) => {
       let t, v, k
@@ -179,10 +163,52 @@ function SelectOptions ({items, onSelect, onChange, ...props}) {
       }
       return <Row key={k} className='select__option'
                   onClick={(...args) => onChange(v, ...args)}
-                  onFocus={(...args) => onSelect(v, ...args)}
-                  children={<Text>{t}</Text>} />
+                  onFocus={(...args) => onFocus(v, ...args)}
+                  onBlur={(...args) => onBlur(v, ...args)}
+                  children={<Text>{t}</Text>}
+                  {...props} />
     })}
   </>)
 }
 
 const Options = React.memo(SelectOptions)
+
+function getOptionsPosition (self = this) {
+  if (!self.node || !self.options || !self.scrollNode) return
+  const {top: topAvail, bottom: top, width, height} = self.node.getBoundingClientRect()
+  const {height: actualHeight} = self.scrollNode.getBoundingClientRect()
+  let maxHeight = +getComputedStyle(self.options).getPropertyValue('max-height').replace('px', '')
+  if (!maxHeight) throw Error('Select options must have explicit max-height!')
+  maxHeight = Math.min(actualHeight, maxHeight)
+  const bottom = window.innerHeight - topAvail
+  const bottomAvail = window.innerHeight - topAvail - height
+  return {
+    canBeUpward: topAvail - maxHeight > 0,
+    canBeDownward: bottomAvail > maxHeight,
+    optimalPosition: bottomAvail > topAvail ? {top} : {bottom}, // where there is more space
+    bottom, // upward placement bottom position
+    top, // downward placement top position
+    width,
+  }
+}
+
+function getFixedOptionsStyle (optionsPosition, desiredPosition) {
+  if (!optionsPosition) return
+  const {canBeUpward, canBeDownward, optimalPosition, bottom, top, width} = optionsPosition
+
+  function getStyle () {
+    switch (desiredPosition) {
+      case 'top':
+        if (canBeUpward) return {bottom} // place upwards
+        if (canBeDownward) return {top} // place downwards
+        return optimalPosition
+      case 'bottom':
+      default: // try to put options downwards, if there is enough space in viewport
+        if (canBeDownward) return {top} // place downwards
+        if (canBeUpward) return {bottom} // place upwards
+        return optimalPosition
+    }
+  }
+
+  return {position: 'fixed', width, top: 'auto', bottom: 'auto', ...getStyle()}
+}
