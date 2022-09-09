@@ -197,7 +197,7 @@ export function useInstance (initialState = {}) {
     self.forceUpdate = () => setState(state => ({...state}))
     self.setState = (newState) => {
       if (isFunction(newState)) return setState(newState)
-      if (isEqualJSON(newState, self.state)) return
+      if (isEqualJSON({...self.state, ...newState}, self.state)) return
       setState(state => ({...state, ...newState}))
     }
   }
