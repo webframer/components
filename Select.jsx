@@ -9,8 +9,6 @@ import { Scroll } from './Scroll.jsx'
 import Text from './Text.jsx'
 import { type } from './types.js'
 
-// import { View } from './View.jsx'
-
 /**
  * Dropdown List of Searchable Select Options and Nested Category Hierarchy
  * Use cases:
@@ -30,7 +28,7 @@ import { type } from './types.js'
  *      => `.select__options` class must have `max-height` set to explicit unit, such as `px`
  */
 export function Select ({
-  options, query, search, defaultOpen, compact,
+  options, value, query, search, defaultOpen, compact,
   forceRender, noFixedOptions, upward, addOption,
   childBefore, childAfter, className,
   multiple, onChange, onSearch, onSelect, onAddOption,
@@ -42,11 +40,16 @@ export function Select ({
   Object.assign(self, {multiple, options, onChange, onSearch, onSelect, onAddOption}, props)
   self.open = open
 
+  // State should store pure value as is, because `value` can be an array for multiple selection
+  // Then let the render logic compute what to display based on given value.
+  // For single selection, when no custom option render exists, input shows text value.
+  if (value != null) state.value = value
+
   // Node Handlers ---------------------------------------------------------------------------------
   if (!self.ref) self.ref = (node) => self.node = node
   if (!self.ref2) self.ref2 = function (node) {
     self.optNode = node
-    return assignRef.apply(this, [ref, ...arguments])
+    return assignRef.call(this, ref, ...arguments)
   }
   if (!self.scrollProps) self.scrollProps = {ref: (node) => self.scrollNode = node}
   if (!self.getOptionsPosition) self.getOptionsPosition = getOptionsPosition
@@ -64,17 +67,25 @@ export function Select ({
   }
   if (!self.blur) self.blur = function () {
     self.hasFocus = false
-    if (self.open) setTimeout(() => !self.hasFocus && toggleOpen.apply(this, arguments), 0)
+    if (self.open) setTimeout(self.close, 0)
     if (self.onBlur) return self.onBlur.apply(this, arguments)
   }
   if (!self.blurOption) self.blurOption = function () {
     self.hasFocus = false
-    if (self.open) setTimeout(() => !self.hasFocus && toggleOpen.apply(this, arguments), 0)
+    if (self.open) setTimeout(self.close, 0)
   }
-  if (!self.change) self.change = function () {
+  if (!self.change) self.change = function (item) {
     self.hasFocus = self.multiple
-    if (self.open) setTimeout(() => !self.hasFocus && toggleOpen.apply(this, arguments), 0)
-    if (self.onChange) return self.onChange.apply(this, arguments)
+    const {text = item, value = text} = isObject(item) ? item : {}
+    self.setState({value, query: String(text)})
+    if (self.open) setTimeout(self.close, 0)
+    if (self.onChange) return self.onChange.apply(this, arguments) // pass selected item by reference
+  }
+  if (!self.close) self.close = function () {
+    if (self.hasFocus || !self.open) return
+    const {value, query} = self.state // reset search query to match selected value
+    if (value !== null && value !== query) self.state.query = String(getValueText(value, self.options))
+    toggleOpen.apply(this, arguments)
   }
 
   // Fuzzy Search ----------------------------------------------------------------------------------
@@ -88,7 +99,7 @@ export function Select ({
     const query = e.target.value
     self.setState({query})
     self.updateOptions(query)
-    if (self.onSearch) return self.onSearch.apply(this, [query, ...arguments])
+    if (self.onSearch) return self.onSearch.call(this, query, ...arguments)
   }
   if (search && !self.updateOptions) self.updateOptions = debounce((query) => {
     if (self.willUnmount) return
@@ -105,13 +116,18 @@ export function Select ({
   }
   upward = upward && (optPos && (optPos.canBeUpward || optPos.optimalPosition.bottom > 0))
 
+  // Input value should be:
+  //    - query: for search selection
+  //    - value: for single selection
+  // Multiple selection does not use input to display value, only single selection
+  // => sync query with value onChange for single selection, then use `query` for input
+
   return (
     <Row className={cn(className, `select wrap ${compact ? 'width-fit' : 'full-width'}`)}
          _ref={self.ref}>
       {childBefore}
       <input className={cn({'full-width': !compact})} readOnly={!search} {...props}
-             {...state.query && {value: state.query}}
-             onChange={self.search} onFocus={self.focus} onBlur={self.blur} />
+             value={state.query} onChange={self.search} onFocus={self.focus} onBlur={self.blur} />
       {childAfter}
       <Scroll _ref={self.ref2} noOffset className={cn('select__options', {open, upward})}
               {...listBox}>
@@ -125,6 +141,7 @@ export function Select ({
 
 Select.defaultProps = {
   get placeholder () {return _.SELECT},
+  query: '', // to prevent React controlled input error
 }
 
 Select.propTypes = {
@@ -142,7 +159,7 @@ Select.propTypes = {
       key: type.Any,
     }),
   )),
-  // Handler(value: string | number | object, name, event) when selected value changes
+  // Handler(value: string | number | object, event) when selected value changes
   onChange: type.Function,
   // Handler(query, event) when search input value changes
   onSearch: type.Function,
@@ -185,14 +202,13 @@ const fuseOpt = {
 function SelectOptions ({items, query, onFocus, onBlur, onChange, ...props}) {
   return (<>
     {items.map((item) => {
-      let t, v, k
+      let t, k
       if (isObject(item)) {
         const {text, value = text, key = String(value)} = item
         t = text
-        v = value
         k = key
       } else {
-        t = v = k = String(item)
+        t = k = String(item)
       }
 
       // Bolden the matched query
@@ -204,9 +220,9 @@ function SelectOptions ({items, query, onFocus, onBlur, onChange, ...props}) {
           t = <>{t.substring(0, i)}<u><b>{t.substring(i, i + q.length)}</b></u>{t.substring(i + q.length)}</>
       }
       return <Row key={k} className='select__option'
-                  onClick={(...args) => onChange(v, ...args)}
-                  onFocus={(...args) => onFocus(v, ...args)}
-                  onBlur={(...args) => onBlur(v, ...args)}
+                  onClick={function () {onChange.call(this, item, ...arguments)}}
+                  onFocus={function () {onFocus.call(this, item, ...arguments)}}
+                  onBlur={function () {onBlur.call(this, item, ...arguments)}}
                   children={<Text>{t}</Text>}
                   {...props} />
     })}
@@ -259,6 +275,12 @@ function getFixedOptionsStyle (optionsPosition, desiredPosition) {
   }
 
   return {position: 'fixed', width, top: 'auto', bottom: 'auto', ...getStyle()}
+}
+
+function getValueText (val, options) {
+  if (!options.length) return val
+  if (isObject(options[0])) return (options.find(({text, value = text}) => value === val) || {}).text || val
+  return val
 }
 
 localiseTranslation({
