@@ -46,21 +46,17 @@ import { onEventStopPropagation } from './utils/interactions.js'
 export function Select ({
   options, value, query, search, defaultOpen, compact, fuzzyOpt,
   forceRender, noFixedOptions, upward, addOption,
-  childBefore, childAfter, className, row, rtl,
-  multiple, onChange, onSearch, onSelect, onAddOption,
+  childBefore, childAfter, className, row,
+  multiple, onClickValue, onChange, onSearch, onSelect, onAddOption,
   icon, iconEnd, iconProps,
   _ref, refInput, ...props
 }) {
   const [self, state] = useInstance({options, query})
-  const [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
+  let [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
   useEffect(() => (self.didMount = true) && (() => {self.willUnmount = true}), [])
   Object.assign(self, {multiple, options, onChange, onSearch, onSelect, onAddOption}, props)
-  self.open = open
-
-  // State should store pure value as is, because `value` can be an array for multiple selection
-  // Then let the render logic compute what to display based on given value.
-  // For single selection, when no custom option render exists, input shows text value.
-  if (value != null) state.value = value
+  self.open = open // for internal logic
+  open = open || animating // for rendering and styling
 
   // Node Handlers ---------------------------------------------------------------------------------
   if (!self.ref) self.ref = function (node) {
@@ -102,7 +98,7 @@ export function Select ({
     self.hasFocus = false
     if (self.open) setTimeout(self.closeOptions, 0)
   }
-  if (!self.change) self.change = function (item) {
+  if (!self.selectOption) self.selectOption = function (item) { // options clicked
     self.hasFocus = self.multiple
     const {text = item, value = text} = isObject(item) ? item : {}
     self.setState({value, query: String(text)})
@@ -120,6 +116,9 @@ export function Select ({
     if (self.open) return
     toggleOpen.apply(this, arguments)
     self.subscribeToKeyboard()
+  }
+  if (multiple && !self.deleteValue) self.deleteValue = function (val) {
+    self.setState({value: value.filter(v => v !== val)})
   }
 
   // Fuzzy Search ----------------------------------------------------------------------------------
@@ -173,7 +172,7 @@ export function Select ({
     if (!self.open || !self.scrollNode) return
     moveFocus(self.scrollNode.children, self.upward ? 1 : -1)
   }
-  if (open) self.subscribeToKeyboard()
+  if (self.open) self.subscribeToKeyboard()
   useEffect(() => self.unsubscribeKeyboard, [])
   const optPos = self.getOptionsPosition()
   const listBox = {
@@ -181,7 +180,7 @@ export function Select ({
     style: (defaultOpen || noFixedOptions) ? null : self.getOptStyle(optPos, upward ? 'top' : 'bottom'),
     scrollProps: self.scrollProps,
   }
-  self.upward = upward = upward && (optPos && (optPos.canBeUpward || optPos.optimalPosition.bottom > 0))
+  self.upward = upward = upward && (!optPos || optPos.canBeUpward || optPos.optimalPosition.bottom > 0)
 
   // Icon ------------------------------------------------------------------------------------------
   const iconNode = icon ? // Let default Icon pass click through to parent Select
@@ -195,22 +194,41 @@ export function Select ({
   // Multiple selection does not use input to display value, only single selection
   // => sync query with value onChange for single selection, then use `query` for input
 
-  return (
-    <Row className={cn(className, `select middle wrap ${compact ? 'width-fit' : 'full-width'}`)}
-         {...{row, rtl}} onClick={toggleOpen} tabIndex={-1} _ref={self.ref}>
+  // State should store pure value as is, because `value` can be an array for multiple selection
+  // Then let the render logic compute what to display based on given value.
+  // For single selection, when no custom option render exists, input shows text value.
+  if (value != null) state.value = value
+  value = state.value
+  const hasValue = value != null
+
+  return ( // When Select is open, assign 'active' CSS class to be consistent with other Input types
+    <Row className={cn(className, `select middle wrap ${compact ? 'width-fit' : 'full-width'}`,
+      {active: open, multiple, upward})}
+         {...{row}} onClick={toggleOpen} tabIndex={-1} _ref={self.ref}>
       {childBefore}
       {!isIconEnd && iconNode}
+
       {/* Multiple selected items */}
-      <input className={cn({'fill-width': !compact})} readOnly={!search} {...props} ref={self.ref1}
+      {multiple && value && value.map(v => {
+        const {text, key = v} = getOptionByValue(v, options)
+        // Use <a> tag, so it can link to another page as selected Tag
+        return <a key={key} onClick={onClickValue && onEventStopPropagation(function () {
+          onClickValue.call(this, v, ...arguments)
+        })}>
+          <Text>{text}</Text><Icon name='delete' onClick={self.deleteValue} tabIndex={-1} />
+        </a>
+      })}
+      <input className={cn({'fill-width': !compact && (!multiple || !hasValue)})}
+             readOnly={!search} {...props} ref={self.ref1}
              value={state.query} onChange={self.search} onFocus={self.focus} onBlur={self.blur}
-             onClick={onEventStopPropagation(props.onClick)} />
+             onClick={search ? onEventStopPropagation(props.onClick) : void 0} />
       {isIconEnd && iconNode}
       {childAfter}
-      <Scroll className={cn('select__options', {open, upward})}
+      <Scroll className={cn('select__options', {open, upward, fixed: listBox.style})}
               noOffset reverse={upward} _ref={self.ref2} {...listBox}>
-        {(forceRender || open || animating) &&
+        {(forceRender || open) &&
           <Options items={state.options} query={state.query}
-                   onFocus={self.focusOption} onBlur={self.blurOption} onChange={self.change} />}
+                   onFocus={self.focusOption} onBlur={self.blurOption} onClick={self.selectOption} />}
       </Scroll>
     </Row>
   )
@@ -249,6 +267,8 @@ Select.propTypes = {
   onSearch: type.Function,
   // Handler(value: string | number | object, event) when an option gets focus
   onSelect: type.Function,
+  // Handler(value: string | number | object, event) when a multiple selected value is clicked
+  onClickValue: type.Function,
   // Handler(value, name) when a new option is added
   onAddOption: type.Function,
   // Whether to allow users to add a new option (in combination with search)
@@ -284,7 +304,7 @@ Select.propTypes = {
 
 export default React.memo(Select)
 
-function SelectOptions ({items, query, onFocus, onBlur, onChange, ...props}) {
+function SelectOptions ({items, query, onFocus, onBlur, onClick, ...props}) {
   return (<>
     {items.map((item) => {
       let t, k
@@ -305,7 +325,7 @@ function SelectOptions ({items, query, onFocus, onBlur, onChange, ...props}) {
           t = <>{t.substring(0, i)}<b>{t.substring(i, i + q.length)}</b>{t.substring(i + q.length)}</>
       }
       return <Row key={k} className='select__option'
-                  onClick={function () {onChange.call(this, item, ...arguments)}}
+                  onClick={function () {onClick.call(this, item, ...arguments)}}
                   onFocus={function () {onFocus.call(this, item, ...arguments)}}
                   onBlur={function () {onBlur.call(this, item, ...arguments)}}
                   children={<Text>{t}</Text>}
@@ -324,37 +344,43 @@ function toFuseList (options) {
 
 function getOptionsPosition (self = this) {
   if (!self.node || !self.optNode || !self.scrollNode) return
-  const {top: topAvail, bottom: top, width, height} = self.node.getBoundingClientRect()
+  let {top: topAvail, left, bottom: top, width, height} = self.node.getBoundingClientRect()
   const {height: actualHeight} = self.scrollNode.getBoundingClientRect()
   let maxHeight = +getComputedStyle(self.optNode).getPropertyValue('max-height').replace('px', '')
   if (!maxHeight) throw Error('Select options must have explicit max-height!')
   maxHeight = Math.min(actualHeight, maxHeight)
-  const bottom = window.innerHeight - topAvail
   const bottomAvail = window.innerHeight - topAvail - height
+  let style = getComputedStyle(self.node)
+  const bTop = +style.getPropertyValue('border-top-width').replace('px', '')
+  const bBottom = +style.getPropertyValue('border-bottom-width').replace('px', '')
+  const bottom = window.innerHeight - topAvail - bTop
+  top -= bBottom
+  style = null
   return {
     canBeUpward: topAvail - maxHeight > 0,
     canBeDownward: bottomAvail > maxHeight,
-    optimalPosition: bottomAvail > topAvail ? {top} : {bottom}, // where there is more space
+    optimalPosition: bottomAvail > topAvail ? {top, left} : {bottom, left}, // where there is more space
     bottom, // upward placement bottom position
     top, // downward placement top position
+    left,
     width,
   }
 }
 
 function getFixedOptionsStyle (optionsPosition, desiredPosition) {
   if (!optionsPosition) return
-  const {canBeUpward, canBeDownward, optimalPosition, bottom, top, width} = optionsPosition
+  const {canBeUpward, canBeDownward, optimalPosition, bottom, top, left, width} = optionsPosition
 
   function getStyle () {
     switch (desiredPosition) {
       case 'top':
-        if (canBeUpward) return {bottom} // place upwards
-        if (canBeDownward) return {top} // place downwards
+        if (canBeUpward) return {bottom, left} // place upwards
+        if (canBeDownward) return {top, left} // place downwards
         return optimalPosition
       case 'bottom':
       default: // try to put options downwards, if there is enough space in viewport
-        if (canBeDownward) return {top} // place downwards
-        if (canBeUpward) return {bottom} // place upwards
+        if (canBeDownward) return {top, left} // place downwards
+        if (canBeUpward) return {bottom, left} // place upwards
         return optimalPosition
     }
   }
@@ -366,6 +392,12 @@ function getValueText (val, options) {
   if (!options.length) return val
   if (isObject(options[0])) return (options.find(({text, value = text}) => value === val) || {}).text || val
   return val
+}
+
+function getOptionByValue (value, options) {
+  return (options.length && isObject(options[0]) &&
+      options.find(({text, value: v = text}) => v === value)) ||
+    {value, key: value, text: String(value)}
 }
 
 localiseTranslation({
