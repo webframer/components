@@ -1,6 +1,6 @@
 /**
  * Make DOM element take no space
- * @param {Element} node - to collapse
+ * @param {Element|HTMLElement} node - to collapse
  */
 export function collapseElement (node) {
   node.style.width = '0'
@@ -24,6 +24,18 @@ export function collapseElement (node) {
  */
 export function indexOfElement (node) {
   return [...node.parentElement.children].indexOf(node)
+}
+
+/**
+ * Move focus in given `nodes` elements by given `count`, where 1 is next, -1 is previous node
+ * (this loops back to the start or end of nodes collection when focus index is out of range).
+ * @param {Element[]|Node[]} nodes - HTML Element collection (aka node.children)
+ * @param {number} [count] - number of elements from the currently focused element to set focus
+ */
+export function moveFocus (nodes, count = 1) {
+  let focusIndex = ([...nodes].findIndex(n => document.activeElement === n) + count) % nodes.length
+  if (focusIndex < 0) focusIndex = nodes.length + focusIndex
+  nodes[focusIndex].focus()
 }
 
 /**

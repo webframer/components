@@ -1,5 +1,16 @@
 // noinspection JSValidateTypes,JSCheckFunctionSignatures
-import { _, debounce, isObject, l, localiseTranslation, TIME_DURATION_INSTANT } from '@webframer/js'
+import {
+  _,
+  debounce,
+  isObject,
+  KEY,
+  l,
+  localiseTranslation,
+  subscribeTo,
+  TIME_DURATION_INSTANT,
+  unsubscribeFrom,
+} from '@webframer/js'
+import { isPureKeyPress } from '@webframer/js/keyboard.js'
 import cn from 'classnames'
 import Fuse from 'fuse.js'
 import React, { useEffect, useMemo } from 'react'
@@ -8,6 +19,7 @@ import { Row } from './Row.jsx'
 import { Scroll } from './Scroll.jsx'
 import Text from './Text.jsx'
 import { type } from './types.js'
+import { moveFocus } from './utils/element.js'
 
 /**
  * Dropdown List of Searchable Select Options and Nested Category Hierarchy
@@ -28,11 +40,11 @@ import { type } from './types.js'
  *      => `.select__options` class must have `max-height` set to explicit unit, such as `px`
  */
 export function Select ({
-  options, value, query, search, defaultOpen, compact,
+  options, value, query, search, defaultOpen, compact, fuzzyOpt,
   forceRender, noFixedOptions, upward, addOption,
   childBefore, childAfter, className,
   multiple, onChange, onSearch, onSelect, onAddOption,
-  ...props
+  _ref, refInput, ...props
 }) {
   const [self, state] = useInstance({options, query})
   const [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
@@ -46,7 +58,14 @@ export function Select ({
   if (value != null) state.value = value
 
   // Node Handlers ---------------------------------------------------------------------------------
-  if (!self.ref) self.ref = (node) => self.node = node
+  if (!self.ref) self.ref = function (node) {
+    self.node = node
+    return assignRef.call(this, _ref, ...arguments)
+  }
+  if (!self.ref1) self.ref1 = function (node) {
+    self.inputNode = node
+    return assignRef.call(this, refInput, ...arguments)
+  }
   if (!self.ref2) self.ref2 = function (node) {
     self.optNode = node
     return assignRef.call(this, ref, ...arguments)
@@ -58,7 +77,7 @@ export function Select ({
   // Event Handlers --------------------------------------------------------------------------------
   if (!self.focus) self.focus = function (e) {
     self.hasFocus = true
-    if (!self.open) toggleOpen.apply(this, arguments)
+    self.openOptions()
     if (self.onFocus) return self.onFocus.apply(this, arguments)
   }
   if (!self.focusOption) self.focusOption = function () {
@@ -67,29 +86,35 @@ export function Select ({
   }
   if (!self.blur) self.blur = function () {
     self.hasFocus = false
-    if (self.open) setTimeout(self.close, 0)
+    if (self.open) setTimeout(self.closeOptions, 0)
     if (self.onBlur) return self.onBlur.apply(this, arguments)
   }
   if (!self.blurOption) self.blurOption = function () {
     self.hasFocus = false
-    if (self.open) setTimeout(self.close, 0)
+    if (self.open) setTimeout(self.closeOptions, 0)
   }
   if (!self.change) self.change = function (item) {
     self.hasFocus = self.multiple
     const {text = item, value = text} = isObject(item) ? item : {}
     self.setState({value, query: String(text)})
-    if (self.open) setTimeout(self.close, 0)
+    if (self.open) setTimeout(self.closeOptions, 0)
     if (self.onChange) return self.onChange.apply(this, arguments) // pass selected item by reference
   }
-  if (!self.close) self.close = function () {
-    if (self.hasFocus || !self.open) return
+  if (!self.closeOptions) self.closeOptions = function () {
+    if (self.willUnmount || self.hasFocus || !self.open) return
     const {value, query} = self.state // reset search query to match selected value
-    if (value !== null && value !== query) self.state.query = String(getValueText(value, self.options))
+    if (value != null && value !== query) self.state.query = String(getValueText(value, self.options))
     toggleOpen.apply(this, arguments)
+    self.unsubscribeKeyboard()
+  }
+  if (!self.openOptions) self.openOptions = function () {
+    if (self.open) return
+    toggleOpen.apply(this, arguments)
+    self.subscribeToKeyboard()
   }
 
   // Fuzzy Search ----------------------------------------------------------------------------------
-  if (search && !self.fuse) self.fuse = new Fuse([], fuseOpt)
+  if (search && !self.fuse) self.fuse = new Fuse([], fuzzyOpt)
   useMemo(() => search && (self.fuse.setCollection(toFuseList(options))), [search, options])
   if (search && !self.getOptions) self.getOptions = function (query) {
     const {options} = self
@@ -108,13 +133,46 @@ export function Select ({
   if (!self.didMount && search && query) self.state.options = self.getOptions(query)
 
   // Accessibility ---------------------------------------------------------------------------------
+  if (!self.subscribeToKeyboard) self.subscribeToKeyboard = function () {
+    if (self.subscribed) return
+    self.subscribed = true
+    subscribeTo('keydown', self.press)
+  }
+  if (!self.unsubscribeKeyboard) self.unsubscribeKeyboard = function () {
+    if (!self.subscribed) return
+    self.subscribed = false
+    unsubscribeFrom('keydown', self.press)
+  }
+  if (!self.press) self.press = function (e) {
+    if (!isPureKeyPress(e) || !self.scrollNode || !self.inputNode) return
+    // Check that keypress originates from this Select instance (input or options node)
+    if (e.target !== self.inputNode && e.target.parentElement !== self.scrollNode) return
+    switch (e.keyCode) {
+      case KEY.ArrowDown:
+        e.preventDefault()
+        return self.pressDown()
+      case KEY.ArrowUp:
+        e.preventDefault()
+        return self.pressUp()
+    }
+  }
+  if (!self.pressDown) self.pressDown = function () {
+    if (!self.open || !self.scrollNode) return
+    moveFocus(self.scrollNode.children, self.upward ? -1 : 1)
+  }
+  if (!self.pressUp) self.pressUp = function () {
+    if (!self.open || !self.scrollNode) return
+    moveFocus(self.scrollNode.children, self.upward ? 1 : -1)
+  }
+  if (open) self.subscribeToKeyboard()
+  useEffect(() => self.unsubscribeKeyboard, [])
   const optPos = self.getOptionsPosition()
   const listBox = {
     role: 'listbox', 'aria-expanded': open,
     style: (defaultOpen || noFixedOptions) ? null : self.getOptStyle(optPos, upward ? 'top' : 'bottom'),
     scrollProps: self.scrollProps,
   }
-  upward = upward && (optPos && (optPos.canBeUpward || optPos.optimalPosition.bottom > 0))
+  self.upward = upward = upward && (optPos && (optPos.canBeUpward || optPos.optimalPosition.bottom > 0))
 
   // Input value should be:
   //    - query: for search selection
@@ -126,11 +184,11 @@ export function Select ({
     <Row className={cn(className, `select wrap ${compact ? 'width-fit' : 'full-width'}`)}
          _ref={self.ref}>
       {childBefore}
-      <input className={cn({'full-width': !compact})} readOnly={!search} {...props}
+      <input className={cn({'full-width': !compact})} readOnly={!search} {...props} ref={self.ref1}
              value={state.query} onChange={self.search} onFocus={self.focus} onBlur={self.blur} />
       {childAfter}
-      <Scroll _ref={self.ref2} noOffset className={cn('select__options', {open, upward})}
-              {...listBox}>
+      <Scroll className={cn('select__options', {open, upward})}
+              noOffset reverse={upward} _ref={self.ref2} {...listBox}>
         {(forceRender || open || animating) &&
           <Options items={state.options} query={state.query}
                    onFocus={self.focusOption} onBlur={self.blurOption} onChange={self.change} />}
@@ -140,8 +198,13 @@ export function Select ({
 }
 
 Select.defaultProps = {
+  // Will be used if input value = ''
   get placeholder () {return _.SELECT},
-  query: '', // to prevent React controlled input error
+  // Fuzzy search options // https://fusejs.io/demo.html
+  // The default works even if the options is a list of Strings (does not work with number)
+  fuzzyOpt: {keys: ['text']},
+  // Default to empty string to prevent React controlled input error
+  query: '',
 }
 
 Select.propTypes = {
@@ -193,11 +256,6 @@ Select.propTypes = {
 }
 
 export default React.memo(Select)
-
-// https://fusejs.io/demo.html
-const fuseOpt = {
-  keys: ['text'], // works even if the options is list of Strings (does not work with number)
-}
 
 function SelectOptions ({items, query, onFocus, onBlur, onChange, ...props}) {
   return (<>
