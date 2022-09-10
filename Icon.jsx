@@ -8,18 +8,22 @@ function createIcon () {
   /**
    * Icon - Pure Component
    */
-  function Icon ({name, className, font, path = FILE.PATH_ICONS, _ref, ...props}, ref) {
+  function Icon ({name, className, font, path = FILE.PATH_ICONS, _ref, children, ...props}, ref) {
     props = accessibilitySupport(props) // ensures correct focus behavior on click
     if (isRef(ref)) props.ref = ref
     else if (_ref) props.ref = _ref
 
+    let mask
     if (!font) {
-      name = name.replace(/\s/g, '-').replace(alphaNumIdPattern, '').toLowerCase()
-      const mask = `url(${path}${name}.svg) no-repeat center / contain`
-      props.style = {...props.style, WebkitMask: mask, mask}
+      mask = `url(${path}${name.replace(/\s/g, '-').replace(alphaNumIdPattern, '')
+        .toLowerCase()}.svg) no-repeat center / contain`
+      mask = {WebkitMask: mask, mask}
     }
 
-    return <i className={cn(`icon-${name}`, className)} {...props} />
+    return <i className={cn(`icon-${name}`, className)} aria-hidden='true' {...props}>
+      {mask && <span className='icon__mask' style={mask} />}
+      {children}
+    </i>
   }
 
   const IconRef = React.forwardRef(Icon)
