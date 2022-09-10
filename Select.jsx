@@ -1,8 +1,10 @@
 // noinspection JSValidateTypes,JSCheckFunctionSignatures
+// noinspection JSCheckFunctionSignatures
 import {
   _,
   debounce,
   isObject,
+  isString,
   KEY,
   l,
   localiseTranslation,
@@ -14,12 +16,14 @@ import { isPureKeyPress } from '@webframer/js/keyboard.js'
 import cn from 'classnames'
 import Fuse from 'fuse.js'
 import React, { useEffect, useMemo } from 'react'
+import Icon from './Icon.jsx'
 import { assignRef, useExpandCollapse, useInstance } from './react.js'
 import { Row } from './Row.jsx'
 import { Scroll } from './Scroll.jsx'
 import Text from './Text.jsx'
 import { type } from './types.js'
 import { moveFocus } from './utils/element.js'
+import { onEventStopPropagation } from './utils/interactions.js'
 
 /**
  * Dropdown List of Searchable Select Options and Nested Category Hierarchy
@@ -42,8 +46,9 @@ import { moveFocus } from './utils/element.js'
 export function Select ({
   options, value, query, search, defaultOpen, compact, fuzzyOpt,
   forceRender, noFixedOptions, upward, addOption,
-  childBefore, childAfter, className,
+  childBefore, childAfter, className, row, rtl,
   multiple, onChange, onSearch, onSelect, onAddOption,
+  icon, iconEnd, iconProps,
   _ref, refInput, ...props
 }) {
   const [self, state] = useInstance({options, query})
@@ -80,6 +85,10 @@ export function Select ({
     self.openOptions()
     if (self.onFocus) return self.onFocus.apply(this, arguments)
   }
+  // if (!self.focusInput) self.focusInput = function () {
+  //   if (!self.inputNode) return
+  //   self.inputNode.focus() // setting focus on input will trigger input.onFocus handler
+  // }
   if (!self.focusOption) self.focusOption = function () {
     self.hasFocus = true
     if (self.onSelect) return self.onSelect.apply(this, arguments)
@@ -174,6 +183,12 @@ export function Select ({
   }
   self.upward = upward = upward && (optPos && (optPos.canBeUpward || optPos.optimalPosition.bottom > 0))
 
+  // Icon ------------------------------------------------------------------------------------------
+  const iconNode = icon ? // Let default Icon pass click through to parent Select
+    <Icon name={isString(icon) ? icon : (search ? 'search' : 'dropdown')}
+          {...{className: 'fade', ...iconProps}} /> : null
+  let isIconEnd = iconEnd || (!search && !isString(icon))
+
   // Input value should be:
   //    - query: for search selection
   //    - value: for single selection
@@ -181,11 +196,15 @@ export function Select ({
   // => sync query with value onChange for single selection, then use `query` for input
 
   return (
-    <Row className={cn(className, `select wrap ${compact ? 'width-fit' : 'full-width'}`)}
-         _ref={self.ref}>
+    <Row className={cn(className, `select middle wrap ${compact ? 'width-fit' : 'full-width'}`)}
+         {...{row, rtl}} onClick={toggleOpen} tabIndex={-1} _ref={self.ref}>
       {childBefore}
-      <input className={cn({'full-width': !compact})} readOnly={!search} {...props} ref={self.ref1}
-             value={state.query} onChange={self.search} onFocus={self.focus} onBlur={self.blur} />
+      {!isIconEnd && iconNode}
+      {/* Multiple selected items */}
+      <input className={cn({'fill-width': !compact})} readOnly={!search} {...props} ref={self.ref1}
+             value={state.query} onChange={self.search} onFocus={self.focus} onBlur={self.blur}
+             onClick={onEventStopPropagation(props.onClick)} />
+      {isIconEnd && iconNode}
       {childAfter}
       <Scroll className={cn('select__options', {open, upward})}
               noOffset reverse={upward} _ref={self.ref2} {...listBox}>
@@ -205,6 +224,8 @@ Select.defaultProps = {
   fuzzyOpt: {keys: ['text']},
   // Default to empty string to prevent React controlled input error
   query: '',
+  // Default is 'dropdown' icon at the end, or 'search' icon at the start if `search = true`
+  icon: true,
 }
 
 Select.propTypes = {
@@ -238,6 +259,12 @@ Select.propTypes = {
   defaultOpen: type.Boolean,
   // Whether to always render options, even when closed
   forceRender: type.Boolean,
+  // Whether to use an icon, pass Icon name for custom Icon
+  icon: type.OneOf(type.String, type.Boolean),
+  // Whether to place Icon after input, default is before input for custom Icon name
+  iconEnd: type.Boolean,
+  // Icon component props to pass over
+  iconProps: type.Object,
   // Whether to allow multiple selections and store values as array
   multiple: type.Boolean,
   // Whether to disable fixed position options. By default, options change to fixed position on open
@@ -273,9 +300,9 @@ function SelectOptions ({items, query, onFocus, onBlur, onChange, ...props}) {
       if (query) {
         let i, q = query.toLowerCase(), text = t.toLowerCase()
         // to keep the logic simple, for now only use exact match once, case-insensitive
-        if (q === text) t = <u><b>{t}</b></u>
+        if (q === text) t = <b>{t}</b>
         else if ((i = text.indexOf(q)) > -1)
-          t = <>{t.substring(0, i)}<u><b>{t.substring(i, i + q.length)}</b></u>{t.substring(i + q.length)}</>
+          t = <>{t.substring(0, i)}<b>{t.substring(i, i + q.length)}</b>{t.substring(i + q.length)}</>
       }
       return <Row key={k} className='select__option'
                   onClick={function () {onChange.call(this, item, ...arguments)}}

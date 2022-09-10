@@ -20,10 +20,13 @@ function createIcon () {
       mask = {WebkitMask: mask, mask}
     }
 
-    return <i className={cn(`icon-${name}`, className)} aria-hidden='true' {...props}>
-      {mask && <span className='icon__mask' style={mask} />}
-      {children}
-    </i>
+    return (
+      <i className={cn(`icon-${name}`, className, {pointer: props.onClick})}
+         aria-hidden='true' {...props}>
+        {mask && <span className='icon__mask' style={mask} />}
+        {children}
+      </i>
+    )
   }
 
   const IconRef = React.forwardRef(Icon)

@@ -19,20 +19,23 @@ export const UIContext = React.createContext({})
  */
 export function accessibilitySupport (props, sound = Active.SETTINGS.HAS_SOUND && SOUND.TOUCH) {
   /* Remove key press and click event if necessary */
-  if (props.tabIndex === -1) {
-    delete props.onKeyPress
-    delete props.onClick
-  } else {
-    const {onClick, onKeyPress, tabIndex} = props
-    if (sound && onKeyPress) props.onKeyPress = onPressHoc(onKeyPress, sound)
-    if (onClick) {
-      if (sound) props.onClick = onPressHoc(onClick, sound)
-      if (tabIndex == null) props.tabIndex = 0  // add keyboard accessibility for onClick
-      if (!onKeyPress) props.onKeyPress = (event) => (event.key === 'Enter' && props.onClick(event))
-    } else {
-      delete props.onClick
+  // comment out to allow click without tabbing (ex. decorative Icon inside input)
+  // if (props.tabIndex === -1) {
+  //   delete props.onKeyPress
+  //   delete props.onClick
+  // } else {
+  const {onClick, onKeyPress, tabIndex} = props
+  if (sound && onKeyPress) props.onKeyPress = onPressHoc(onKeyPress, sound)
+  if (onClick) {
+    if (sound) props.onClick = onPressHoc(onClick, sound)
+    if (tabIndex == null) props.tabIndex = 0  // add keyboard accessibility for onClick
+    if (!onKeyPress) props.onKeyPress = function (event) {
+      if (event.key === 'Enter') props.onClick.apply(this, arguments)
     }
+  } else {
+    delete props.onClick
   }
+  // }
   return props
 }
 
@@ -48,7 +51,7 @@ export function accessibilitySupport (props, sound = Active.SETTINGS.HAS_SOUND &
 export function onPressHoc (onClick, sound) {
   return function onPress () {
     if (sound) sound.play()
-    onClick && onClick(...arguments)
+    if (onClick) onClick.apply(this, arguments)
   }
 }
 
