@@ -3,6 +3,7 @@
 import {
   _,
   debounce,
+  hasListValue,
   isObject,
   isString,
   KEY,
@@ -57,7 +58,7 @@ export function Select ({
   const [self, state] = useInstance({options, query, value})
   let [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
   useEffect(() => (self.didMount = true) && (() => {self.willUnmount = true}), [])
-  Object.assign(self, {multiple, search, options, onChange, onSearch, onSelect, onAddOption}, props)
+  Object.assign(self, {multiple, search, query, options, onChange, onSearch, onSelect, onAddOption}, props)
   self.open = open // for internal logic
   open = open || animating // for rendering and styling
 
@@ -122,9 +123,21 @@ export function Select ({
   }
   if (!self.closeOptions) self.closeOptions = function () {
     if (self.willUnmount || self.hasFocus || !self.open) return
-    const {value, query} = self.state
-    if (value !== query)  // reset search query to match selected value, or empty it
-      self.state.query = (!self.multiple && value != null) ? String(getValueText(value, self.options)) : ''
+    // Input query on close use-cases:
+    // Single search query
+    //    - match selected value if selected,
+    //    - or reset to query from props (empty by default)
+    // Multiple search query
+    //    - reset to query from props (empty by default)
+    // Single/Multiple select query (no logic needed because user cannot change query)
+    if (self.search) {
+      const {value, query} = self.state
+      if (!self.multiple && value != null && String(value) !== query) // single search
+        self.state.query = String(getValueText(value, self.options))
+      else if (self.multiple || value == null) // multiple or unselected single search
+        self.state.query = self.query
+      if (query !== self.state.query) self.state.options = self.getOptions(self.state.query)
+    }
     toggleOpen.apply(this, arguments)
     self.unsubscribeEvents()
   }
@@ -137,8 +150,7 @@ export function Select ({
   // Fuzzy Search ----------------------------------------------------------------------------------
   if (search && !self.fuse) self.fuse = new Fuse([], fuzzyOpt)
   if (search && !self.getOptions) self.getOptions = function (query) {
-    const {options} = self
-    return self.fuse.search(query).map(v => options[v.refIndex])
+    return self.fuse.search(query).map(v => v.item)
   }
   if (search && !self.searchQuery) self.searchQuery = function (e) {
     const query = e.target.value
@@ -236,7 +248,7 @@ export function Select ({
   value = state.value
   query = state.query
   options = state.options // filtered by search results and selected values
-  const hasValue = value != null
+  const hasValue = multiple ? hasListValue(value) : value != null
   if (hasValue) delete props.placeholder // remove for multiple search
 
   // Compact Input ---------------------------------------------------------------------------------
