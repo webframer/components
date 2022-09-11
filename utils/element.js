@@ -1,3 +1,5 @@
+import { debounce } from '@webframer/js'
+
 /**
  * Make DOM element take no space
  * @param {Element|HTMLElement} node - to collapse
@@ -60,6 +62,33 @@ export function replaceElement (oldNode, newNode) {
 }
 
 /**
+ * Resize Element Width to Match Content Length
+ * @example:
+ *    resizeWidth(node.value, node.style, compact)
+ *
+ *    // React hook example:
+ *    const style = useMemo(() => {if (compact) return resizeWidth(value, {}, compact)}, [value, compact])
+ *
+ * Common cases when resize needs to fire:
+ *  - onChange value event
+ *  - before mounting
+ *  - value changes in controlled component
+ *
+ * @param {string} value - of the element to resize
+ * @param {object} style - of the element to resize
+ * @param {boolean|number} offset - count of characters to add to final width
+ * @returns {object} style - with required attributes set
+ */
+export function resizeWidth (value, style, offset = 1) {
+  // Add additional character to prevent truncation from uneven fonts
+  // boolean `offset` evaluates to 1 by default.
+  style.width = value.length + Number(offset) + 'ch'
+  style.boxSizing = 'content-box'
+  if (!style.transition) style.transition = '200ms'
+  return style
+}
+
+/**
  * Get Computed CSS property to animate for inserting/removing child nodes
  * @param {Element} node - the parent element to get property from
  * @returns {string} side - can be 'width' or 'height'
@@ -83,4 +112,28 @@ export function sideToAnimate (node) {
   }
   css = null // garbage clean
   return side
+}
+
+/**
+ * Event handler to autosize Input height to match typed in text height
+ * @example:
+ *  <Input type='textarea' onKeyUp={toTextHeight} />
+ */
+export const toTextHeight = debounce(toTextHeightFunc, 50, {leading: true})
+
+export function toTextHeightFunc (e) {
+  if (!e.target) return
+
+  // Reset field height
+  e.target.style.height = 'inherit'
+
+  // Get the computed styles for the element
+  const computed = getComputedStyle(e.target)
+
+  // Calculate the height
+  const height = parseInt(computed.getPropertyValue('border-top-width'), 10)
+    + e.target.scrollHeight
+    + parseInt(computed.getPropertyValue('border-bottom-width'), 10)
+
+  e.target.style.height = `${Math.min(height, Math.round(window.innerHeight / 5))}px`
 }
