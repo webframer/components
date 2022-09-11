@@ -10,6 +10,7 @@ import {
   localiseTranslation,
   subscribeTo,
   TIME_DURATION_INSTANT,
+  toUniqueListFast,
   unsubscribeFrom,
 } from '@webframer/js'
 import { isPureKeyPress } from '@webframer/js/keyboard.js'
@@ -54,7 +55,7 @@ export function Select ({
   const [self, state] = useInstance({options, query})
   let [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
   useEffect(() => (self.didMount = true) && (() => {self.willUnmount = true}), [])
-  Object.assign(self, {multiple, options, onChange, onSearch, onSelect, onAddOption}, props)
+  Object.assign(self, {multiple, search, options, onChange, onSearch, onSelect, onAddOption}, props)
   self.open = open // for internal logic
   open = open || animating // for rendering and styling
 
@@ -87,7 +88,7 @@ export function Select ({
   // }
   if (!self.focusOption) self.focusOption = function () {
     self.hasFocus = true
-    if (self.onSelect) return self.onSelect.apply(this, arguments)
+    if (self.onSelect) return self.onSelect.apply(this, arguments) // pass selected item by reference
   }
   if (!self.blur) self.blur = function () {
     self.hasFocus = false
@@ -98,24 +99,27 @@ export function Select ({
     self.hasFocus = false
     if (self.open) setTimeout(self.closeOptions, 0)
   }
-  if (!self.selectOption) self.selectOption = function (item) { // options clicked
-    self.hasFocus = self.multiple
-    const {text = item, value = text} = isObject(item) ? item : {}
-    self.setState({value, query: String(text)})
+  if (!self.selectOption) self.selectOption = function (item, ...args) { // options clicked
+    const {multiple} = self
+    self.hasFocus = multiple
+    let {text = item, value = text} = isObject(item) ? item : {}
+    if (multiple) value = toUniqueListFast(self.state.value.push(value))
+    self.setState({value, query: multiple ? '' : String(text)})
     if (self.open) setTimeout(self.closeOptions, 0)
-    if (self.onChange) return self.onChange.apply(this, arguments) // pass selected item by reference
+    if (self.onChange) return self.onChange.call(this, value, ...args)
   }
   if (!self.closeOptions) self.closeOptions = function () {
     if (self.willUnmount || self.hasFocus || !self.open) return
-    const {value, query} = self.state // reset search query to match selected value
-    if (value != null && value !== query) self.state.query = String(getValueText(value, self.options))
+    const {value, query} = self.state
+    if (value !== query)  // reset search query to match selected value, or empty it
+      self.state.query = (!self.multiple && value != null) ? String(getValueText(value, self.options)) : ''
     toggleOpen.apply(this, arguments)
-    self.unsubscribeKeyboard()
+    self.unsubscribeEvents()
   }
   if (!self.openOptions) self.openOptions = function () {
     if (self.open) return
     toggleOpen.apply(this, arguments)
-    self.subscribeToKeyboard()
+    self.subscribeToEvents()
   }
   if (multiple && !self.deleteValue) self.deleteValue = function (val) {
     self.setState({value: value.filter(v => v !== val)})
@@ -128,7 +132,7 @@ export function Select ({
     const {options} = self
     return self.fuse.search(query).map(v => options[v.refIndex])
   }
-  if (search && !self.search) self.search = function (e) {
+  if (search && !self.searchQuery) self.searchQuery = function (e) {
     const query = e.target.value
     self.setState({query})
     self.updateOptions(query)
@@ -141,15 +145,28 @@ export function Select ({
   if (!self.didMount && search && query) self.state.options = self.getOptions(query)
 
   // Accessibility ---------------------------------------------------------------------------------
-  if (!self.subscribeToKeyboard) self.subscribeToKeyboard = function () {
+  if (!self.subscribeToEvents) self.subscribeToEvents = function () {
     if (self.subscribed) return
     self.subscribed = true
     subscribeTo('keydown', self.press)
+    subscribeTo('pointerdown', self.click)
   }
-  if (!self.unsubscribeKeyboard) self.unsubscribeKeyboard = function () {
+  if (!self.unsubscribeEvents) self.unsubscribeEvents = function () {
     if (!self.subscribed) return
     self.subscribed = false
     unsubscribeFrom('keydown', self.press)
+    unsubscribeFrom('pointerdown', self.click)
+  }
+  if (!self.click) self.click = function (e) {
+    if (!self.node || !self.open) return
+    // Ignore clicks originating from this Select instance (anything within this node)
+    if (e.target === self.node) return
+    let node = e.target
+    while (node.parentElement) {
+      node = node.parentElement
+      if (node === self.node) return
+    }
+    self.closeOptions.apply(this, arguments) // If clicked outside - close this
   }
   if (!self.press) self.press = function (e) {
     if (!isPureKeyPress(e) || !self.scrollNode || !self.inputNode) return
@@ -162,6 +179,12 @@ export function Select ({
       case KEY.ArrowUp:
         e.preventDefault()
         return self.pressUp()
+      case KEY.Enter: // input search Enter will select the first option in the result
+        if (!self.search || e.target !== self.inputNode) return
+        const {query, options} = self.state
+        if (!query || !options.length) return
+        e.preventDefault()
+        return self.selectOption.call(this, options[0], ...arguments)
     }
   }
   if (!self.pressDown) self.pressDown = function () {
@@ -172,8 +195,8 @@ export function Select ({
     if (!self.open || !self.scrollNode) return
     moveFocus(self.scrollNode.children, self.upward ? 1 : -1)
   }
-  if (self.open) self.subscribeToKeyboard()
-  useEffect(() => self.unsubscribeKeyboard, [])
+  if (self.open) self.subscribeToEvents()
+  useEffect(() => self.unsubscribeEvents, [])
   const optPos = self.getOptionsPosition()
   const listBox = {
     role: 'listbox', 'aria-expanded': open,
@@ -200,10 +223,11 @@ export function Select ({
   if (value != null) state.value = value
   value = state.value
   const hasValue = value != null
+  if (hasValue) delete props.placeholder // remove for multiple search
 
   return ( // When Select is open, assign 'active' CSS class to be consistent with other Input types
     <Row className={cn(className, `select middle wrap ${compact ? 'width-fit' : 'full-width'}`,
-      {active: open, multiple, upward})}
+      {active: open, done: hasValue, multiple, upward})}
          {...{row}} onClick={toggleOpen} tabIndex={-1} _ref={self.ref}>
       {childBefore}
       {!isIconEnd && iconNode}
@@ -220,7 +244,7 @@ export function Select ({
       })}
       <input className={cn({'fill-width': !compact && (!multiple || !hasValue)})}
              readOnly={!search} {...props} ref={self.ref1}
-             value={state.query} onChange={self.search} onFocus={self.focus} onBlur={self.blur}
+             value={state.query} onChange={self.searchQuery} onFocus={self.focus} onBlur={self.blur}
              onClick={search ? onEventStopPropagation(props.onClick) : void 0} />
       {isIconEnd && iconNode}
       {childAfter}
