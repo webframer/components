@@ -21,12 +21,14 @@ import Icon from './Icon.jsx'
 import { assignRef, useExpandCollapse, useInstance } from './react.js'
 import { Row } from './Row.jsx'
 import { Scroll } from './Scroll.jsx'
+import SelectOptions from './SelectOptions.jsx'
 import Text from './Text.jsx'
 import { type } from './types.js'
 import { moveFocus, resizeWidth } from './utils/element.js'
 import { onEventStopPropagation } from './utils/interactions.js'
 
 /**
+ * @todo: addOption + noResultMessage
  * Dropdown List of Searchable Select Options and Nested Category Hierarchy
  * Use cases:
  *    1. Select (with options like `<select/>` element)
@@ -204,7 +206,7 @@ export function Select ({
         return self.selectOption.call(this, options[0], ...arguments)
       }
       case KEY.Backspace: {// input search Backspace will delete the last selected option
-        if (!self.search || !self.multiple && e.target !== self.inputNode) return
+        if (!self.search || !self.multiple || e.target !== self.inputNode) return
         const {query, value} = self.state
         if (query || !value.length) return
         e.preventDefault()
@@ -294,14 +296,14 @@ export function Select ({
              style={styleI}
              readOnly={!search} {...props} ref={self.ref1}
              value={query} onChange={self.searchQuery} onFocus={self.focus} onBlur={self.blur}
-             onClick={search ? onEventStopPropagation(props.onClick) : void 0} />
+             onClick={search ? onEventStopPropagation(self.openOptions, props.onClick) : void 0} />
       {isIconEnd && iconNode}
       {childAfter}
       <Scroll className={cn('select__options', {open, upward, fixed: listBox.style})}
               noOffset reverse={upward} _ref={self.ref2} {...listBox}>
         {(forceRender || open) &&
-          <Options items={options} query={query}
-                   onFocus={self.focusOption} onBlur={self.blurOption} onClick={self.selectOption} />}
+          <SelectOptions items={options} {...{multiple, search, query, value}}
+                         onFocus={self.focusOption} onBlur={self.blurOption} onClick={self.selectOption} />}
       </Scroll>
     </Row>
   )
@@ -376,41 +378,6 @@ Select.propTypes = {
 }
 
 export default React.memo(Select)
-
-function SelectOptions ({items, query, onFocus, onBlur, onClick, ...props}) {
-  return (<>
-    {items.map((item) => {
-      let t, k
-      if (isObject(item)) {
-        const {text, value = text, key = String(value)} = item
-        t = text
-        k = key
-      } else {
-        t = k = String(item)
-      }
-
-      // Bolden the matched query
-      if (query) {
-        let i, q = query.toLowerCase(), text = t.toLowerCase()
-        // to keep the logic simple, for now only use exact match once, case-insensitive
-        if (q === text) t = <b>{t}</b>
-        else if ((i = text.indexOf(q)) > -1)
-          t = <>{t.substring(0, i)}<b>{t.substring(i, i + q.length)}</b>{t.substring(i + q.length)}</>
-      }
-      return <Row key={k} className='select__option'
-                  onClick={function (e) {
-                    e.stopPropagation()
-                    onClick.call(this, item, ...arguments)
-                  }}
-                  onFocus={function () {onFocus.call(this, item, ...arguments)}}
-                  onBlur={function () {onBlur.call(this, item, ...arguments)}}
-                  children={<Text>{t}</Text>}
-                  {...props} />
-    })}
-  </>)
-}
-
-const Options = React.memo(SelectOptions)
 
 function toFuseList (options) {
   if (!options.length) return options
