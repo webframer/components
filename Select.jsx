@@ -8,10 +8,12 @@ import {
   isString,
   KEY,
   l,
+  last,
   localiseTranslation,
   subscribeTo,
   TIME_DURATION_INSTANT,
   toUniqueListFast,
+  trimSpaces,
   unsubscribeFrom,
 } from '@webframer/js'
 import { isPureKeyPress } from '@webframer/js/keyboard.js'
@@ -22,14 +24,13 @@ import Icon from './Icon.jsx'
 import { assignRef, useExpandCollapse, useInstance } from './react.js'
 import { Row } from './Row.jsx'
 import { Scroll } from './Scroll.jsx'
-import SelectOptions from './SelectOptions.jsx'
+import SelectOptions, { addOptionItem } from './SelectOptions.jsx'
 import Text from './Text.jsx'
 import { type } from './types.js'
 import { moveFocus, resizeWidth } from './utils/element.js'
 import { onEventStopPropagation } from './utils/interactions.js'
 
 /**
- * @todo: addOption + noResultMessage
  * Dropdown List of Searchable Select Options and Nested Category Hierarchy
  * Use cases:
  *    1. Select (with options like `<select/>` element)
@@ -49,16 +50,20 @@ import { onEventStopPropagation } from './utils/interactions.js'
  */
 export function Select ({
   options, value, query, search, defaultOpen, compact, fuzzyOpt,
-  forceRender, fixed, upward, addOption,
+  forceRender, fixed, upward,
   childBefore, childAfter, className, style, row,
-  multiple, onClickValue, onChange, onSearch, onSelect, onAddOption,
+  multiple, onClickValue, onChange, onSearch, onSelect,
   icon, iconEnd, iconProps,
+  addOption, addOptionMsg, noOptionsMsg,
   _ref, refInput, ...props
 }) {
   const [self, state] = useInstance({options, query, value})
   let [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
   useEffect(() => (self.didMount = true) && (() => {self.willUnmount = true}), [])
-  Object.assign(self, {multiple, search, query, options, onChange, onSearch, onSelect, onAddOption}, props)
+  Object.assign(self, {
+    addOption, multiple, search, query, options,
+    onChange, onSearch, onSelect,
+  }, props)
   self.open = open // for internal logic
   open = open || animating // for rendering and styling
 
@@ -212,17 +217,17 @@ export function Select ({
         return self.pressUp()
       case KEY.Enter: {// input search Enter will select the first option in the result
         if (!self.search || e.target !== self.inputNode) return
+        e.preventDefault() // prevent event propagation that toggles open state
         const {query, options} = self.state
-        if (!query || !options.length) return
-        e.preventDefault()
-        return self.selectOption.call(this, options[0], ...arguments)
+        if (!query || (!options.length && !self.addOption)) return
+        return self.selectOption.call(this, options.length ? options[0] : trimSpaces(query), ...arguments)
       }
       case KEY.Backspace: {// input search Backspace will delete the last selected option
         if (!self.search || !self.multiple || e.target !== self.inputNode) return
         const {query, value} = self.state
         if (query || !value.length) return
         e.preventDefault()
-        return self.deleteValue.call(this, value[0], ...arguments)
+        return self.deleteValue.call(this, last(value), ...arguments)
       }
     }
   }
@@ -250,6 +255,12 @@ export function Select ({
   options = state.options // filtered by search results and selected values
   const hasValue = multiple ? hasListValue(value) : value != null
   if (hasValue) delete props.placeholder // remove for multiple search
+
+  // Options Props ---------------------------------------------------------------------------------
+  const optionsProps = {}
+  if (addOption && search && query)
+    optionsProps.addOption = addOptionItem(query, options, addOptionMsg, value)
+  if (!options.length) optionsProps.noOptionsMsg = noOptionsMsg
 
   // Compact Input ---------------------------------------------------------------------------------
   // Logic to get compact input width:
@@ -315,7 +326,8 @@ export function Select ({
               noOffset reverse={upward} _ref={self.ref2} {...listBox}>
         {(forceRender || open) &&
           <SelectOptions items={options} {...{multiple, search, query, value}}
-                         onFocus={self.focusOption} onBlur={self.blurOption} onClick={self.selectOption} />}
+                         onFocus={self.focusOption} onBlur={self.blurOption} onClick={self.selectOption}
+                         {...optionsProps} />}
       </Scroll>
     </Row>
   )
@@ -324,6 +336,8 @@ export function Select ({
 Select.defaultProps = {
   // Will be used if input value = ''
   get placeholder () {return _.SELECT},
+  get addOptionMsg () {return _.__ADD___term__},
+  get noOptionsMsg () {return _.NO_OPTIONS_AVAILABLE},
   // Fuzzy search options // https://fusejs.io/demo.html
   // The default works even if the options is a list of Strings (does not work with number)
   fuzzyOpt: {keys: ['text']},
@@ -357,9 +371,9 @@ Select.propTypes = {
   // Handler(value: string | number | object, event) when a multiple selected value is clicked
   onClickValue: type.Function,
   // Handler(value, name) when a new option is added
-  onAddOption: type.Function,
-  // Whether to allow users to add a new option (in combination with search)
-  addOption: type.Boolean,
+  // onAddOption: type.Function,
+  // Whether to allow users to add new options (in combination with search)
+  addOption: type.OneOf(type.Boolean, type.Object),
   // Whether to take minimal width required to render selection(s)
   compact: type.Boolean,
   // Whether to open options initially
@@ -384,8 +398,10 @@ Select.propTypes = {
   upward: type.Boolean,
   // Selected value(s) - if passed, becomes a controlled component
   value: type.OneOf(type.String, type.Number, type.Boolean, type.List),
-  // Message to display when there are no results.
-  noResultsMessage: type.String,
+  // Message to display when there are no options left for multiple select
+  noOptionsMsg: type.String,
+  // Message to display when there are no matching results for search select
+  // noResultsMsg: type.String, // not needed, use the same `noOptionsMsg`
   // Other native `<input>` props
 }
 
@@ -471,5 +487,11 @@ function getOptionsFiltered (self) {
 localiseTranslation({
   SELECT: {
     [l.ENGLISH]: 'Select',
+  },
+  __ADD___term__: {
+    [l.ENGLISH]: '+ Add "{term}"',
+  },
+  NO_OPTIONS_AVAILABLE: {
+    [l.ENGLISH]: 'No Options Available',
   },
 })
