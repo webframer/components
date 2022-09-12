@@ -164,7 +164,7 @@ export function Select ({
   }
   if (search && !self.searchQuery) self.searchQuery = function (e) {
     const query = e.target.value
-    self.setState({query})
+    self.setState({query, focusIndex: 0})
     self.openOptions.apply(this, arguments) // reopen if it was closed when Enter pressed
     self.updateOptions(query)
     if (self.onSearch) return self.onSearch.call(this, query, ...arguments)
@@ -217,10 +217,10 @@ export function Select ({
     switch (e.keyCode) {
       case KEY.ArrowDown:
         e.preventDefault()
-        return self.pressDown()
+        return self.setOptionFocus(self.state.focusIndex + (self.upward ? -1 : 1))
       case KEY.ArrowUp:
         e.preventDefault()
-        return self.pressUp()
+        return self.setOptionFocus(self.state.focusIndex + (self.upward ? 1 : -1))
       case KEY.Enter: {// Enter will select the focusIndex option in the result
         if (e.target !== self.inputNode && e.target !== self.node) return
         e.preventDefault() // prevent event propagation that toggles open state
@@ -234,7 +234,7 @@ export function Select ({
       case KEY.Backspace: {// input search Backspace will delete the last selected option
         if (!self.search || !self.multiple || e.target !== self.inputNode) return
         const {query, value} = self.state
-        if (query || !value.length) return
+        if (query || !value || !value.length) return
         e.preventDefault()
         return self.deleteValue.call(this, last(value), ...arguments)
       }
@@ -246,19 +246,12 @@ export function Select ({
       }
     }
   }
-  if (!self.pressDown) self.pressDown = function () {
+  if (!self.setOptionFocus) self.setOptionFocus = function (focusIndex) {
     if (!self.open || !self.scrollNode || !self.inputNode) return
-    let focusIndex = self.state.focusIndex + (self.upward ? -1 : 1)
-    // First actually focus on the selection to scroll if necessary
-    focusIndex = setFocus(self.scrollNode.children, focusIndex)
+    // First actually focus on the option to scroll if necessary, excluding noOptionsMsg
+    const length = self.scrollNode.children.length + (!self.state.options.length ? -1 : 0)
+    focusIndex = setFocus(self.scrollNode.children, focusIndex, length)
     // Then focus back to input for possible query change, keeping focused state
-    self.inputNode.focus()
-    self.setState({focusIndex})
-  }
-  if (!self.pressUp) self.pressUp = function () {
-    if (!self.open || !self.scrollNode || !self.inputNode) return
-    let focusIndex = self.state.focusIndex + (self.upward ? 1 : -1)
-    focusIndex = setFocus(self.scrollNode.children, focusIndex)
     self.inputNode.focus()
     self.setState({focusIndex})
   }

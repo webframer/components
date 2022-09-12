@@ -44,7 +44,7 @@ export function SelectOptions ({
 
   return (<>
     {items.map(renderItem)}
-    {addOption && renderItem(addOption)}
+    {addOption && renderItem(addOption, items.length)}
     {noOptionsMsg && <Row className='select__option' children={<Text>{noOptionsMsg}</Text>} />}
   </>)
 }

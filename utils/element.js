@@ -47,11 +47,13 @@ export function moveFocus (nodes, count = 1) {
  * (this loops back to the start or end of nodes collection when focus index is out of range).
  * @param {Element[]|Node[]} nodes - HTML Element collection (aka node.children)
  * @param {number} [focusIndex] - the desired index of the element to focus
+ * @param {number} [length] - number of nodes to restrict focusIndex range, default is nodes.length
  * @returns {number} focusIndex - of the element that got focus, normalized to be within given nodes
  */
-export function setFocus (nodes, focusIndex) {
-  focusIndex %= nodes.length
-  if (focusIndex < 0) focusIndex += nodes.length
+export function setFocus (nodes, focusIndex, length = nodes.length) {
+  if (!length || length < 0) return -1
+  focusIndex %= length
+  if (focusIndex < 0) focusIndex += length
   nodes[focusIndex].focus()
   return focusIndex
 }
