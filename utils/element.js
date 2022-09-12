@@ -33,11 +33,27 @@ export function indexOfElement (node) {
  * (this loops back to the start or end of nodes collection when focus index is out of range).
  * @param {Element[]|Node[]} nodes - HTML Element collection (aka node.children)
  * @param {number} [count] - number of elements from the currently focused element to set focus
+ * @returns {number} focusIndex - of the element that got focus
  */
 export function moveFocus (nodes, count = 1) {
   let focusIndex = ([...nodes].findIndex(n => document.activeElement === n) + count) % nodes.length
-  if (focusIndex < 0) focusIndex = nodes.length + focusIndex
+  if (focusIndex < 0) focusIndex += nodes.length
   nodes[focusIndex].focus()
+  return focusIndex
+}
+
+/**
+ * Set focus on the element within given `nodes` with desired `focusIndex`.
+ * (this loops back to the start or end of nodes collection when focus index is out of range).
+ * @param {Element[]|Node[]} nodes - HTML Element collection (aka node.children)
+ * @param {number} [focusIndex] - the desired index of the element to focus
+ * @returns {number} focusIndex - of the element that got focus, normalized to be within given nodes
+ */
+export function setFocus (nodes, focusIndex) {
+  focusIndex %= nodes.length
+  if (focusIndex < 0) focusIndex += nodes.length
+  nodes[focusIndex].focus()
+  return focusIndex
 }
 
 /**

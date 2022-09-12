@@ -5,13 +5,13 @@ import { Row } from './Row.jsx'
 import Text from './Text.jsx'
 
 export function SelectOptions ({
-  items, multiple, search, query, value, onFocus, onBlur, onClick,
+  items, multiple, search, query, value, focusIndex, onFocus, onBlur, onClick,
   addOption, noOptionsMsg,
   ...props
 }) {
   const isActive = value != null ? (multiple ? (v => value.includes(v)) : (v => value === v)) : (v => false)
 
-  function renderItem (item) {
+  function renderItem (item, i) {
     let t, k, selected
     if (isObject(item)) {
       const {text, value = text, key = String(value)} = item
@@ -31,7 +31,7 @@ export function SelectOptions ({
       else if ((i = text.indexOf(q)) > -1)
         t = <>{t.substring(0, i)}<b>{t.substring(i, i + q.length)}</b>{t.substring(i + q.length)}</>
     }
-    return <Row key={k} className={cn('select__option', {selected})}
+    return <Row key={k} className={cn('select__option', {focus: focusIndex === i, selected})}
                 onClick={function (e) {
                   e.stopPropagation()
                   onClick.call(this, item, ...arguments)
@@ -73,4 +73,11 @@ export function addOptionItem (query, options, addOptionMsg, value) {
     if (options.find(o => String(o).toLowerCase() === q)) return
   }
   return {text: ips(addOptionMsg, {term: query}), value: query}
+}
+
+// Keep focus within options length
+export function normalizeFocusIndex (focusIndex, options) {
+  focusIndex = focusIndex % options.length
+  if (focusIndex < 0) focusIndex = options.length + focusIndex
+  return focusIndex
 }

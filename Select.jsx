@@ -27,7 +27,7 @@ import { Scroll } from './Scroll.jsx'
 import SelectOptions, { addOptionItem } from './SelectOptions.jsx'
 import Text from './Text.jsx'
 import { type } from './types.js'
-import { moveFocus, resizeWidth } from './utils/element.js'
+import { resizeWidth, setFocus } from './utils/element.js'
 import { onEventStopPropagation } from './utils/interactions.js'
 
 /**
@@ -49,7 +49,7 @@ import { onEventStopPropagation } from './utils/interactions.js'
  *      => `.select__options` class must have `max-height` set to explicit unit, such as `px`
  */
 export function Select ({
-  options, value, query, search, defaultOpen, compact, fuzzyOpt,
+  options, value, query, search, defaultOpen, compact, fuzzyOpt, focusIndex,
   forceRender, fixed, upward,
   childBefore, childAfter, className, style, row,
   multiple, onClickValue, onChange, onSearch, onSelect,
@@ -57,7 +57,7 @@ export function Select ({
   addOption, addOptionMsg, noOptionsMsg,
   _ref, refInput, ...props
 }) {
-  const [self, state] = useInstance({options, query, value})
+  const [self, state] = useInstance({options, query, value, focusIndex})
   let [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
   useEffect(() => (self.didMount = true) && (() => {self.willUnmount = true}), [])
   Object.assign(self, {
@@ -117,7 +117,12 @@ export function Select ({
     self.hasFocus = multiple
     let {text = item, value = text} = isObject(item) ? item : {}
     if (multiple) value = toUniqueListFast((self.state.value || []).concat(value))
-    self.setState({value, query: multiple ? '' : String(text), options: getOptionsFiltered(self)})
+    const options = getOptionsFiltered(self)
+    self.setState({
+      value, query: multiple ? '' : String(text), options,
+      focusIndex: options.findIndex(i => i === item),
+    })
+    if (multiple && self.inputNode) self.inputNode.focus()
     if (self.open) setTimeout(self.closeOptions, 0)
     if (self.onChange) return self.onChange.call(this, value, ...args)
   }
@@ -207,7 +212,8 @@ export function Select ({
   if (!self.press) self.press = function (e) {
     if (!isPureKeyPress(e) || !self.scrollNode || !self.inputNode) return
     // Check that keypress originates from this Select instance (input or options node)
-    if (e.target !== self.inputNode && e.target.parentElement !== self.scrollNode) return
+    if (e.target !== self.inputNode && e.target !== self.node && e.target.parentElement !== self.scrollNode)
+      return
     switch (e.keyCode) {
       case KEY.ArrowDown:
         e.preventDefault()
@@ -215,12 +221,15 @@ export function Select ({
       case KEY.ArrowUp:
         e.preventDefault()
         return self.pressUp()
-      case KEY.Enter: {// input search Enter will select the first option in the result
-        if (!self.search || e.target !== self.inputNode) return
+      case KEY.Enter: {// Enter will select the focusIndex option in the result
+        if (e.target !== self.inputNode && e.target !== self.node) return
         e.preventDefault() // prevent event propagation that toggles open state
-        const {query, options} = self.state
-        if (!query || (!options.length && !self.addOption)) return
-        return self.selectOption.call(this, options.length ? options[0] : trimSpaces(query), ...arguments)
+        const {query, options, focusIndex} = self.state
+        if (!options.length && !self.addOption) return
+        let selected = options.length ? options[focusIndex] : null
+        if (selected == null && self.addOption && query) selected = trimSpaces(query)
+        if (selected == null) return
+        return self.selectOption.call(this, selected, ...arguments)
       }
       case KEY.Backspace: {// input search Backspace will delete the last selected option
         if (!self.search || !self.multiple || e.target !== self.inputNode) return
@@ -229,15 +238,29 @@ export function Select ({
         e.preventDefault()
         return self.deleteValue.call(this, last(value), ...arguments)
       }
+      case KEY.Escape: {
+        if (e.target !== self.inputNode && e.target !== self.node) return
+        e.preventDefault()
+        self.hasFocus = false
+        return self.closeOptions.apply(this, arguments)
+      }
     }
   }
   if (!self.pressDown) self.pressDown = function () {
-    if (!self.open || !self.scrollNode) return
-    moveFocus(self.scrollNode.children, self.upward ? -1 : 1)
+    if (!self.open || !self.scrollNode || !self.inputNode) return
+    let focusIndex = self.state.focusIndex + (self.upward ? -1 : 1)
+    // First actually focus on the selection to scroll if necessary
+    focusIndex = setFocus(self.scrollNode.children, focusIndex)
+    // Then focus back to input for possible query change, keeping focused state
+    self.inputNode.focus()
+    self.setState({focusIndex})
   }
   if (!self.pressUp) self.pressUp = function () {
-    if (!self.open || !self.scrollNode) return
-    moveFocus(self.scrollNode.children, self.upward ? 1 : -1)
+    if (!self.open || !self.scrollNode || !self.inputNode) return
+    let focusIndex = self.state.focusIndex + (self.upward ? 1 : -1)
+    focusIndex = setFocus(self.scrollNode.children, focusIndex)
+    self.inputNode.focus()
+    self.setState({focusIndex})
   }
   if (self.open) self.subscribeToEvents()
   useEffect(() => self.unsubscribeEvents, [])
@@ -253,6 +276,7 @@ export function Select ({
   value = state.value
   query = state.query
   options = state.options // filtered by search results and selected values
+  focusIndex = state.focusIndex // focused selection without actual focus
   const hasValue = multiple ? hasListValue(value) : value != null
   if (hasValue) delete props.placeholder // remove for multiple search
 
@@ -325,8 +349,9 @@ export function Select ({
       <Scroll className={cn('select__options', {open, upward, fixed: listBox.style})}
               noOffset reverse={upward} _ref={self.ref2} {...listBox}>
         {(forceRender || open) &&
-          <SelectOptions items={options} {...{multiple, search, query, value}}
+          <SelectOptions items={options} {...{multiple, search, query, value, focusIndex}}
                          onFocus={self.focusOption} onBlur={self.blurOption} onClick={self.selectOption}
+                         tabIndex={-1} // tab moves to the next input + avoid focusIndex mismatch
                          {...optionsProps} />}
       </Scroll>
     </Row>
@@ -338,6 +363,7 @@ Select.defaultProps = {
   get placeholder () {return _.SELECT},
   get addOptionMsg () {return _.__ADD___term__},
   get noOptionsMsg () {return _.NO_OPTIONS_AVAILABLE},
+  focusIndex: 0,
   // Fuzzy search options // https://fusejs.io/demo.html
   // The default works even if the options is a list of Strings (does not work with number)
   fuzzyOpt: {keys: ['text']},
