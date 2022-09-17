@@ -1,42 +1,42 @@
 /* spacer.css */
 .spacer {
     display: inline-flex;
-    min-width: var(--margin);
-    min-height: var(--margin);
+    min-width: 1em;
+    min-height: 1em;
 }
 
 .spacer-small {
     display: inline-flex;
-    min-width: var(--margin-small);
-    min-height: var(--margin-small);
+    min-width: 0.75em;
+    min-height: 0.75em;
 }
 
 .spacer-smaller {
     display: inline-flex;
-    min-width: var(--margin-smaller);
-    min-height: var(--margin-smaller);
+    min-width: 0.5em;
+    min-height: 0.5em;
 }
 
 .spacer-smallest {
     display: inline-flex;
-    min-width: var(--margin-smallest);
-    min-height: var(--margin-smallest);
+    min-width: 0.25em;
+    min-height: 0.25em;
 }
 
 .spacer-large {
     display: inline-flex;
-    min-width: var(--margin-large);
-    min-height: var(--margin-large);
+    min-width: 1.25em;
+    min-height: 1.25em;
 }
 
 .spacer-larger {
     display: inline-flex;
-    min-width: var(--margin-larger);
-    min-height: var(--margin-larger);
+    min-width: 1.5em;
+    min-height: 1.5em;
 }
 
 .spacer-largest {
     display: inline-flex;
-    min-width: var(--margin-largest);
-    min-height: var(--margin-largest);
+    min-width: 1.75em;
+    min-height: 1.75em;
 }

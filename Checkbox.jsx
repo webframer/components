@@ -31,8 +31,8 @@ export function Checkbox ({
   )
   const toggle = type === 'toggle'
   return (
-    <Row className={cn('checkbox--wrapper', className)}>
-      <input id={id} type='checkbox' className={cn('checkbox', {toggle})} {...props} />
+    <Row className={cn('checkbox', className, {toggle})}>
+      <input id={id} type='checkbox' {...props} />
       <Label htmlFor={id} title={title} className={cn('row middle justify', {danger})}>
         {toggle
           ? <Fragment>
