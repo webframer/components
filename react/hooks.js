@@ -7,6 +7,10 @@ export * from 'usehooks-ts/dist/esm/index.js'
 
 export const useAnimatedHeight = hookAnimatedSize('height')
 export const useAnimatedWidth = hookAnimatedSize('width')
+const useAnimatedSize = {
+  height: useAnimatedHeight,
+  width: useAnimatedWidth,
+}
 
 /**
  * Create a React Hook for useAnimatedHeight/Width.
@@ -79,7 +83,6 @@ function hookAnimatedSize (side = 'height') {
 
 /**
  * Expand/Collapse Element with Animated Height.
- *
  * @example:
  *    function Component ({list, ...props}) {
  *      const [{open, animating}, toggleOpen, ref] = useExpandCollapse(props.open)
@@ -94,21 +97,36 @@ function hookAnimatedSize (side = 'height') {
  *
  * @param {boolean|null} [isOpen] - whether expanded initially, will update state if changes
  * @param {number} [duration] - animation duration in milliseconds
- * @param {number | string} [height] - CSS style for open state, default is 'auto'
+ * @param {string} [side] - expand/collapse direction enum ('height' or 'width')
+ * @param {number | string} [size] - CSS style for open state, default is 'auto'
  * @returns [{open: boolean, animating: boolean}, toggleOpen: function, ref: (node: HTMLElement) => void]
  */
-export function useExpandCollapse (isOpen, {height = 'auto', duration} = {}) {
+export function useExpandCollapse (isOpen, {side = 'height', size = 'auto', duration} = {}) {
   const opened = usePreviousProp(isOpen)
   const [self, state] = useInstance({open: isOpen})
   if (opened != null && isOpen != null && opened !== isOpen) state.open = isOpen // update prop changes
-  const {open} = state
 
   if (!self.toggleOpen) self.toggleOpen = () => {
     if (self.animating) return
     self.setState({open: !self.state.open})
   }
-  const [ref, animating, resetStyles] = useAnimatedHeight(open ? height : 0, {self, duration, forwards: true})
-  useEffect(() => {animating || resetStyles()}, [animating, resetStyles])
+
+  // Use cached open state while animating, to achieve the effect similar to throttle,
+  // when `isOpen` prop changes too fast, so that it will always animate to the last prop
+  const open = self.animating ? self.open : state.open
+  const [ref, animating, resetStyles] = useAnimatedSize[side](open ? size : 0, {self, duration, forwards: true})
+  useEffect(() => {
+    // Started/in animation
+    if (animating) {
+      if (self.open == null) self.open = self.state.open // cache state initially
+      return
+    }
+
+    // Finished animation
+    resetStyles()
+    if (self.open !== self.state.open) self.forceUpdate() // render with the latest prop if changed
+    self.open = null // then reset cached state
+  }, [animating, resetStyles])
   self.animating = animating
   return [{open, animating}, self.toggleOpen, ref]
 }
