@@ -20,6 +20,15 @@ export function collapseElement (node) {
 }
 
 /**
+ * Get the top most Node Element under cursor position for given Event
+ * @param {PointerEvent} event
+ * @returns {Element} node - under the event's cursor position
+ */
+export function hitNodeFrom (event) {
+  return document.elementFromPoint(event.clientX, event.clientY)
+}
+
+/**
  * Get index of current Node element within its direct parent element
  * @param {Element} node
  * @returns {number} index

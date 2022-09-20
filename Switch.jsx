@@ -2,7 +2,7 @@ import cn from 'classnames'
 import React, { useId, useRef, useState } from 'react'
 import Icon from './Icon.jsx'
 import Label from './Label.jsx'
-import { useExpandCollapse } from './react.js'
+import { toReactProps, useExpandCollapse } from './react.js'
 import { resolveChildren } from './react/render.js'
 import { Row } from './Row.jsx'
 import Spacer from './Spacer.jsx'
@@ -13,13 +13,13 @@ import { type } from './types.js'
  */
 export function Switch ({
   value, defaultValue, checkedValue, uncheckedValue, label, checkedLabel, uncheckedLabel,
-  id = useId(), onChange, title, readonly, danger, className, style, reverse,
+  id = useId(), onChange, title, danger, className, style, reverse,
   float: _0, // not used
   initialValues: _1, // not used
   ...props
 }) {
   const {current: self} = useRef({onChange})
-  if (readonly) props.readOnly = readonly // React wants `readonly` to be `readOnly`
+  props = toReactProps(props)
   if (value === checkedValue) value = true
   if (value === uncheckedValue) value = false
   if (value == null) { // Uncontrolled component

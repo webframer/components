@@ -12,6 +12,8 @@ export const type = {}
 type.Any = PropTypes.any
 // True or False
 type.Boolean = PropTypes.bool
+// Data size equivalent to 8 Bits
+type.Byte = PropTypes.number
 // Object or Array
 type.Collection = PropTypes.oneOfType([PropTypes.object, PropTypes.array])
 // Rotation Degree

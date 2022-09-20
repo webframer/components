@@ -84,6 +84,18 @@ export function getOriginalClass (Component) {
 }
 
 /**
+ * Convert HTML input props, such as `readonly`, `autofocus` to match with React convention
+ * @param {object} props
+ * @returns {object} props - new object with React props
+ */
+export function toReactProps (props) {
+  const {readonly, autofocus, ...result} = props
+  if (autofocus != null) result.autoFocus = autofocus !== false
+  if (readonly != null) result.readOnly = readonly !== false
+  return result
+}
+
+/**
  * Sync React Component state with new props
  * @example:
  *    UNSAFE_componentWillReceiveProps (next, _) {

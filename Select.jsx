@@ -21,7 +21,7 @@ import cn from 'classnames'
 import Fuse from 'fuse.js'
 import React, { useEffect, useMemo } from 'react'
 import Icon from './Icon.jsx'
-import { assignRef, useExpandCollapse, useInstance } from './react.js'
+import { assignRef, toReactProps, useExpandCollapse, useInstance } from './react.js'
 import { Row } from './Row.jsx'
 import { Scroll } from './Scroll.jsx'
 import SelectOptions, { addOptionItem } from './SelectOptions.jsx'
@@ -60,6 +60,7 @@ export function Select ({
   const [self, state] = useInstance({options, query, value, focusIndex})
   let [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
   useEffect(() => (self.didMount = true) && (() => {self.willUnmount = true}), [])
+  props = toReactProps(props)
   Object.assign(self, {
     addOption, multiple, search, query, options,
     onChange, onSearch, onSelect,
