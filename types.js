@@ -26,8 +26,15 @@ type.Element = PropTypes.shape({
 })
 // Enumerable. Example: type.Enum(['a', 'b'])
 type.Enum = PropTypes.oneOf
-// File object
-type.File = PropTypes.object
+// File object https://developer.mozilla.org/en-US/docs/Web/API/File
+type.File = PropTypes.shape({
+  // File name with extension
+  name: PropTypes.string.isRequired,
+  // File size in bytes
+  size: PropTypes.number.isRequired,
+  // MIME type
+  type: PropTypes.string.isRequired,
+})
 // Number with decimal points
 type.Float = PropTypes.number
 // A floating point number between 0 - 1

@@ -311,6 +311,16 @@ export function getUIState () {
   }
 }
 
+// Resolve input `value` based on given `props` to be Controlled or Uncontrolled state,
+// this will mutate `props` to avoid duplicate value/defaultValue passed to <input/>
+export function useInputValue (props) {
+  let {value = props.defaultValue} = props
+  const [valueState, setValue] = useState(value)
+  if (value == null) value = props.value = valueState // use state if uncontrolled value
+  delete props.defaultValue
+  return [value, setValue]
+}
+
 /**
  * Instagram/Pinterest Style Route as Modal.
  * Logic: changes route when Modal opens and goes back one route when Modal closes.

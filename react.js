@@ -92,6 +92,7 @@ export function toReactProps (props) {
   const {readonly, autofocus, ...result} = props
   if (autofocus != null) result.autoFocus = autofocus !== false
   if (readonly != null) result.readOnly = readonly !== false
+  if (props.value != null && props.defaultValue != null) delete result.defaultValue
   return result
 }
 

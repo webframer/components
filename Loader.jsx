@@ -36,7 +36,7 @@ export function Loader ({
 
 Loader.propTypes = {
   loading: type.Boolean,
-  size: type.ListOf(type.String),
+  size: type.String,
   className: type.String,
   classIcon: type.String,
 }
