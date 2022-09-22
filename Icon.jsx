@@ -14,7 +14,7 @@ function createIcon () {
     else if (_ref) props.ref = _ref
 
     let mask
-    if (!font) {
+    if (!font && name) {
       mask = `url(${path}${name.replace(/\s/g, '-').replace(alphaNumIdPattern, '')
         .toLowerCase()}.svg) no-repeat center / contain`
       mask = {WebkitMask: mask, mask}
@@ -32,6 +32,7 @@ function createIcon () {
   const IconRef = React.forwardRef(Icon)
 
   Icon.propTypes = IconRef.propTypes = {
+    // Icon name, can be empty string to be styled with custom CSS
     name: type.String.isRequired,
     // If true, use Font Icon, instead of CSS Mask Icon - the default
     font: type.Boolean,
