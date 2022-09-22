@@ -12,6 +12,8 @@ import { hitNodeFrom } from './utils/element.js'
 import { View } from './View.jsx'
 
 /**
+ * File Uploader Input component that works with native HTML form submit.
+ *
  * todo: test - all possible 'accept' attribute variations
  * Notes:
  *  - Image preview should be delegated to UploadGrid because each Upload slot will be multiple,
@@ -28,7 +30,7 @@ import { View } from './View.jsx'
  */
 export function Upload ({
   maxFiles, maxSize, minSize, onChange, onError, onRemove,
-  inputClass, inputStyle, className, style, fill, children, square, iconRemove, iconSelect,
+  inputClass, inputStyle, className, style, children, square, iconRemove, iconSelect,
   _ref, inputRef, id = useId(), title, loading,
   ...props
 }) {
@@ -155,11 +157,12 @@ export function Upload ({
   delete props.defaultValue
   const hasValue = value && value.length
   const hasIcon = !(props.readOnly || props.disabled || loading)
+  const {disabled, readOnly: readonly} = props
 
   return (
-    <View className={cn(className, 'upload', {active, loading, squared: square})} {...{style}}
-          onDrop={self.drop} onDragEnter={self.dragEnter} onDragLeave={self.dragLeave}
-          _ref={self.ref}>
+    <View className={cn(className, 'upload', {active, disabled, readonly, loading, squared: square})}
+          {...{style}} _ref={self.ref}
+          onDrop={self.drop} onDragEnter={self.dragEnter} onDragLeave={self.dragLeave}>
       <input id={id} className={cn(inputClass, 'upload__input')} style={inputStyle} {...props}
              onChange={self.change} ref={self.refInput} />
       <Label className='upload__label' title={title} {...!props.readOnly && {htmlFor: id}}>
@@ -168,12 +171,12 @@ export function Upload ({
             : <Icon className='upload__icon' name='download' />
         )}
       </Label>
-      {hasIcon &&
+      {hasIcon && // Icon is needed when preview has event.stopPropagation, such as 3D mesh preview
         <Icon className={hasValue ? 'upload__icon-remove' : 'upload__icon-select'}
               name={hasValue ? iconRemove : iconSelect} tabIndex={hasValue ? 0 : -1}
               onClick={self.clickIcon}
         />}
-      <Loader loading={loading} size='small' />
+      {loading && <Loader loading={loading} size='small' />}
     </View>
   )
 }

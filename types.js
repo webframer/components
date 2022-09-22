@@ -8,12 +8,18 @@ import PropTypes from 'prop-types'
 
 export const type = {}
 
-/* Common types */
+/**
+ * Common Types ------------------------------------------------------------------------------------
+ */
+
+// Any value type
 type.Any = PropTypes.any
 // True or False
 type.Boolean = PropTypes.bool
 // Data size equivalent to 8 Bits
 type.Byte = PropTypes.number
+// Unitless Pixel number or CSS value as string
+type.CSSValue = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 // Object or Array
 type.Collection = PropTypes.oneOfType([PropTypes.object, PropTypes.array])
 // Rotation Degree
@@ -97,7 +103,7 @@ type.UrlOrObject = type.OneOf(type.String, type.Object)
  * Component Types ---------------------------------------------------------------------------------
  */
 
-// localised definition (example: LANGUAGE.ENGLISH object)
+// Localised definition (example: LANGUAGE.ENGLISH object)
 type.Definition = type.Of({
   _: type.Any.isRequired, // identifier code that is language agnostic
   name: type.GetterString.isRequired, // definition's `name` string for currently active Language
@@ -105,7 +111,7 @@ type.Definition = type.Of({
   // 'ru': other definition's `name` strings by their language code
 })
 
-// set of localised definitions (example: LANGUAGE object)
+// Set of localised definitions (example: LANGUAGE object)
 type.DefinitionMap = type.ObjectOf(type.Definition.isRequired)
 
 // File Input object
