@@ -17,7 +17,7 @@ export const UIContext = React.createContext({})
  * @param {Object|HTMLAudioElement} [sound] - new Audio(URL) file
  * @returns {Object} props - mutated with necessary accessibility attributes
  */
-export function accessibilitySupport (props, sound = Active.SETTINGS.HAS_SOUND && SOUND.TOUCH) {
+export function accessibilitySupport (props, sound = Active.SETTINGS.HAS_SOUND && SOUND.FILE.TOUCH) {
   /* Remove key press and click event if necessary */
   // comment out to allow click without tabbing (ex. decorative Icon inside input)
   // if (props.tabIndex === -1) {

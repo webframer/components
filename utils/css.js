@@ -1,4 +1,4 @@
-import { CDN_URL, isFileSrc, isFunction } from '@webframer/js'
+import { isFileSrc, isFunction } from '@webframer/js'
 
 /**
  * Apply CSS styles to Node element, with original styles extracted.
@@ -44,17 +44,4 @@ export function cssBgImageFrom (src) {
  */
 export function inlineSvg (svgString, x = 0, y = 0) {
   return `url('data:image/svg+xml;utf8,${svgString.replace(/#/g, '%23')}') ${x} ${y}, auto`
-}
-
-/**
- * Compute Preview Image src from dynamic `preview` attribute
- * @param {String|Object} preview - type.UrlOrBase64OrPreview
- * @param {String} [size] - one of thumb/medium/large/etc.
- * @param {String} [prefix] - url prefix (defaults to CDN url, if set in .env variable REACT_APP_CDN_URL)
- * @returns {String|Object|any} preview src ready for consumption by Components
- */
-export function previewSize (preview, size = 'thumb',
-  prefix = ((typeof preview === 'string' && (preview.indexOf('blob:') === 0 || preview.indexOf('http') === 0)) ? '' : CDN_URL)) {
-  // typeof DOMString/ObjectURL === 'string' and typeof new String() === 'object'
-  return preview && (prefix + (typeof preview === 'object' ? (preview[size] || preview) : preview))
 }

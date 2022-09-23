@@ -1,4 +1,4 @@
-import { debounce, Id, isEqualJSON, isFunction, objChanges, subscribeTo, unsubscribeFrom } from '@webframer/js'
+import { debounce, Id, isEqual, isFunction, subscribeTo, unsubscribeFrom } from '@webframer/js'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useEventListener, useIsomorphicLayoutEffect } from 'usehooks-ts/dist/esm/index.js'
 import { animateSize } from './animations.js'
@@ -172,21 +172,31 @@ export function useUId (id) {
 }
 
 /**
- * React Hook to update Component state when props change
+ * React Hook to update Component state when props change, similar to class.componentWillReceiveProps
  * @example:
  *    const {current: self} = useRef({})
- *    self.state = useControlledState(props, self.state)
+ *    self.state = useSyncedState(props, self.state)
  *
  * @param {object} props - initial or new props to sync state with
- * @param {object|null|void} [state] - the current state
- * @returns {object|null|void} state - new object with partially updated `props` that changed,
- *    or existing state if nothing changed
+ * @param {object} [state] - the current state
+ * @returns {object} state - mutated with partially updated `props` that changed,
+ *    or existing state if nothing changed.
+ *    If `props` has `null` attributes, they will override `state`.
+ *    Attributes that do not exist in `props` but in `state` are kept (usually the desired behavior).
  */
 export function useSyncedState (props, state) {
-  const prevProps = usePreviousProp(props)
-  if (!prevProps) return props
-  if (prevProps && isEqualJSON(prevProps, props)) return state
-  return Object.assign({}, state, objChanges(state, props))
+  const prevProps = usePreviousProp(props, true) // shallow match to allow new object each time
+  // On initial render, prevProps is undefined
+  // Lodash isEqual() allows deep nesting of array/objects, and considers them to be equal
+  // @example:
+  //    const a = [new File([], 'test')]
+  //    isEqual({a: [a]}, {a: [a]}))
+  //    >>> true
+  //    isEqual({a: [a]}, {a: [new File([], 'test')]}))
+  //    >>> false
+  // Object.assign is required for updating array to new props, and to keep `state` object the same
+  if (prevProps === void 0 || !isEqual(prevProps, props)) return Object.assign(state, props)
+  return state
 }
 
 /**
@@ -215,7 +225,7 @@ export function useInstance (initialState = {}) {
     self.forceUpdate = () => setState(state => ({...state}))
     self.setState = (newState) => {
       if (isFunction(newState)) return setState(newState)
-      if (isEqualJSON({...self.state, ...newState}, self.state)) return
+      if (isEqual({...self.state, ...newState}, self.state)) return
       setState(state => ({...state, ...newState}))
     }
   }
@@ -225,14 +235,18 @@ export function useInstance (initialState = {}) {
 /**
  * Get previous prop of the Component, similar to class.componentWillReceiveProps
  * @param {any} value - to get from previous Component props
+ * @param {boolean} [shallow] - whether to use shallow isEqual() comparison
  * @param {object} [self] - Component instance
- * @returns {any|void} previous prop - undefined initially
+ * @returns {any|void} previous prop - undefined initially on the very first render
  */
-export function usePreviousProp (value, self = useRef({}).current) {
-  self.hasChanged = value !== self.lastValue
+export function usePreviousProp (value, shallow, self = useRef({}).current) {
+  self.hasChanged = shallow ? !isEqual(value, self.lastValue) : value !== self.lastValue
 
+  // Set initial value once
+  useEffect(() => {self.lastValue = value}, [])
+
+  // Update cache value for the next render cycle if prop changed
   useEffect(() => {
-    // Cache value for the next render cycle if prop changed
     if (self.hasChanged) {
       self.prevValue = self.lastValue // the cached value before the last value to restore
       self.lastValue = value
