@@ -1,4 +1,14 @@
-import { _, hasListValue, ips, l, localiseTranslation, shortNumber, SIZE_KB, toListTotal } from '@webframer/js'
+import {
+  _,
+  hasListValue,
+  ips,
+  isEqual,
+  l,
+  localiseTranslation,
+  shortNumber,
+  SIZE_KB,
+  toListTotal,
+} from '@webframer/js'
 import cn from 'classnames'
 import React, { useId } from 'react'
 import Icon from './Icon.jsx'
@@ -14,7 +24,6 @@ import { View } from './View.jsx'
 /**
  * File Uploader Input component that works with native HTML form submit.
  *
- * todo: test - all possible 'accept' attribute variations
  * Notes:
  *  - Image preview should be delegated to UploadGrid because each Upload slot will be multiple,
  *    but shows a File preview for only given slot index, while spreading the rest to other slots.
@@ -29,14 +38,15 @@ import { View } from './View.jsx'
  *       because the form will not submit disabled inputs.
  */
 export function Upload ({
-  maxFiles, maxSize, minSize, onChange, onError, onRemove,
+  maxFiles, maxSize, minSize, onChange, onError, onRemove, placeholder,
   inputClass, inputStyle, className, style, children, square, iconRemove, iconSelect,
-  _ref, inputRef, id = useId(), title, loading,
+  childBefore, childAfter, _ref, inputRef, id = useId(), title, loading,
   ...props
 }) {
   props = toReactProps(props)
   let [self, {active}] = useInstance()
-  const [value, setValue] = useInputValue(props)
+  const [value, setValue, valueState] = useInputValue(props)
+
   Object.assign(self, {
     maxFiles, maxSize, minSize, onChange, onError, onRemove, value,
     accept: props.accept, multiple: props.multiple, name: props.name,
@@ -88,14 +98,15 @@ export function Upload ({
       self.setState({active: false})
     }
     self.remove = function (e) {
-      if (self.onRemove) self.onRemove.call(this, self.removeFiles, self.name, ...arguments)
+      if (self.onRemove) self.onRemove.call(
+        this, self.value, self.name, e, () => self.removeFiles.apply(this, arguments),
+      )
       if (e.isDefaultPrevented()) return
       if (confirm(ips(_.DO_YOU_WANT_TO_REMOVE___file___, {file: self.value.map(f => f.name).join(', ')})))
         self.removeFiles.apply(this, arguments)
     }
     self.removeFiles = function (e) {
       if (self.onChange) self.onChange.call(this, null, self.name, ...arguments)
-      if (e.isDefaultPrevented()) return
       setInputFiles(self.inputNode, [])
       setValue(null)
     }
@@ -125,7 +136,8 @@ export function Upload ({
       if (accepts) {
         for (const file of files) {
           const {name, type} = file
-          if (!accepts.find(t => type.indexOf(t) > -1 || `.${name.split('.').pop().toLowerCase()}` === t))
+          // Since we check native File object, `type` always exists, and `name`
+          if (!accepts.find(t => type.indexOf(t) > -1 || `.${name.split('.').pop().toLowerCase().trim()}` === t))
             errors.push({
               file,
               message: ips(_.INVALID___file___FILE_FORMAT__MUST_BE_ONE_OF___ext_,
@@ -144,6 +156,10 @@ export function Upload ({
   // Enter and Space press while focused calls onClick, so disabling onClick event is enough
   if (props.readOnly || loading) props.onClick = noop
   if (props.readOnly || props.disabled) active = false
+
+  // Sync input.files with controlled `value`
+  if (self.inputNode && props.value && !isEqual(props.value, valueState))
+    setInputFiles(self.inputNode, props.value)
 
   // React cannot set value for Input of type 'file' programmatically,
   // https://reactjs.org/docs/uncontrolled-components.html#the-file-input-tag,
@@ -165,12 +181,17 @@ export function Upload ({
           onDrop={self.drop} onDragEnter={self.dragEnter} onDragLeave={self.dragLeave}>
       <input id={id} className={cn(inputClass, 'upload__input')} style={inputStyle} {...props}
              onChange={self.change} ref={self.refInput} />
+      {childBefore != null && resolveChildren(childBefore, self)}
       <Label className='upload__label' title={title} {...!props.readOnly && {htmlFor: id}}>
         {children != null ? resolveChildren(children, self) : (hasValue
             ? <Text className='upload__text'>{value.map(v => v.name).join(', ')}</Text>
-            : <Icon className='upload__icon' name='download' />
+            : (placeholder
+                ? <Text className='upload__placeholder'>{placeholder}</Text>
+                : <Icon className='upload__icon' name='download' />
+            )
         )}
       </Label>
+      {childAfter != null && resolveChildren(childAfter, self)}
       {hasIcon && // Icon is needed when preview has event.stopPropagation, such as 3D mesh preview
         <Icon className={hasValue ? 'upload__icon-remove' : 'upload__icon-select'}
               name={hasValue ? iconRemove : iconSelect} tabIndex={hasValue ? 0 : -1}
@@ -192,6 +213,12 @@ Upload.defaultProps = {
 Upload.propTypes = {
   // Native HTML Comma-separated list of one or more file types allowed for upload
   accept: type.String,
+  // Custom label to show inside Upload dropzone, default is placeholder Icon or Text
+  children: type.NodeOrFunction,
+  // Custom UI to show inside Upload dropzone, before upload__label
+  childBefore: type.NodeOrFunction,
+  // Custom UI to show inside Upload dropzone, after upload__label
+  childAfter: type.NodeOrFunction,
   // Whether to show loading spinner and block input interaction
   loading: type.Boolean,
   // Maximum number of uploaded files (when `multiple` is true)
@@ -216,7 +243,7 @@ Upload.propTypes = {
   onChange: type.Function,
   // Handler({message: String, file?: File}[], name, event) when input changes and validation fails
   onError: type.Function,
-  // Handler(callback, name, event) before input files are to be removed,
+  // Handler(removedFiles: File[], name, event, callback) before input files are to be removed,
   // To use custom behavior, set event.preventDefault, then fire `callback()` yourself.
   // The default behavior uses window.confirm() before calling `onChange` to remove files.
   onRemove: type.Function,

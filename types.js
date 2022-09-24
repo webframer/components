@@ -55,6 +55,8 @@ type.Int = PropTypes.number
 type.List = PropTypes.array
 // Array of values
 type.ListOf = PropTypes.arrayOf
+// File MIME type
+type.MIME = PropTypes.string
 // A floating number that is to be multiplied with
 type.Multiplier = PropTypes.number
 // Method

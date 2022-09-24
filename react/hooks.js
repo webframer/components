@@ -175,12 +175,12 @@ export function useUId (id) {
  * React Hook to update Component state when props change, similar to class.componentWillReceiveProps
  * @example:
  *    const {current: self} = useRef({})
- *    self.state = useSyncedState(props, self.state)
+ *    self.state = useSyncedState(props, self.state)[0]
  *
  * @param {object} props - initial or new props to sync state with
  * @param {object} [state] - the current state
- * @returns {object} state - mutated with partially updated `props` that changed,
- *    or existing state if nothing changed.
+ * @returns {[state: object, justSynced: boolean]} state - mutated with partially updated `props`
+ *    that changed, or existing state if nothing changed; and if it has just changed to sync with props.
  *    If `props` has `null` attributes, they will override `state`.
  *    Attributes that do not exist in `props` but in `state` are kept (usually the desired behavior).
  */
@@ -195,8 +195,8 @@ export function useSyncedState (props, state) {
   //    isEqual({a: [a]}, {a: [new File([], 'test')]}))
   //    >>> false
   // Object.assign is required for updating array to new props, and to keep `state` object the same
-  if (prevProps === void 0 || !isEqual(prevProps, props)) return Object.assign(state, props)
-  return state
+  if (prevProps === void 0 || !isEqual(prevProps, props)) return [Object.assign(state, props), true]
+  return [state, false]
 }
 
 /**
@@ -332,7 +332,7 @@ export function useInputValue (props) {
   const [valueState, setValue] = useState(value)
   if (value == null) value = props.value = valueState // use state if uncontrolled value
   delete props.defaultValue
-  return [value, setValue]
+  return [value, setValue, valueState]
 }
 
 /**
