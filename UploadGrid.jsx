@@ -61,7 +61,7 @@ export function UploadGrid ({
     name: props.name, // trigger reset state when input.name changes
   }, self.state)
   const {fileInputs} = self.state = state
-  if (justSynced) self.changedValues = {} // reset changed values
+  if (justSynced) self.state.changedValues = {} // reset changed values
   self.isExplicitType = hasListValue(types)
   self.isIncremental = !self.isExplicitType && maxFiles > 1
   if (self.isExplicitType) maxFiles = types.length
