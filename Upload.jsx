@@ -1,5 +1,6 @@
 import {
   _,
+  __CLIENT__,
   hasListValue,
   ips,
   isEqual,
@@ -39,7 +40,7 @@ import { View } from './View.jsx'
  */
 export function Upload ({
   maxFiles, maxSize, minSize, onChange, onError, onRemove, placeholder,
-  inputClass, inputStyle, className, style, children, square, iconRemove, iconSelect,
+  inputClass, inputStyle, className, style, children, hyphen, square, iconRemove, iconSelect,
   childBefore, childAfter, _ref, inputRef, id = useId(), title, loading,
   ...props
 }) {
@@ -176,7 +177,7 @@ export function Upload ({
   const {disabled, readOnly: readonly} = props
 
   return (
-    <View className={cn(className, 'upload', {active, disabled, readonly, loading, squared: square})}
+    <View className={cn(className, 'upload', {active, disabled, readonly, hyphen, loading, squared: square})}
           {...{style}} _ref={self.ref}
           onDrop={self.drop} onDragEnter={self.dragEnter} onDragLeave={self.dragLeave}>
       <input id={id} className={cn(inputClass, 'upload__input')} style={inputStyle} {...props}
@@ -204,6 +205,7 @@ export function Upload ({
 
 Upload.defaultProps = {
   type: 'file',
+  hyphen: true,
   loading: false,
   iconSelect: '',
   iconRemove: '',
@@ -219,6 +221,8 @@ Upload.propTypes = {
   childBefore: type.NodeOrFunction,
   // Custom UI to show inside Upload dropzone, after upload__label
   childAfter: type.NodeOrFunction,
+  // Whether to hyphenate Text when it overflows width
+  hyphen: type.Boolean,
   // Whether to show loading spinner and block input interaction
   loading: type.Boolean,
   // Maximum number of uploaded files (when `multiple` is true)
@@ -262,6 +266,7 @@ function noop (e) {
 
 // Set Input value to given list of Files
 function setInputFiles (inputNode, files) {
+  if (!__CLIENT__) return
   const dataTransfer = new DataTransfer()
   for (const file of files)
     dataTransfer.items.add(file)

@@ -9,8 +9,12 @@ import {
   ips,
   isFunction,
   isString,
+  l,
+  localiseTranslation,
   previewSize,
   previewSizes,
+  shortNumber,
+  SIZE_KB,
   toList,
 } from '@webframer/js'
 import cn from 'classnames'
@@ -116,10 +120,11 @@ export function UploadGrid ({
       const {onChange, onChangeLast, maxFiles, asArray, name} = self.props
       const {changedValues} = self.state
       const isArray = maxFiles > 1 || asArray
-      changedFiles.forEach(fileInput => {
-        const {kind, i} = fileInput
-        changedValues[`${kind}_${i}`] = fileInput
-      })
+      changedFiles = (self.isIncremental ? changedFiles.filter(f => f.i < maxFiles) : changedFiles)
+        .map(fileInput => {
+          const {kind, i} = fileInput
+          return changedValues[`${kind}_${i}`] = fileInput
+        })
       // `i` may be undefined or NaN for single upload, and if it's numeric, no need to convert for comparison
       self.setState({
         fileInputs: self.isIncremental ? fileInputs.sort(by('i')).filter(f => f.i < maxFiles) : fileInputs,
@@ -167,8 +172,8 @@ export function UploadGrid ({
     // `src` only exists for uploaded files from backend
     //  => use it to check and add `preview` to differentiate newly selected file from uploaded `src`
     const {file, preview, src, name} = fileInput
-    if (!src && !preview) self.previewByURL[fileInput.preview = URL.createObjectURL(file)] = true
-    else if (src && !file && __CLIENT__) fileInput.file = new File([], name)
+    if (!src && !preview && file) self.previewByURL[fileInput.preview = URL.createObjectURL(file)] = true
+    else if (src && !file) fileInput.file = __CLIENT__ ? (new File([], name)) : {name}
   })
   // Release unused File previews
   if (showPreview && !noPreviewClean) cleanPreviewURLs(self.previewByURL, fileInputs)
@@ -194,7 +199,7 @@ export function UploadGrid ({
   return ( // The desired 'square' effect is for individual slots, UploadGrid itself can be any size
     <Row className={cn(className, 'upload-grid', {loading})} {...{style, _ref}}>
       {slots.map((fileInput, index) => {
-        let {i, name, file} = fileInput
+        let {i, name, file, width, height, size} = fileInput
         if (i == null) i = index
 
         // File Preview
@@ -211,11 +216,22 @@ export function UploadGrid ({
             ) : (isFunction(preview) ? preview(fileInput, index, self) : preview)
         }
 
-        // Slot Identifier
+        // File Labels
         let fileLabel
         if (showLabelAlways) fileLabel = (showI || !file) ? (types ? types[index].name : (index + 1)) : name
         else if (showFileName && filePreview) fileLabel = name
-        if (fileLabel != null) fileLabel = <Text className='upload__file__label'>{fileLabel}</Text>
+        if (fileLabel != null) {
+          fileLabel = <Text className='upload__file__label'>{fileLabel}</Text>
+
+          // Show width/height or size if backend data has it
+          let fileSize
+          if (width && height) fileSize = ips(_._width__X__height_, {width, height})
+          else if (size != null) fileSize = shortNumber(size, 3, SIZE_KB) + 'B'
+          if (fileSize != null) {
+            fileSize = <Text className='upload__file__size'>{fileSize}</Text>
+            fileLabel = <>{fileLabel}{fileSize}</>
+          }
+        }
 
         return (
           <View key={i} className='upload-grid__item' style={styleSlot}>
@@ -302,3 +318,9 @@ function toCSSValue (v) {
 }
 
 const obj = {}
+
+localiseTranslation({
+  _width__X__height_: {
+    [l.ENGLISH]: '{width} x {height}',
+  },
+})

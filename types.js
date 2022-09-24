@@ -118,16 +118,32 @@ type.DefinitionMap = type.ObjectOf(type.Definition.isRequired)
 
 // File Input object
 type.FileInput = type.Of({
-  src: type.UrlOrBase64, // file source URL or base64 encoded string
-  kind: type.Any, // type of file (ex: public/private...)
-  i: type.Any, // identifier or index position of the file in the grid (ex. thumb/small/large...)
-  id: type.String, // optional ID
-  name: type.String, // file name with extension
-  file: type.File, // -> sent by onChange callbacks for upload to backend (example: Dropzone file object)
-  remove: type.Boolean, // -> sent by onChange callbacks for deletion to backend
-  sizes: type.ListOf(type.Of({ // for ImageInput
-    key: type.String, // resKey (ex. 'thumb', 'medium', '')
-    val: type.Number, // size in bytes
+  // File source URL or base64 encoded string
+  src: type.UrlOrBase64,
+  // Type of file (ex: public/private...)
+  kind: type.Any,
+  // Identifier or index position of the file in the grid (ex. thumb/small/large/0/1...)
+  i: type.Any,
+  // Optional ID
+  id: type.String,
+  // File name with extension
+  name: type.String,
+  // Selected File object to send to backend for upload (example: Upload input file object)
+  file: type.File,
+  // Flag to delete the file from backend
+  remove: type.Boolean,
+  // Optional dimension in Pixels
+  width: type.Px,
+  // Optional dimension in Pixels
+  height: type.Px,
+  // Optional size in Bytes
+  size: type.Byte,
+  // Available file sizes (i.e. ImageInput)
+  sizes: type.ListOf(type.Of({
+    // resKey (ex. 'thumb', 'medium', '')
+    key: type.String,
+    // Size in bytes
+    val: type.Byte,
   })),
 })
 
