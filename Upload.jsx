@@ -41,7 +41,7 @@ import { View } from './View.jsx'
 export function Upload ({
   maxFiles, maxSize, minSize, onChange, onError, onRemove, placeholder,
   inputClass, inputStyle, className, style, children, hyphen, square, iconRemove, iconSelect,
-  childBefore, childAfter, _ref, inputRef, id = useId(), title, loading,
+  childBefore, childAfter, _ref, inputRef, id = useId(), loading,
   ...props
 }) {
   props = toReactProps(props)
@@ -183,7 +183,7 @@ export function Upload ({
       <input id={id} className={cn(inputClass, 'upload__input')} style={inputStyle} {...props}
              onChange={self.change} ref={self.refInput} />
       {childBefore != null && resolveChildren(childBefore, self)}
-      <Label className='upload__label' title={title} {...!props.readOnly && {htmlFor: id}}>
+      <Label className='upload__label' {...!props.readOnly && {htmlFor: id}}>
         {children != null ? resolveChildren(children, self) : (hasValue
             ? <Text className='upload__text'>{value.map(v => v.name).join(', ')}</Text>
             : (placeholder

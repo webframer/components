@@ -184,7 +184,7 @@ export function useUId (id) {
  *    If `props` has `null` attributes, they will override `state`.
  *    Attributes that do not exist in `props` but in `state` are kept (usually the desired behavior).
  */
-export function useSyncedState (props, state) {
+export function useSyncedState (props, state = {}) {
   const prevProps = usePreviousProp(props, true) // shallow match to allow new object each time
   // On initial render, prevProps is undefined
   // Lodash isEqual() allows deep nesting of array/objects, and considers them to be equal
@@ -325,12 +325,19 @@ export function getUIState () {
   }
 }
 
-// Resolve input `value` based on given `props` to be Controlled or Uncontrolled state,
-// this will mutate `props` to avoid duplicate value/defaultValue passed to <input/>
+/**
+ * Resolve input `value` based on given `props` to be Controlled or Uncontrolled state,
+ * this will mutate `props` to avoid duplicate value/defaultValue passed to `<input/>`
+ * @example:
+ *    const [value, setValue, valueState] = useInputValue(props)
+ *
+ * @param {object} props - input props containing `value` and/or `defaultValue`
+ * @returns [value, setValue, valueState] value - to use as input value
+ */
 export function useInputValue (props) {
   let {value = props.defaultValue} = props
   const [valueState, setValue] = useState(value)
-  if (value == null) value = props.value = valueState // use state if uncontrolled value
+  if (props.value == null) value = props.value = valueState // use state if uncontrolled value
   delete props.defaultValue
   return [value, setValue, valueState]
 }

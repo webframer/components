@@ -341,7 +341,7 @@ export function Select ({
       {isIconEnd && iconNode}
       {childAfter}
       <Scroll className={cn('select__options', {open, upward, fixed: listBox.style})}
-              noOffset reverse={upward} _ref={self.ref2} {...listBox}>
+              noScrollOffset reverse={upward} _ref={self.ref2} {...listBox}>
         {(forceRender || open) &&
           <SelectOptions items={options} {...{multiple, search, query, value, focusIndex}}
                          onFocus={self.focusOption} onBlur={self.blurOption} onClick={self.selectOption}

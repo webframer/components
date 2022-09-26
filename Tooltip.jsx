@@ -80,27 +80,28 @@ export function Tooltip ({
 
     self.parent = ref.current.parentElement
     let eventArgs = [void 0, self.parent]
-    let events = toUniqueListFast(trimSpaces(on).split(' ')).map((event) => {
-      switch (event) {
-        // clicking anywhere outside should close the popup (i.e. toggle state on click)
-        case 'click':
-          subscribeTo(event, self.toggleOpenOnClick)
-          return () => unsubscribeFrom(event, self.toggleOpenOnClick)
+    let events = toUniqueListFast(trimSpaces(on).toLowerCase().split(',').map(e => e.trim()))
+      .map((event) => {
+        switch (event) {
+          // clicking anywhere outside should close the popup (i.e. toggle state on click)
+          case 'click':
+            subscribeTo(event, self.toggleOpenOnClick)
+            return () => unsubscribeFrom(event, self.toggleOpenOnClick)
 
-        // https://www.w3schools.com/jsref/event_onmouseenter.asp
-        case 'hover':
-          // noinspection JSCheckFunctionSignatures
-          subscribeTo('mouseenter', self.openOnHover, ...eventArgs)
-          // noinspection JSCheckFunctionSignatures
-          subscribeTo('mouseleave', self.closeOnHover, ...eventArgs)
-          return () => {
+          // https://www.w3schools.com/jsref/event_onmouseenter.asp
+          case 'hover':
             // noinspection JSCheckFunctionSignatures
-            unsubscribeFrom('mouseenter', self.openOnHover, ...eventArgs)
+            subscribeTo('mouseenter', self.openOnHover, ...eventArgs)
             // noinspection JSCheckFunctionSignatures
-            unsubscribeFrom('mouseleave', self.closeOnHover, ...eventArgs)
-          }
-      }
-    })
+            subscribeTo('mouseleave', self.closeOnHover, ...eventArgs)
+            return () => {
+              // noinspection JSCheckFunctionSignatures
+              unsubscribeFrom('mouseenter', self.openOnHover, ...eventArgs)
+              // noinspection JSCheckFunctionSignatures
+              unsubscribeFrom('mouseleave', self.closeOnHover, ...eventArgs)
+            }
+        }
+      })
     return () => events.forEach(unsubscribe => unsubscribe())
   }, [])
 
@@ -136,7 +137,7 @@ export function Tooltip ({
 }
 
 Tooltip.propTypes = {
-  // One of, or any combination of: 'hover', 'click' - separated by space
+  // One of, or any combination of: 'hover', 'click' - separated by comma
   on: type.String,
   // Tooltip alignment relative to the `position`, default is center/middle alignment.
   //  - `start === 'left'` and `end === 'right'` if position is 'top' or 'bottom'
