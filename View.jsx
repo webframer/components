@@ -54,7 +54,7 @@ export function createView (defaultProp) {
 
     // Scrollable View -----------------------------------------------------------------------------
     // The wrapper should get rest props by default, because that's the expected behavior
-    let {classScroll, styleScroll, style, noOffset, ..._props} = props
+    let {scrollClass, scrollStyle, style, noOffset, ..._props} = props
     scrollProps = {...scrollProps}
     if (hasProp(_props, '_id')) {
       Object.assign(_props, {_nodrop: ''})
@@ -69,7 +69,7 @@ export function createView (defaultProp) {
     // // }
     // // ```
     // className = cn(className, 'scrollable', {col, row, fill, rtl})
-    // classScroll = cn({'position-fill': scroll})
+    // scrollClass = cn({'position-fill': scroll})
 
     // @Flexbox version
     className = cn( // outer div container
@@ -81,7 +81,7 @@ export function createView (defaultProp) {
       // 'max-size' class is to be extended inside _layout.less to reduce html footprint
       // 'max-size', // row ? 'max-width' : 'max-height', // a scroll can overflow in any direction
     )
-    classScroll = cn( // inner div directly wrapping the children
+    scrollClass = cn( // inner div directly wrapping the children
       // @note: this will not prevent overflow in the other direction (ex. Row inside Scroll column)
       // The only way to prevent that is with overflow-x: hidden, but applied to the outer div.
       // If applied to inner div, it makes this inner div restrict itself within the outer div's
@@ -100,7 +100,7 @@ export function createView (defaultProp) {
       //
       //    - Warn users when there are two nested scroll components with the same direction?
       //      Because that use-case is not valid anyway?
-      classScroll, row ? 'min-width no-max-width' : 'min-height no-max-height', {
+      scrollClass, row ? 'min-width no-max-width' : 'min-height no-max-height', {
         col, row, fill, reverse, rtl,
         left, right, top, bottom, center, middle,
         pointer: props.onClick,
@@ -142,7 +142,7 @@ export function createView (defaultProp) {
     // Scroll View
     return (
       <div className={className} style={style} {..._props} >
-        <div className={classScroll} style={styleScroll} {...scrollProps}>{children}</div>
+        <div className={scrollClass} style={scrollStyle} {...scrollProps}>{children}</div>
         {tooltip}
       </div>
     )
@@ -167,11 +167,15 @@ export function createView (defaultProp) {
     sound: type.Object,
     children: type.Any,
     className: type.String,
+    // Ref for the View or outer Scroll container
     _ref: type.Ref,
-    // Scroll View only
+    // Whether to use Scroll View
     scroll: type.Boolean,
-    classScroll: type.String,
-    styleScroll: type.Object,
+    // CSS class for inner wrapper Scroll component
+    scrollClass: type.String,
+    // CSS style for inner wrapper Scroll component
+    scrollStyle: type.Object,
+    // Props for inner wrapper Scroll component
     scrollProps: type.Object,
     // Whether to prevent Scroll from setting offset style to parent element
     noOffset: type.Boolean,
