@@ -122,7 +122,7 @@ export function Tooltip ({
       <span className={cn('col', {'position-fixed': self.mounted})}
             style={open ? styleTooltip : noPointerEvents}>
         {/* Inner div behaves like View.jsx - tooltip pointer can be added to this */}
-        <span className={cn(className, 'padding-small padding-v-smaller radius', {
+        <span className={cn(className, 'tooltip__content', {
           col, row, fill, reverse, rtl,
           left, right, top, bottom, center, middle,
           'pointer': props.onClick,
