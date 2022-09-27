@@ -1,8 +1,9 @@
+import { __CLIENT__, numericPattern, parseNumber } from '@webframer/js'
 import cn from 'classnames'
-import React, { useId, useMemo, useRef, useState } from 'react'
+import React, { useId, useMemo, useState } from 'react'
 import Label from './Label.jsx'
 import { assignRef, toReactProps } from './react.js'
-import { useInputValue } from './react/hooks.js'
+import { useInputValue, useInstance } from './react/hooks.js'
 import { renderProp } from './react/render.js'
 import { Row } from './Row.jsx'
 import Text from './Text.jsx'
@@ -19,17 +20,18 @@ import { resizeWidth } from './utils/element.js'
  *  - Input unit prefix/suffix (ex. '$' prefix or 'USD' suffix for number input)
  */
 export function InputNative ({
-  onChange, onBlur, onFocus,
+  type, format = formatByType[type], parse = parseByType[type],
   compact, float, error, label, loading, prefix, suffix, id = useId(),
   _ref, ...props
 }) {
   props.id = id
+  props.type = type
   props = toReactProps(props)
-  const {current: self} = useRef({})
-  const [value, setValue] = useInputValue(props)
+  const [self] = useInstance()
+  let [value, setValue] = useInputValue(props)
   const [focus, setFocus] = useState(props.autoFocus)
   const hasValue = value != null && value !== ''
-  self.props = {onChange, onBlur, onFocus, focus, value, name: props.name}
+  self.props = {...props, focus, format, value, parse}
 
   // Event Handlers --------------------------------------------------------------------------------
   if (!self.ref) {
@@ -38,10 +40,15 @@ export function InputNative ({
       return assignRef.call(this, _ref, ...arguments)
     }
     self.change = function (e) {
-      const {value} = e.target
-      const {name, onChange} = self.props
+      let {value} = e.target
+      const {name, onChange, parse} = self.props
+      if (parse) value = parse(value, name, e, self)
       if (onChange) onChange.call(this, value, name, ...arguments)
       if (e.defaultPrevented) return
+      // Same internal value does not re-render, but for input number,
+      // we need to update UI when user types in numbers with trailing zeros: 1.020,
+      // or anytime parse() function returns the same value, but format() does not.
+      if (value === self.props.value) self.forceUpdate()
       setValue(value)
     }
     self.blur = function (e) {
@@ -56,7 +63,16 @@ export function InputNative ({
       if (e.defaultPrevented) return
       setFocus(true)
     }
+    // Fix for Safari/Firefox bug returning empty input value when typing invalid characters
+    if (type === 'number' && __CLIENT__) self.keyPress = function (e) {
+      const {onKeyPress} = self.props
+      if (onKeyPress) onKeyPress.apply(this, ...arguments)
+      if (e.defaultPrevented) return
+      // Prevent Safari from sending empty value when there is invalid character
+      if (!numericPattern().test(e.key)) e.preventDefault()
+    }
   }
+  if (self.keyPress) props.onKeyPress = self.keyPress
   props.onChange = self.change
   props.onBlur = self.blur
   props.onFocus = self.focus
@@ -69,9 +85,11 @@ export function InputNative ({
     if (placeholder && placeholder.length > maxContent.length) maxContent = placeholder
     return resizeWidth(maxContent, {}, compact)
   }, [compact, placeholder, value])
+  if (compact) props.style = {...props.style, ...styleCompact}
 
   // Render Props ----------------------------------------------------------------------------------
   const {disabled, readOnly: readonly} = props
+  if (format) value = props.value = format(value, props.name, void 0, self)
 
   return (<>
     {!float && label != null &&
@@ -86,15 +104,7 @@ export function InputNative ({
           </Row>
         </Label>
       }
-      {(() => {
-        switch (props.type) {
-          case 'textarea':
-            return <textarea {...props} />
-          default:
-            if (compact) props.style = {...props.style, ...styleCompact}
-            return <input {...props} ref={self.ref} />
-        }
-      })()}
+      <input {...props} ref={self.ref} />
     </Row>
   </>)
 }
@@ -102,8 +112,32 @@ export function InputNative ({
 InputNative.propTypes = {
   // Label to show before the Input (or after Input with `reverse` true)
   label: type.NodeOrFunction,
+  // Function(value, name?, event?, self) => string - Input value formatter for UI display
+  format: type.Function,
+  // Function(value, name?, event, self) => any - Parser for internal Input value for onChange
+  parse: type.Function,
   // Prefix to show before the Input value text
   prefix: type.NodeOrFunction,
   // Suffix to show after the Input value text (value must be non-empty)
   suffix: type.NodeOrFunction,
+}
+
+// Default formatter for Input value
+const formatByType = {
+  number: (value, name, event, self) => {
+    if (self.inputValue === void 0) return value
+    if (self.inputValue === null) return ''
+    return self.inputValue // use the same value user typed in (`value` is the result of parseNumber)
+  },
+}
+
+// Default parser for Input value
+const parseByType = {
+  number: (value, name, event, self) => {
+    // Note: in Safari, if user types in a comma, onChange event only fires once with value = '',
+    // even with valid values, like 1,000 - this is clearly a bug for input type number from Safari.
+    // => on Safari, perform sanitization of all none numeric characters, to behave like Chrome
+    self.inputValue = value // cache user typed in value for formatting later
+    return parseNumber(value)
+  },
 }

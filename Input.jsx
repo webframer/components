@@ -23,8 +23,7 @@ import { View } from './View.jsx'
  *    or simply use another View node below tooltip.
  */
 export function Input ({
-  error, type,
-  id = useId(), idHelp = `${id}-help`,
+  error, id = useId(), idHelp = `${id}-help`,
   className, style, tooltip, _ref,
   ...props
 }) {
@@ -38,7 +37,7 @@ export function Input ({
   return (
     <View className={cn(className, 'input-group', {error})} {...{style, tooltip, _ref}}>
       {(() => {
-        switch (type) {
+        switch (props.type) {
           case 'select':
             return <Select {...props} />
           case 'switch':
