@@ -333,7 +333,7 @@ export function Select ({
         })} tabIndex={-1} />
         </a>
       })}
-      <input className={cn({'fill-width': !compact && (multiple || !hasValue), iconEnd: isIconEnd})}
+      <input className={cn('select__input', {'fill-width': !compact && (multiple || !hasValue), iconEnd: isIconEnd})}
              style={styleI}
              readOnly={!search} {...props} ref={self.ref1}
              value={query} onChange={self.searchQuery} onFocus={self.focus} onBlur={self.blur}
