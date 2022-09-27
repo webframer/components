@@ -1,7 +1,7 @@
 import cn from 'classnames'
 import React, { useContext, useId, useRef } from 'react'
 import { useExpandCollapse } from './react/hooks.js'
-import { resolveChildren } from './react/render.js'
+import { renderProp } from './react/render.js'
 import { type } from './types.js'
 import { View, ViewRef } from './View.jsx'
 
@@ -54,7 +54,7 @@ export function Expand ({
   self.renderProps = {...self, ...self.state}
 
   // Resolve children
-  props.children = resolveChildren(props.children, self.renderProps)
+  props.children = renderProp(props.children, self.renderProps)
   if (asPanel) props.children = <ExpandPanel>{props.children}</ExpandPanel>
 
   return (
@@ -110,7 +110,7 @@ export function ExpandTab ({className, onClick, ...props}) {
   }
 
   // Resolve children
-  props.children = resolveChildren(props.children, self.renderProps)
+  props.children = renderProp(props.children, self.renderProps)
 
   return <View className={cn(className, 'expand__tab', {open})} {...props} />
 }
@@ -155,7 +155,7 @@ export function ExpandPanel ({className, forceRender, ...props}) {
   }
 
   // Resolve children
-  props.children = resolveChildren(props.children, self.renderProps)
+  props.children = renderProp(props.children, self.renderProps)
   props.ref = ref
 
   // Do not use Scroll here so user can have a choice of explicitly passing `scroll` attribute

@@ -16,7 +16,7 @@ import Icon from './Icon.jsx'
 import { Label } from './Label.jsx'
 import Loader from './Loader.jsx'
 import { assignRef, toReactProps, useInputValue, useInstance } from './react.js'
-import { resolveChildren } from './react/render.js'
+import { renderProp } from './react/render.js'
 import Text from './Text.jsx'
 import { type } from './types.js'
 import { hitNodeFrom } from './utils/element.js'
@@ -72,7 +72,7 @@ export function Upload ({
       }
 
       if (self.onChange) self.onChange.call(this, files, self.name, ...arguments)
-      if (e.isDefaultPrevented()) return
+      if (e.defaultPrevented) return
       setValue(files)
     }
     self.clickIcon = function () {
@@ -102,7 +102,7 @@ export function Upload ({
       if (self.onRemove) self.onRemove.call(
         this, self.value, self.name, e, () => self.removeFiles.apply(this, arguments),
       )
-      if (e.isDefaultPrevented()) return
+      if (e.defaultPrevented) return
       if (confirm(ips(_.DO_YOU_WANT_TO_REMOVE___file___, {file: self.value.map(f => f.name).join(', ')})))
         self.removeFiles.apply(this, arguments)
     }
@@ -182,9 +182,9 @@ export function Upload ({
           onDrop={self.drop} onDragEnter={self.dragEnter} onDragLeave={self.dragLeave}>
       <input id={id} className={cn(inputClass, 'upload__input')} style={inputStyle} {...props}
              onChange={self.change} ref={self.refInput} />
-      {childBefore != null && resolveChildren(childBefore, self)}
+      {childBefore != null && renderProp(childBefore, self)}
       <Label className='upload__label' {...!props.readOnly && {htmlFor: id}}>
-        {children != null ? resolveChildren(children, self) : (hasValue
+        {children != null ? renderProp(children, self) : (hasValue
             ? <Text className='upload__text'>{value.map(v => v.name).join(', ')}</Text>
             : (placeholder
                 ? <Text className='upload__placeholder'>{placeholder}</Text>
@@ -192,7 +192,7 @@ export function Upload ({
             )
         )}
       </Label>
-      {childAfter != null && resolveChildren(childAfter, self)}
+      {childAfter != null && renderProp(childAfter, self)}
       {hasIcon && // Icon is needed when preview has event.stopPropagation, such as 3D mesh preview
         <Icon className={hasValue ? 'upload__icon-remove' : 'upload__icon-select'}
               name={hasValue ? iconRemove : iconSelect} tabIndex={hasValue ? 0 : -1}

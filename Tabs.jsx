@@ -3,7 +3,7 @@ import cn from 'classnames'
 import React, { useContext, useEffect, useId } from 'react'
 import Icon from './Icon.jsx'
 import { useInstance } from './react/hooks.js'
-import { resolveChildren } from './react/render.js'
+import { renderProp } from './react/render.js'
 import Spacer from './Spacer.jsx'
 import { type } from './types.js'
 import View from './View.jsx'
@@ -155,7 +155,7 @@ export default React.memo(Tabs)
  */
 export function TabList ({className, ...props}) {
   const {vertical} = useContext(TabState)
-  
+
   // Do not use Scroll here to avoid potential bugs with parent offset, let user set `scroll`
   return <View className={cn(className, 'tabs__list no-scrollbar')} row={!vertical} {...props} />
 }
@@ -242,7 +242,7 @@ export function TabPanel ({id, className, forceRender, mustRender, ...props}) {
   }
 
   // Resolve children
-  props.children = resolveChildren(props.children, self)
+  props.children = renderProp(props.children, self)
 
   // Do not use Scroll here so user can have a choice of explicitly passing `scroll` attribute
   return <View className={cn(className, 'tabs__panel')} {...props} />

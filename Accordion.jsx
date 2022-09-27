@@ -1,7 +1,7 @@
 import cn from 'classnames'
 import React from 'react'
 import { useInstance, usePreviousProp } from './react/hooks.js'
-import { resolveChildren } from './react/render.js'
+import { renderProp } from './react/render.js'
 import { type } from './types.js'
 import { View } from './View.jsx'
 
@@ -48,7 +48,7 @@ export function Accordion ({
   // Resolve direct children with Accordion props
   const {openAll, openById} = state
   self.renderProps = {...self, duration, forceRender, multiple, onChange, open: openAll}
-  props.children = resolveChildren(props.children, self.renderProps)
+  props.children = renderProp(props.children, self.renderProps)
   props.children = React.Children.map(props.children, (child, index) => {
     // Checking isValidElement is the safe way and avoids a typescript error.
     if (React.isValidElement(child)) {

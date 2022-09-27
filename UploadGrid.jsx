@@ -149,7 +149,7 @@ export function UploadGrid ({
       if (onRemove) onRemove.call(
         this, isArray ? [fileInput] : fileInput, name, e, () => self.removeFiles.apply(this, arguments),
       )
-      if (e.isDefaultPrevented()) return
+      if (e.defaultPrevented) return
 
       e.preventDefault() // disable default behavior of Upload
       if (confirm(ips(_.DO_YOU_WANT_TO_REMOVE___file___, {file: fileInput.name})))

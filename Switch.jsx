@@ -3,7 +3,7 @@ import React, { useId, useRef, useState } from 'react'
 import Icon from './Icon.jsx'
 import Label from './Label.jsx'
 import { toReactProps, useExpandCollapse } from './react.js'
-import { resolveChildren } from './react/render.js'
+import { renderProp } from './react/render.js'
 import { Row } from './Row.jsx'
 import Spacer from './Spacer.jsx'
 import { type } from './types.js'
@@ -43,7 +43,7 @@ export function Switch ({
   return (
     <Row className={cn(className, 'switch', {checked, reverse, danger})} style={style}>
       {label && <>
-        <Label className='switch__label'>{resolveChildren(label, self)}</Label>
+        <Label className='switch__label'>{renderProp(label, self)}</Label>
         <Spacer />
       </>}
       <input id={id} className='sr-only' {...props} />
@@ -61,12 +61,12 @@ function ToggleLabels ({checked, checkedLabel, uncheckedLabel, self}) {
     <div className={cn('switch__on', {open: oOn || aOn})} ref={on}
          children={(oOn || aOn) && (checkedLabel == null
            ? <Icon className='fade-in' name='checkmark' font />
-           : resolveChildren(checkedLabel, self))} />
+           : renderProp(checkedLabel, self))} />
     <div className='switch__btn' />
     <div className={cn('switch__off', {open: oOff || aOff})} ref={off}
          children={(oOff || aOff) && (uncheckedLabel == null
            ? <Spacer />
-           : resolveChildren(uncheckedLabel, self))} />
+           : renderProp(uncheckedLabel, self))} />
   </>
 }
 
