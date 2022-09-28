@@ -22,6 +22,7 @@ import Fuse from 'fuse.js'
 import React, { useEffect, useMemo } from 'react'
 import Icon from './Icon.jsx'
 import { assignRef, toReactProps, useExpandCollapse, useInstance } from './react.js'
+import { renderProp } from './react/render.js'
 import { Row } from './Row.jsx'
 import { Scroll } from './Scroll.jsx'
 import SelectOptions, { addOptionItem } from './SelectOptions.jsx'
@@ -55,7 +56,7 @@ export function Select ({
   multiple, onClickValue, onChange, onSearch, onSelect,
   icon, iconEnd, iconProps,
   addOption, addOptionMsg, noOptionsMsg,
-  _ref, refInput, ...props
+  _ref, inputRef, ...props
 }) {
   const [self, state] = useInstance({options, query, value, focusIndex})
   let [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
@@ -80,7 +81,7 @@ export function Select ({
   }
   if (!self.ref1) self.ref1 = function (node) {
     self.inputNode = node
-    return assignRef.call(this, refInput, ...arguments)
+    return assignRef.call(this, inputRef, ...arguments)
   }
   if (!self.ref2) self.ref2 = function (node) {
     self.optNode = node
@@ -319,7 +320,7 @@ export function Select ({
     <Row className={cn(className, `select`,
       {active: open, done: hasValue, compact, multiple, search, upward, query})} style={style}
          {...{row}} onClick={toggleOpen} tabIndex={-1} _ref={self.ref}>
-      {childBefore}
+      {childBefore != null && renderProp(childBefore, self)}
       {!isIconEnd && iconNode}
 
       {/* Multiple selected items */}
@@ -340,7 +341,7 @@ export function Select ({
              value={query} onChange={self.searchQuery} onFocus={self.focus} onBlur={self.blur}
              onClick={search ? onEventStopPropagation(self.openOptions, props.onClick) : void 0} />
       {isIconEnd && iconNode}
-      {childAfter}
+      {childAfter != null && renderProp(childAfter, self)}
       <Scroll className={cn('select__options', {open, upward, fixed: listBox.style})}
               noScrollOffset reverse={upward} _ref={self.ref2} {...listBox}>
         {(forceRender || open) &&

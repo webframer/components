@@ -14,7 +14,7 @@ import { resizeWidth } from './utils/element.js'
  * Wrapper for Native HTML Input, such as: 'text', 'number', 'email', etc. where value is text.
  * Features:
  *  - Label added before input
- *  - Floating Label style
+ *  - Floating Label style (TBD)
  *  - Icon at the start or end of input
  *  - Loading state (with spinner icon and temporarily readonly input)
  *  - Handles controlled or uncontrolled input value state
@@ -25,7 +25,8 @@ import { resizeWidth } from './utils/element.js'
 export function InputNative ({
   type, format = formatByType[type], parse = parseByType[type],
   compact, float, error, label, loading, prefix, suffix, id = useId(),
-  _ref, ...props
+  childBefore, childAfter, className, style,
+  _ref, inputRef, ...props
 }) {
   props.id = id
   props.type = type
@@ -40,13 +41,13 @@ export function InputNative ({
   if (!self.ref) {
     self.ref = function (node) {
       self.inputNode = node
-      return assignRef.call(this, _ref, ...arguments)
+      return assignRef.call(this, inputRef, ...arguments)
     }
     self.change = function (e) {
       let {value} = e.target
       const {name, onChange, parse} = self.props
       if (parse) value = parse(value, name, e, self)
-      if (onChange) onChange.call(this, value, name, ...arguments)
+      if (onChange) onChange.call(this, value, name, e, self)
       if (e.defaultPrevented) return
       // Same internal value does not re-render, but for input number,
       // we need to update UI when user types in numbers with trailing zeros: 1.020,
@@ -56,13 +57,13 @@ export function InputNative ({
     }
     self.blur = function (e) {
       const {name, onBlur, value} = self.props
-      if (onBlur) onBlur.call(this, value, name, ...arguments)
+      if (onBlur) onBlur.call(this, value, name, e, self)
       if (e.defaultPrevented) return
       setFocus(false)
     }
     self.focus = function (e) {
       const {name, onFocus, value} = self.props
-      if (onFocus) onFocus.call(this, value, name, ...arguments)
+      if (onFocus) onFocus.call(this, value, name, e, self)
       if (e.defaultPrevented) return
       setFocus(true)
     }
@@ -96,10 +97,11 @@ export function InputNative ({
   if (format) value = props.value = format(value, props.name, void 0, self)
 
   return (<>
-    {!float && label != null &&
-      <Label className='input__label'>{renderProp(label, self)}</Label>
-    }
-    <Row className={cn('input', {active: focus, compact, error, disabled, readonly, loading})}>
+    {label != null &&
+      <Label className='input__label'>{renderProp(label, self)}</Label>}
+    <Row className={cn(className, 'input', {active: focus, compact, error, disabled, readonly, loading})}
+         {...{_ref, style}}>
+      {childBefore != null && renderProp(childBefore, self)}
       {prefix != null && <Label className='input__prefix' htmlFor={id}>{renderProp(prefix, self)}</Label>}
       {suffix != null && hasValue &&
         <Label className='input__suffix'>
@@ -109,6 +111,7 @@ export function InputNative ({
         </Label>
       }
       <input {...props} ref={self.ref} />
+      {childAfter != null && renderProp(childAfter, self)}
     </Row>
   </>)
 }
@@ -116,8 +119,20 @@ export function InputNative ({
 InputNative.propTypes = {
   // Whether to take minimal width required to render input
   compact: type.OneOf(type.Boolean, type.Number),
-  // Label to show before the Input (or after Input with `reverse` true)
+  // Initial value for uncontrolled state
+  defaultValue: type.Any,
+  // Internal value for controlled state
+  value: type.Any,
+  // Handler(value: any, name?: string, event: Event, self) on input value changes
+  onChange: type.Function,
+  // Handler(value: any, name?: string, event: Event, self) on input focus
+  onFocus: type.Function,
+  // Handler(value: any, name?: string, event: Event, self) on input blur
+  onBlur: type.Function,
+  // Label to show before the input (or after Input with `reverse` true)
   label: type.NodeOrFunction,
+  // Whether input is loading
+  loading: type.Boolean,
   // Function(value, name?, event?, self) => string - Input value formatter for UI display
   format: type.Function,
   // Function(value, name?, event, self) => any - Parser for internal Input value for onChange
@@ -126,6 +141,11 @@ InputNative.propTypes = {
   prefix: type.NodeOrFunction,
   // Suffix to show after the Input value text (value must be non-empty)
   suffix: type.NodeOrFunction,
+  // Custom UI to render before input node (inside .input wrapper with focus state)
+  childBefore: type.NodeOrFunction,
+  // Custom UI to render after input node (inside .input wrapper with focus state)
+  childAfter: type.NodeOrFunction,
+  // ...other native HTML `<input/>` props
 }
 
 // Default formatter for Input value
