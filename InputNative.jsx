@@ -14,10 +14,13 @@ import { resizeWidth } from './utils/element.js'
  * Wrapper for Native HTML Input, such as: 'text', 'number', 'email', etc. where value is text.
  * Features:
  *  - Label added before input
+ *  - Floating Label style
+ *  - Icon at the start or end of input
+ *  - Loading state (with spinner icon and temporarily readonly input)
  *  - Handles controlled or uncontrolled input value state
- *  - Resizing rows for textarea input
- *  - Compact width calculation
  *  - Input unit prefix/suffix (ex. '$' prefix or 'USD' suffix for number input)
+ *  - Compact input with automatic width calculation
+ *  - Auto-resize rows for textarea input as user enters content
  */
 export function InputNative ({
   type, format = formatByType[type], parse = parseByType[type],
@@ -80,11 +83,12 @@ export function InputNative ({
   // Compact Input ---------------------------------------------------------------------------------
   const {placeholder} = props
   const styleCompact = useMemo(() => {
-    if (!compact) return
+    if (compact == null || compact === false) return
     let maxContent = value == null ? '' : value
     if (placeholder && placeholder.length > maxContent.length) maxContent = placeholder
     return resizeWidth(maxContent, {}, compact)
   }, [compact, placeholder, value])
+  compact = compact != null && compact !== false // convert to boolean for rendering
   if (compact) props.style = {...props.style, ...styleCompact}
 
   // Render Props ----------------------------------------------------------------------------------
@@ -93,9 +97,9 @@ export function InputNative ({
 
   return (<>
     {!float && label != null &&
-      <Label className='input__label' htmlFor={id}>{renderProp(label, self)}</Label>
+      <Label className='input__label'>{renderProp(label, self)}</Label>
     }
-    <Row className={cn('input', {active: focus, error, disabled, readonly, loading})}>
+    <Row className={cn('input', {active: focus, compact, error, disabled, readonly, loading})}>
       {prefix != null && <Label className='input__prefix' htmlFor={id}>{renderProp(prefix, self)}</Label>}
       {suffix != null && hasValue &&
         <Label className='input__suffix'>
@@ -110,6 +114,8 @@ export function InputNative ({
 }
 
 InputNative.propTypes = {
+  // Whether to take minimal width required to render input
+  compact: type.OneOf(type.Boolean, type.Number),
   // Label to show before the Input (or after Input with `reverse` true)
   label: type.NodeOrFunction,
   // Function(value, name?, event?, self) => string - Input value formatter for UI display

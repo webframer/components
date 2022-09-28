@@ -1,7 +1,7 @@
 import cn from 'classnames'
 import React, { useId } from 'react'
 import { InputNative } from './InputNative.jsx'
-import { useExpandCollapse } from './react.js'
+import { useExpandCollapse, usePreviousProp } from './react.js'
 import { renderProp } from './react/render.js'
 import { Select } from './Select.jsx'
 import { Switch } from './Switch.jsx'
@@ -24,10 +24,13 @@ import { View } from './View.jsx'
  */
 export function Input ({
   error, id = useId(), idHelp = `${id}-help`,
-  className, style, tooltip, _ref,
+  fill, className, style, tooltip, _ref,
   ...props
 }) {
-  const [state, _on, ref] = useExpandCollapse(error != null)
+  // Error Message ---------------------------------------------------------------------------------
+  const [{animating}, _on, ref] = useExpandCollapse(error != null)
+  const _error = usePreviousProp(error) // for animation to collapse error
+  if (animating && error == null) error = _error
 
   // Accessibility ---------------------------------------------------------------------------------
   props.id = id
@@ -35,7 +38,7 @@ export function Input ({
   props['aria-describedby'] = idHelp
 
   return (
-    <View className={cn(className, 'input-group', {error})} {...{style, tooltip, _ref}}>
+    <View className={cn(className, 'input-group', {error})} {...{fill, style, tooltip, _ref}}>
       {(() => {
         switch (props.type) {
           case 'select':
@@ -69,7 +72,7 @@ Input.propTypes = {
   // Label to show before the Input (or after Input with `reverse` true)
   label: type.NodeOrFunction,
   // Tooltip props or value to display as tooltip on hover
-  tooltip: type.NodeOrFunction,
+  tooltip: type.Tooltip,
   // Input onChange callback(value: any, name: string, event: Event)
   onChange: type.Function,
   // Internal value for controlled state

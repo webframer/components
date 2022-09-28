@@ -396,7 +396,7 @@ Select.propTypes = {
   // Whether to allow users to add new options (in combination with search)
   addOption: type.OneOf(type.Boolean, type.Object),
   // Whether to take minimal width required to render selection(s)
-  compact: type.Boolean,
+  compact: type.OneOf(type.Boolean, type.Number),
   // Whether to open options initially
   defaultOpen: type.Boolean,
   // Whether to always render options, even when closed

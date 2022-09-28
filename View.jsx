@@ -180,7 +180,7 @@ export function createView (defaultProp) {
     // Whether to prevent Scroll from setting offset style to parent element
     noScrollOffset: type.Boolean,
     // Tooltip props or value to display as tooltip on hover
-    tooltip: type.NodeOrFunction,
+    tooltip: type.Tooltip,
   }
 
   return [View, ViewRef]
