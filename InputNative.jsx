@@ -1,6 +1,7 @@
-import { __CLIENT__, numericPattern, parseNumber } from '@webframer/js'
+import { __CLIENT__, isString, numericPattern, parseNumber } from '@webframer/js'
 import cn from 'classnames'
 import React, { useId, useMemo, useState } from 'react'
+import Icon from './Icon.jsx'
 import Label from './Label.jsx'
 import { assignRef, toReactProps } from './react.js'
 import { useInputValue, useInstance } from './react/hooks.js'
@@ -24,7 +25,7 @@ import { resizeWidth } from './utils/element.js'
  */
 export function InputNative ({
   type, format = formatByType[type], parse = parseByType[type],
-  compact, float, error, label, loading, prefix, suffix, id = useId(),
+  compact, float, error, icon, iconEnd, label, loading, prefix, suffix, id = useId(),
   childBefore, childAfter, className, style,
   _ref, inputRef, ...props
 }) {
@@ -96,13 +97,21 @@ export function InputNative ({
   const {disabled, readOnly: readonly} = props
   if (format) value = props.value = format(value, props.name, void 0, self)
 
+  // Icon ------------------------------------------------------------------------------------------
+  const iconNode = icon ? <Label className='input__icon' htmlFor={id}>{(isString(icon)
+      ? <Icon name={icon} />
+      : <Icon {...{icon}} />
+  )}</Label> : null
+
   return (<>
     {label != null &&
       <Label className='input__label'>{renderProp(label, self)}</Label>}
     <Row className={cn(className, 'input', {active: focus, compact, error, disabled, readonly, loading})}
          {...{_ref, style}}>
       {childBefore != null && renderProp(childBefore, self)}
-      {prefix != null && <Label className='input__prefix' htmlFor={id}>{renderProp(prefix, self)}</Label>}
+      {!iconEnd && iconNode}
+      {prefix != null &&
+        <Label className='input__prefix' htmlFor={id}>{renderProp(prefix, self)}</Label>}
       {suffix != null && hasValue &&
         <Label className='input__suffix'>
           <Row>
@@ -110,14 +119,16 @@ export function InputNative ({
           </Row>
         </Label>
       }
-      <input {...props} ref={self.ref} />
+      <input className={cn('input__field', {iconStart: !iconEnd && iconNode, iconEnd: iconEnd && iconNode})}
+             {...props} ref={self.ref} />
+      {iconEnd && iconNode}
       {childAfter != null && renderProp(childAfter, self)}
     </Row>
   </>)
 }
 
 InputNative.propTypes = {
-  // Whether to take minimal width required to render input
+  // Whether to use minimal width that fits content, pass number for additional character offset
   compact: type.OneOf(type.Boolean, type.Number),
   // Initial value for uncontrolled state
   defaultValue: type.Any,
@@ -145,6 +156,10 @@ InputNative.propTypes = {
   childBefore: type.NodeOrFunction,
   // Custom UI to render after input node (inside .input wrapper with focus state)
   childAfter: type.NodeOrFunction,
+  // Custom Icon name or props
+  icon: type.OneOf(type.String, type.Object),
+  // Whether to place Icon after input node, default is before input node
+  iconEnd: type.Boolean,
   // ...other native HTML `<input/>` props
 }
 
