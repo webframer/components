@@ -1,33 +1,107 @@
 import { __CLIENT__, isString, numericPattern, parseNumber } from '@webframer/js'
 import cn from 'classnames'
-import React, { useId, useMemo, useState } from 'react'
+import React, { useId, useState } from 'react'
 import Icon from './Icon.jsx'
 import Label from './Label.jsx'
 import { assignRef, toReactProps } from './react.js'
-import { useInputValue, useInstance } from './react/hooks.js'
+import { useCompactStyle, useInputValue, useInstance } from './react/hooks.js'
 import { renderProp } from './react/render.js'
 import { Row } from './Row.jsx'
 import Text from './Text.jsx'
 import { type } from './types.js'
-import { resizeWidth } from './utils/element.js'
 
 /**
  * Wrapper for Native HTML Input, such as: 'text', 'number', 'email', etc. where value is text.
  * Features:
  *  - Label added before input
- *  - Floating Label style (TBD)
  *  - Icon at the start or end of input
  *  - Loading state (with spinner icon and temporarily readonly input)
- *  - Handles controlled or uncontrolled input value state
+ *  - Controlled or uncontrolled input value state
  *  - Input unit prefix/suffix (ex. '$' prefix or 'USD' suffix for number input)
- *  - Compact input with automatic width calculation
- *  - Auto-resize rows for textarea input as user enters content
+ *  - Compact input with automatic width adjustment
+ *
+ *  - todo: improvement - Floating Label style
+ *  - todo: Auto-resize rows for textarea input as user enters content
  */
 export function InputNative ({
-  type, format = formatByType[type], parse = parseByType[type],
-  compact, float, error, icon, iconEnd, label, loading, prefix, suffix, id = useId(),
-  childBefore, childAfter, className, style,
-  _ref, inputRef, ...props
+  float, error, icon, iconEnd, label, loading, prefix, suffix,
+  childBefore, childAfter, className, style, reverse,
+  _ref, ..._props
+}) {
+  const {active, compact, disabled, readonly, hasValue, value, id, props, self} = useInputSetup(_props)
+
+  // Icon ------------------------------------------------------------------------------------------
+  const iconNode = icon ? <Label className='input__icon' htmlFor={id}>{(isString(icon)
+      ? <Icon name={icon} />
+      : <Icon {...{icon}} />
+  )}</Label> : null
+
+  return (<>
+    {label != null &&
+      <Label className='input__label'>{renderProp(label, self)}</Label>}
+    <Row className={cn(className, 'input', {active, compact, disabled, readonly, loading, error})}
+         {...{_ref, reverse, style}}>
+      {childBefore != null && renderProp(childBefore, self)}
+      {!iconEnd && iconNode}
+      {prefix != null &&
+        <Label className='input__prefix' htmlFor={id}>{renderProp(prefix, self)}</Label>}
+      {suffix != null && hasValue &&
+        <Label className='input__suffix'>
+          <Row>
+            <Text className='invisible' aria-hidden='true'>{value}</Text>{renderProp(suffix, self)}
+          </Row>
+        </Label>
+      }
+      <input className={cn('input__field', {iconStart: !iconEnd && iconNode, iconEnd: iconEnd && iconNode})}
+             {...props} ref={self.ref} />
+      {iconEnd && iconNode}
+      {childAfter != null && renderProp(childAfter, self)}
+    </Row>
+  </>)
+}
+
+InputNative.propTypes = {
+  // Whether to use minimal width that fits content, pass number for additional character offset
+  compact: type.OneOf(type.Boolean, type.Number),
+  // Initial value for uncontrolled state
+  defaultValue: type.Any,
+  // Internal value for controlled state
+  value: type.Any,
+  // Handler(value: any, name?: string, event: Event, self) on input value changes
+  onChange: type.Function,
+  // Handler(value: any, name?: string, event: Event, self) on input focus
+  onFocus: type.Function,
+  // Handler(value: any, name?: string, event: Event, self) on input blur
+  onBlur: type.Function,
+  // Label to show before the input (or after with `reverse` true)
+  label: type.NodeOrFunction,
+  // Whether input is loading
+  loading: type.Boolean,
+  // Function(value, name?, event?, self) => string - Input value formatter for UI display
+  format: type.Function,
+  // Function(value, name?, event, self) => any - Parser for internal Input value for onChange
+  parse: type.Function,
+  // Prefix to show before the Input value text
+  prefix: type.NodeOrFunction,
+  // Suffix to show after the Input value text (value must be non-empty)
+  suffix: type.NodeOrFunction,
+  // Custom UI to render before input node (inside .input wrapper with focus state)
+  childBefore: type.NodeOrFunction,
+  // Custom UI to render after input node (inside .input wrapper with focus state)
+  childAfter: type.NodeOrFunction,
+  // Custom Icon name or props
+  icon: type.OneOf(type.String, type.Object),
+  // Whether to place Icon after input node, default is before input node
+  iconEnd: type.Boolean,
+  // ...other native HTML `<input/>` props
+}
+
+/**
+ * Common Input Behaviors Setup
+ */
+export function useInputSetup ({
+  type, id = useId(), compact, format = formatByType[type], parse = parseByType[type],
+  inputRef, ...props
 }) {
   props.id = id
   props.type = type
@@ -83,84 +157,13 @@ export function InputNative ({
   props.onFocus = self.focus
 
   // Compact Input ---------------------------------------------------------------------------------
-  const {placeholder} = props
-  const styleCompact = useMemo(() => {
-    if (compact == null || compact === false) return
-    let maxContent = value == null ? '' : value
-    if (placeholder && placeholder.length > maxContent.length) maxContent = placeholder
-    return resizeWidth(maxContent, {}, compact)
-  }, [compact, placeholder, value])
-  compact = compact != null && compact !== false // convert to boolean for rendering
-  if (compact) props.style = {...props.style, ...styleCompact}
+  compact = useCompactStyle(compact, value, props).compact
 
   // Render Props ----------------------------------------------------------------------------------
   const {disabled, readOnly: readonly} = props
   if (format) value = props.value = format(value, props.name, void 0, self)
 
-  // Icon ------------------------------------------------------------------------------------------
-  const iconNode = icon ? <Label className='input__icon' htmlFor={id}>{(isString(icon)
-      ? <Icon name={icon} />
-      : <Icon {...{icon}} />
-  )}</Label> : null
-
-  return (<>
-    {label != null &&
-      <Label className='input__label'>{renderProp(label, self)}</Label>}
-    <Row className={cn(className, 'input', {active: focus, compact, error, disabled, readonly, loading})}
-         {...{_ref, style}}>
-      {childBefore != null && renderProp(childBefore, self)}
-      {!iconEnd && iconNode}
-      {prefix != null &&
-        <Label className='input__prefix' htmlFor={id}>{renderProp(prefix, self)}</Label>}
-      {suffix != null && hasValue &&
-        <Label className='input__suffix'>
-          <Row>
-            <Text className='invisible' aria-hidden='true'>{value}</Text>{renderProp(suffix, self)}
-          </Row>
-        </Label>
-      }
-      <input className={cn('input__field', {iconStart: !iconEnd && iconNode, iconEnd: iconEnd && iconNode})}
-             {...props} ref={self.ref} />
-      {iconEnd && iconNode}
-      {childAfter != null && renderProp(childAfter, self)}
-    </Row>
-  </>)
-}
-
-InputNative.propTypes = {
-  // Whether to use minimal width that fits content, pass number for additional character offset
-  compact: type.OneOf(type.Boolean, type.Number),
-  // Initial value for uncontrolled state
-  defaultValue: type.Any,
-  // Internal value for controlled state
-  value: type.Any,
-  // Handler(value: any, name?: string, event: Event, self) on input value changes
-  onChange: type.Function,
-  // Handler(value: any, name?: string, event: Event, self) on input focus
-  onFocus: type.Function,
-  // Handler(value: any, name?: string, event: Event, self) on input blur
-  onBlur: type.Function,
-  // Label to show before the input (or after Input with `reverse` true)
-  label: type.NodeOrFunction,
-  // Whether input is loading
-  loading: type.Boolean,
-  // Function(value, name?, event?, self) => string - Input value formatter for UI display
-  format: type.Function,
-  // Function(value, name?, event, self) => any - Parser for internal Input value for onChange
-  parse: type.Function,
-  // Prefix to show before the Input value text
-  prefix: type.NodeOrFunction,
-  // Suffix to show after the Input value text (value must be non-empty)
-  suffix: type.NodeOrFunction,
-  // Custom UI to render before input node (inside .input wrapper with focus state)
-  childBefore: type.NodeOrFunction,
-  // Custom UI to render after input node (inside .input wrapper with focus state)
-  childAfter: type.NodeOrFunction,
-  // Custom Icon name or props
-  icon: type.OneOf(type.String, type.Object),
-  // Whether to place Icon after input node, default is before input node
-  iconEnd: type.Boolean,
-  // ...other native HTML `<input/>` props
+  return {active: focus, compact, disabled, readonly, hasValue, value, id, props, self}
 }
 
 // Default formatter for Input value

@@ -1,6 +1,7 @@
 import { debounce, Id, isEqual, isFunction, subscribeTo, unsubscribeFrom } from '@webframer/js'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useEventListener, useIsomorphicLayoutEffect } from 'usehooks-ts/dist/esm/index.js'
+import { resizeWidth } from '../utils/element.js'
 import { animateSize } from './animations.js'
 
 export * from 'usehooks-ts/dist/esm/index.js'
@@ -156,6 +157,26 @@ export function useElementHeight (delay = 16) {
   useIsomorphicLayoutEffect(handleSize, [element])
 
   return [height, setRef]
+}
+
+/**
+ * React Hook to calculate `compact` styles to apply to props
+ * @param {boolean|number|null|void} compact - whether to use minimal width that fits content
+ * @param {string} [content] - value to use for calculating compact width
+ * @param {object|{placeholder: string}} [props] - Component props to mutate with compact `style`
+ * @returns {{compact: boolean, props}} - props mutated with compact `style` if `compact` is defined
+ */
+export function useCompactStyle (compact, content, props = {}) {
+  const {placeholder} = props
+  const styleCompact = useMemo(() => {
+    if (compact == null || compact === false) return
+    let maxContent = content == null ? '' : content
+    if (placeholder && placeholder.length > maxContent.length) maxContent = placeholder
+    return resizeWidth(maxContent, {}, compact)
+  }, [compact, content, placeholder])
+  compact = compact != null && compact !== false // convert to boolean for rendering
+  if (compact) props.style = {...props.style, ...styleCompact}
+  return {compact, props}
 }
 
 /**
