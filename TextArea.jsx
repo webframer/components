@@ -36,7 +36,7 @@ export function TextArea ({
   return (<>
     {label != null &&
       <Label className='input__label'>{renderProp(label, self)}</Label>}
-    <Row className={cn(className, 'textarea', {active, compact, error, disabled, readonly, loading})}
+    <Row className={cn(className, 'textarea', {active, compact, disabled, readonly, loading, error, resize})}
          {...{_ref, reverse, style}}>
       {childBefore != null && renderProp(childBefore, self)}
       <textarea className='textarea__field' {...props} ref={self.ref} />
@@ -72,6 +72,8 @@ TextArea.propTypes = {
   parse: type.Function,
   // Whether to automatically resize height style to fit content
   resize: type.Boolean,
+  // Whether to disable spell check and autocorrection
+  noSpellCheck: type.Boolean,
   // Custom UI to render before textarea node (inside .textarea wrapper with focus state)
   childBefore: type.NodeOrFunction,
   // Custom UI to render after textarea node (inside .textarea wrapper with focus state)

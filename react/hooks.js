@@ -162,7 +162,7 @@ export function useElementHeight (delay = 16) {
 /**
  * React Hook to calculate `compact` styles to apply to props
  * @param {boolean|number|null|void} compact - whether to use minimal width that fits content
- * @param {string} [content] - value to use for calculating compact width
+ * @param {string|number} [content] - value to use for calculating compact width
  * @param {object|{placeholder: string}} [props] - Component props to mutate with compact `style`
  * @returns {{compact: boolean, props}} - props mutated with compact `style` if `compact` is defined
  */
@@ -170,7 +170,7 @@ export function useCompactStyle (compact, content, props = {}) {
   const {placeholder} = props
   const styleCompact = useMemo(() => {
     if (compact == null || compact === false) return
-    let maxContent = content == null ? '' : content
+    let maxContent = content == null ? '' : String(content)
     if (placeholder && placeholder.length > maxContent.length) maxContent = placeholder
     return resizeWidth(maxContent, {}, compact)
   }, [compact, content, placeholder])

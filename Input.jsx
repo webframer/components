@@ -27,6 +27,8 @@ export function Input ({
   fill, className, style, tooltip, _ref,
   ...props
 }) {
+  if (props.type === 'hidden') return <input {...{id, className, style, ref: _ref, ...props}} />
+
   // Error Message ---------------------------------------------------------------------------------
   const [{animating}, _on, ref] = useExpandCollapse(error != null || info != null)
   const _error = usePreviousProp(error) // for animation to collapse
@@ -41,8 +43,12 @@ export function Input ({
   props['aria-describedby'] = idHelp
   compact = compact != null && compact !== false
 
+  // Render Prop -----------------------------------------------------------------------------------
+  const {required} = props
+
   return (
-    <View className={cn(className, 'input-group', {compact, error})} {...{fill, style, tooltip, _ref}}>
+    <View className={cn(className, 'input-group', {compact, error, required})}
+          {...{fill, style, tooltip, _ref}}>
       {(() => {
         switch (props.type) {
           case 'select':

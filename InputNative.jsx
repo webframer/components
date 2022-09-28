@@ -19,10 +19,12 @@ import { type } from './types.js'
  *  - Controlled or uncontrolled input value state
  *  - Input unit prefix/suffix (ex. '$' prefix or 'USD' suffix for number input)
  *  - Compact input with automatic width adjustment
+ *  - Sticky placeholder that persists as user enters text
+ *  - todo: improvement - onRemove handler
  *  - todo: improvement - Floating Label style
  */
 export function InputNative ({
-  float, error, icon, iconEnd, label, loading, prefix, suffix,
+  float, error, icon, iconEnd, label, loading, prefix, suffix, stickyPlaceholder,
   childBefore, childAfter, className, style, reverse,
   _ref, ..._props
 }) {
@@ -34,6 +36,12 @@ export function InputNative ({
       : <Icon {...{icon}} />
   )}</Label> : null
 
+  // Render Props ----------------------------------------------------------------------------------
+  if (stickyPlaceholder) {
+    const {placeholder} = props
+    stickyPlaceholder = placeholder && placeholder.substring(String(value).length)
+  }
+
   return (<>
     {label != null &&
       <Label className='input__label'>{renderProp(label, self)}</Label>}
@@ -43,10 +51,11 @@ export function InputNative ({
       {!iconEnd && iconNode}
       {prefix != null &&
         <Label className='input__prefix' htmlFor={id}>{renderProp(prefix, self)}</Label>}
-      {suffix != null && hasValue &&
+      {(stickyPlaceholder || suffix != null) && hasValue &&
         <Label className='input__suffix'>
           <Row>
-            <Text className='invisible' aria-hidden='true'>{value}</Text>{renderProp(suffix, self)}
+            <Text className='invisible' aria-hidden='true'>{value}</Text>
+            {stickyPlaceholder ? <Text>{stickyPlaceholder}</Text> : renderProp(suffix, self)}
           </Row>
         </Label>
       }
@@ -87,6 +96,10 @@ InputNative.propTypes = {
   prefix: type.NodeOrFunction,
   // Suffix to show after the Input value text (value must be non-empty)
   suffix: type.NodeOrFunction,
+  // Whether to persist placeholder as user enters text
+  stickyPlaceholder: type.Boolean,
+  // Whether to disable spell check and autocorrection
+  noSpellCheck: type.Boolean,
   // Custom UI to render before input node (inside .input wrapper with focus state)
   childBefore: type.NodeOrFunction,
   // Custom UI to render after input node (inside .input wrapper with focus state)
@@ -102,7 +115,7 @@ InputNative.propTypes = {
  * Common Input Behaviors Setup
  */
 export function useInputSetup ({
-  type, id = useId(), compact, format = formatByType[type], parse = parseByType[type],
+  type, id = useId(), compact, format = formatByType[type], parse = parseByType[type], noSpellCheck,
   inputRef, ...props
 }) {
   props.id = id
@@ -112,7 +125,7 @@ export function useInputSetup ({
   let [value, setValue] = useInputValue(props)
   const [focus, setFocus] = useState(props.autoFocus)
   const hasValue = value != null && value !== ''
-  self.props = {...props, focus, format, value, parse}
+  self.props = {...props, compact, focus, format, parse, noSpellCheck, value}
 
   // Event Handlers --------------------------------------------------------------------------------
   if (!self.ref) {
@@ -123,7 +136,7 @@ export function useInputSetup ({
     self.change = function (e) {
       let {value} = e.target
       const {name, onChange, parse} = self.props
-      if (parse) value = parse(value, name, e, self)
+      if (parse) value = parse.call(this, value, name, e, self)
       if (onChange) onChange.call(this, value, name, e, self)
       if (e.defaultPrevented) return
       // Same internal value does not re-render, but for input number,
@@ -164,6 +177,8 @@ export function useInputSetup ({
   // Render Props ----------------------------------------------------------------------------------
   const {disabled, readOnly: readonly} = props
   if (format) value = props.value = format(value, props.name, void 0, self)
+  if (value == null) value = props.value = '' // fix for React controlled value error
+  if (noSpellCheck) Object.assign(props, noSpellCheckProps)
 
   return {active: focus, compact, disabled, readonly, hasValue, value, id, props, self}
 }
@@ -172,7 +187,6 @@ export function useInputSetup ({
 const formatByType = {
   number: (value, name, event, self) => {
     if (self.inputValue === void 0) return value
-    if (self.inputValue === null) return ''
     return self.inputValue // use the same value user typed in (`value` is the result of parseNumber)
   },
 }
@@ -186,4 +200,11 @@ const parseByType = {
     self.inputValue = value // cache user typed in value for formatting later
     return parseNumber(value)
   },
+}
+
+export const noSpellCheckProps = {
+  autoComplete: 'off',
+  autoCorrect: 'off',
+  autoCapitalize: 'off',
+  spellCheck: false,
 }
