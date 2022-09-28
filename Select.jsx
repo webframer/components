@@ -286,7 +286,8 @@ export function Select ({
   //   - set input box-sizing to content-box
   const {placeholder} = props
   const styleI = useMemo(() => {
-    if (!compact && !multiple) return
+    // Prevent flickering when selecting the first value in multiple (no width should be set)
+    if (!compact && !(multiple && hasValue)) return
     let maxContent = query || placeholder || ''
     if (!multiple && open && options.length) {
       if (isObject(options[0])) {
@@ -300,7 +301,7 @@ export function Select ({
       }
     }
     return resizeWidth(maxContent, {}, compact)
-  }, [query, compact, multiple, open, options, placeholder])
+  }, [hasValue, query, compact, multiple, open, options, placeholder])
 
   // Render Icon -----------------------------------------------------------------------------------
   const iconNode = icon ? // Let default Icon pass click through to parent Select
@@ -315,7 +316,7 @@ export function Select ({
   // => sync query with value onChange for single selection, then use `query` for input
 
   return ( // When Select is open, assign 'active' CSS class to be consistent with other Input types
-    <Row className={cn(className, `select middle wrap ${compact ? 'width-fit' : 'full-width'}`,
+    <Row className={cn(className, `select`,
       {active: open, done: hasValue, compact, multiple, search, upward, query})} style={style}
          {...{row}} onClick={toggleOpen} tabIndex={-1} _ref={self.ref}>
       {childBefore}
