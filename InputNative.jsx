@@ -19,9 +19,7 @@ import { type } from './types.js'
  *  - Controlled or uncontrolled input value state
  *  - Input unit prefix/suffix (ex. '$' prefix or 'USD' suffix for number input)
  *  - Compact input with automatic width adjustment
- *
  *  - todo: improvement - Floating Label style
- *  - todo: Auto-resize rows for textarea input as user enters content
  */
 export function InputNative ({
   float, error, icon, iconEnd, label, loading, prefix, suffix,
@@ -58,6 +56,10 @@ export function InputNative ({
       {childAfter != null && renderProp(childAfter, self)}
     </Row>
   </>)
+}
+
+InputNative.defaultProps = {
+  type: 'text',
 }
 
 InputNative.propTypes = {
@@ -145,7 +147,7 @@ export function useInputSetup ({
     // Fix for Safari/Firefox bug returning empty input value when typing invalid characters
     if (type === 'number' && __CLIENT__) self.keyPress = function (e) {
       const {onKeyPress} = self.props
-      if (onKeyPress) onKeyPress.apply(this, ...arguments)
+      if (onKeyPress) onKeyPress.apply(this, arguments)
       if (e.defaultPrevented) return
       // Prevent Safari from sending empty value when there is invalid character
       if (!numericPattern().test(e.key)) e.preventDefault()

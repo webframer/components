@@ -142,13 +142,16 @@ export function sideToAnimate (node) {
 }
 
 /**
+ * Debounced version of toTextHeight()
+ */
+export const toTextHeightDebounce = debounce(toTextHeight, 50, {leading: true})
+
+/**
  * Event handler to autosize Input height to match typed in text height
  * @example:
  *  <Input type='textarea' onKeyUp={toTextHeight} />
  */
-export const toTextHeight = debounce(toTextHeightFunc, 50, {leading: true})
-
-export function toTextHeightFunc (e) {
+export function toTextHeight (e) {
   if (!e.target) return
 
   // Reset field height

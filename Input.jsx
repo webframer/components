@@ -6,6 +6,7 @@ import { useExpandCollapse, usePreviousProp } from './react.js'
 import { renderProp } from './react/render.js'
 import { Select } from './Select.jsx'
 import { Switch } from './Switch.jsx'
+import { TextArea } from './TextArea.jsx'
 import { type } from './types.js'
 import { Upload } from './Upload.jsx'
 import { UploadGrid } from './UploadGrid.jsx'
@@ -22,7 +23,7 @@ import { View } from './View.jsx'
  *    User can always use `tooltip` prop to display additional input information on hover.
  */
 export function Input ({
-  error, info, id = useId(), idHelp = `${id}-help`,
+  compact, error, info, id = useId(), idHelp = `${id}-help`,
   fill, className, style, tooltip, _ref,
   ...props
 }) {
@@ -35,11 +36,13 @@ export function Input ({
 
   // Accessibility ---------------------------------------------------------------------------------
   props.id = id
+  props.compact = compact
   props.error = error
   props['aria-describedby'] = idHelp
+  compact = compact != null && compact !== false
 
   return (
-    <View className={cn(className, 'input-group', {error})} {...{fill, style, tooltip, _ref}}>
+    <View className={cn(className, 'input-group', {compact, error})} {...{fill, style, tooltip, _ref}}>
       {(() => {
         switch (props.type) {
           case 'select':
@@ -50,6 +53,8 @@ export function Input ({
             return <Upload {...props} />
           case 'file':
             return <UploadGrid {...props} />
+          case 'textarea':
+            return <TextArea {...props} />
           default:
             return <InputNative {...props} />
         }
