@@ -1,4 +1,4 @@
-import { __CLIENT__, isString, numericPattern, parseNumber } from '@webframer/js'
+import { __CLIENT__, isObject, isString, numericPattern, parseNumber } from '@webframer/js'
 import cn from 'classnames'
 import React, { useId, useState } from 'react'
 import Icon from './Icon.jsx'
@@ -28,7 +28,23 @@ export function InputNative ({
   childBefore, childAfter, className, style, reverse,
   _ref, ..._props
 }) {
-  const {active, compact, disabled, readonly, hasValue, value, id, icon, iconEnd, props, self} = useInputSetup(_props)
+  let {active, compact, disabled, readonly, hasValue, value, id, icon, iconEnd, props, self} = useInputSetup(_props)
+
+  // Password visibility toggle --------------------------------------------------------------------
+  if (_props.type === 'password') {
+    const {visible} = self.state
+    if (visible) props.type = 'text'
+    if (!isObject(_props.iconEnd) && !_props.onRemove) {
+      if (!self.toggleVisibility) self.toggleVisibility = function () {
+        self.setState({visible: !self.state.visible})
+      }
+      iconEnd = (
+        <Label className='input__icon' htmlFor={id}>
+          <Icon name={_props.iconEnd || (visible ? 'eye-blocked' : 'eye')} onClick={self.toggleVisibility} />
+        </Label>
+      )
+    }
+  }
 
   // Render Props ----------------------------------------------------------------------------------
   if (stickyPlaceholder) {
