@@ -11,17 +11,19 @@ import { toTextHeight, toTextHeightDebounce } from './utils/element.js'
  * Wrapper for Native HTML `<textarea>`.
  * Features:
  *  - Label added before textarea
+ *  - Icon at the start or end of textarea
  *  - Loading state (with spinner icon and temporarily readonly textarea)
  *  - Controlled or uncontrolled textarea value state
  *  - Compact textarea with automatic width adjustment
  *  - Resize textarea with automatic height adjustment
+ *  - onRemove handler for removing the input field
  */
 export function TextArea ({
   float, error, label, loading, resize,
   childBefore, childAfter, className, style, reverse,
   _ref, ..._props
 }) {
-  const {active, compact, disabled, readonly, props, self} = useInputSetup(_props)
+  const {active, compact, disabled, readonly, icon, iconEnd, props, self} = useInputSetup(_props)
 
   // Autoresize height to fit content length -------------------------------------------------------
   if (!self.keyUp) self.keyUp = function (e) {
@@ -39,7 +41,9 @@ export function TextArea ({
     <Row className={cn(className, 'textarea', {active, compact, disabled, readonly, loading, error, resize})}
          {...{_ref, reverse, style}}>
       {childBefore != null && renderProp(childBefore, self)}
-      <textarea className='textarea__field' {...props} ref={self.ref} />
+      {icon}
+      <textarea className={cn('textarea__field', {iconStart: icon, iconEnd})} {...props} ref={self.ref} />
+      {iconEnd}
       {childAfter != null && renderProp(childAfter, self)}
     </Row>
   </>)
@@ -62,6 +66,9 @@ TextArea.propTypes = {
   onFocus: type.Function,
   // Handler(value: any, name?: string, event: Event, self) on textarea blur
   onBlur: type.Function,
+  // Handler(value: any, name?: string, event: Event, self) on textarea removal
+  // `onChange` will be called first with `null` as value to update form instance
+  onRemove: type.Function,
   // Label to show before the textarea (or after with `reverse` true)
   label: type.NodeOrFunction,
   // Whether textarea is loading
@@ -78,6 +85,10 @@ TextArea.propTypes = {
   childBefore: type.NodeOrFunction,
   // Custom UI to render after textarea node (inside .textarea wrapper with focus state)
   childAfter: type.NodeOrFunction,
+  // Custom Icon name or props to render before textarea node
+  icon: type.OneOf(type.String, type.Object),
+  // Custom Icon name or props to render after textarea node (if `onRemove` not defined)
+  iconEnd: type.OneOf(type.String, type.Object),
   // ...other native HTML `<textarea/>` props
 }
 

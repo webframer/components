@@ -19,22 +19,16 @@ import { type } from './types.js'
  *  - Controlled or uncontrolled input value state
  *  - Input unit prefix/suffix (ex. '$' prefix or 'USD' suffix for number input)
  *  - Compact input with automatic width adjustment
+ *  - onRemove handler for removing the input field
  *  - Sticky placeholder that persists as user enters text
- *  - todo: improvement - onRemove handler
  *  - todo: improvement - Floating Label style
  */
 export function InputNative ({
-  float, error, icon, iconEnd, label, loading, prefix, suffix, stickyPlaceholder,
+  float, error, label, loading, prefix, suffix, stickyPlaceholder,
   childBefore, childAfter, className, style, reverse,
   _ref, ..._props
 }) {
-  const {active, compact, disabled, readonly, hasValue, value, id, props, self} = useInputSetup(_props)
-
-  // Icon ------------------------------------------------------------------------------------------
-  const iconNode = icon ? <Label className='input__icon' htmlFor={id}>{(isString(icon)
-      ? <Icon name={icon} />
-      : <Icon {...{icon}} />
-  )}</Label> : null
+  const {active, compact, disabled, readonly, hasValue, value, id, icon, iconEnd, props, self} = useInputSetup(_props)
 
   // Render Props ----------------------------------------------------------------------------------
   if (stickyPlaceholder) {
@@ -48,7 +42,7 @@ export function InputNative ({
     <Row className={cn(className, 'input', {active, compact, disabled, readonly, loading, error})}
          {...{_ref, reverse, style}}>
       {childBefore != null && renderProp(childBefore, self)}
-      {!iconEnd && iconNode}
+      {icon}
       {prefix != null &&
         <Label className='input__prefix' htmlFor={id}>{renderProp(prefix, self)}</Label>}
       {(stickyPlaceholder || suffix != null) && hasValue &&
@@ -59,9 +53,9 @@ export function InputNative ({
           </Row>
         </Label>
       }
-      <input className={cn('input__field', {iconStart: !iconEnd && iconNode, iconEnd: iconEnd && iconNode})}
+      <input className={cn('input__field', {iconStart: icon, iconEnd})}
              {...props} ref={self.ref} />
-      {iconEnd && iconNode}
+      {iconEnd}
       {childAfter != null && renderProp(childAfter, self)}
     </Row>
   </>)
@@ -84,6 +78,9 @@ InputNative.propTypes = {
   onFocus: type.Function,
   // Handler(value: any, name?: string, event: Event, self) on input blur
   onBlur: type.Function,
+  // Handler(value: any, name?: string, event: Event, self) on input removal.
+  // `onChange` will be called first with `null` as value to update form instance
+  onRemove: type.Function,
   // Label to show before the input (or after with `reverse` true)
   label: type.NodeOrFunction,
   // Whether input is loading
@@ -104,10 +101,10 @@ InputNative.propTypes = {
   childBefore: type.NodeOrFunction,
   // Custom UI to render after input node (inside .input wrapper with focus state)
   childAfter: type.NodeOrFunction,
-  // Custom Icon name or props
+  // Custom Icon name or props to render before input node
   icon: type.OneOf(type.String, type.Object),
-  // Whether to place Icon after input node, default is before input node
-  iconEnd: type.Boolean,
+  // Custom Icon name or props to render after input node (if `onRemove` not defined)
+  iconEnd: type.OneOf(type.String, type.Object),
   // ...other native HTML `<input/>` props
 }
 
@@ -115,7 +112,8 @@ InputNative.propTypes = {
  * Common Input Behaviors Setup
  */
 export function useInputSetup ({
-  type, id = useId(), compact, format = formatByType[type], parse = parseByType[type], noSpellCheck,
+  type, id = useId(), compact, format = formatByType[type], parse = parseByType[type],
+  icon, iconEnd, onRemove, noSpellCheck,
   inputRef, ...props
 }) {
   props.id = id
@@ -125,7 +123,7 @@ export function useInputSetup ({
   let [value, setValue] = useInputValue(props)
   const [focus, setFocus] = useState(props.autoFocus)
   const hasValue = value != null && value !== ''
-  self.props = {...props, compact, focus, format, parse, noSpellCheck, value}
+  self.props = {...props, compact, focus, format, parse, onRemove, noSpellCheck, value}
 
   // Event Handlers --------------------------------------------------------------------------------
   if (!self.ref) {
@@ -133,8 +131,7 @@ export function useInputSetup ({
       self.inputNode = node
       return assignRef.call(this, inputRef, ...arguments)
     }
-    self.change = function (e) {
-      let {value} = e.target
+    self.change = function (e, value = e.target.value) {
       const {name, onChange, parse} = self.props
       if (parse) value = parse.call(this, value, name, e, self)
       if (onChange) onChange.call(this, value, name, e, self)
@@ -157,6 +154,11 @@ export function useInputSetup ({
       if (e.defaultPrevented) return
       setFocus(true)
     }
+    self.remove = function (e) {
+      const {name, onRemove, value} = self.props
+      self.change(e, null)
+      if (onRemove) onRemove.call(this, value, name, e, self) // call with value before removal
+    }
     // Fix for Safari/Firefox bug returning empty input value when typing invalid characters
     if (type === 'number' && __CLIENT__) self.keyPress = function (e) {
       const {onKeyPress} = self.props
@@ -174,13 +176,30 @@ export function useInputSetup ({
   // Compact Input ---------------------------------------------------------------------------------
   compact = useCompactStyle(compact, value, props).compact
 
+  // Remove handler --------------------------------------------------------------------------------
+  if (onRemove) iconEnd = {name: 'delete', onClick: self.remove}
+
+  // Icon ------------------------------------------------------------------------------------------
+  if (icon != null) icon = (
+    <Label className='input__icon' htmlFor={id}>{(isString(icon)
+        ? <Icon name={icon} />
+        : <Icon {...icon} />
+    )}</Label>
+  )
+  if (iconEnd != null) iconEnd = (
+    <Label className='input__icon' htmlFor={id}>{(isString(iconEnd)
+        ? <Icon name={iconEnd} />
+        : <Icon {...iconEnd} />
+    )}</Label>
+  )
+
   // Render Props ----------------------------------------------------------------------------------
   const {disabled, readOnly: readonly} = props
   if (format) value = props.value = format(value, props.name, void 0, self)
   if (value == null) value = props.value = '' // fix for React controlled value error
   if (noSpellCheck) Object.assign(props, noSpellCheckProps)
 
-  return {active: focus, compact, disabled, readonly, hasValue, value, id, props, self}
+  return {active: focus, compact, disabled, readonly, hasValue, value, id, icon, iconEnd, props, self}
 }
 
 // Default formatter for Input value
