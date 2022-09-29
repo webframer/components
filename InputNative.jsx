@@ -1,4 +1,4 @@
-import { __CLIENT__, isObject, isString, numericPattern, parseNumber } from '@webframer/js'
+import { __CLIENT__, isString, numericPattern, parseNumber } from '@webframer/js'
 import cn from 'classnames'
 import React, { useId, useState } from 'react'
 import Icon from './Icon.jsx'
@@ -34,13 +34,13 @@ export function InputNative ({
   if (_props.type === 'password') {
     const {visible} = self.state
     if (visible) props.type = 'text'
-    if (!isObject(_props.iconEnd) && !_props.onRemove) {
+    if (_props.iconEnd == null && _props.onRemove == null) {
       if (!self.toggleVisibility) self.toggleVisibility = function () {
         self.setState({visible: !self.state.visible})
       }
       iconEnd = (
         <Label className='input__icon' htmlFor={id}>
-          <Icon name={_props.iconEnd || (visible ? 'eye-blocked' : 'eye')} onClick={self.toggleVisibility} />
+          <Icon name={visible ? 'eye-blocked' : 'eye'} onClick={self.toggleVisibility} />
         </Label>
       )
     }
@@ -95,7 +95,9 @@ InputNative.propTypes = {
   // Handler(value: any, name?: string, event: Event, self) on input blur
   onBlur: type.Function,
   // Handler(value: any, name?: string, event: Event, self) on input removal.
-  // `onChange` will be called first with `null` as value to update form instance
+  // `onChange` handler will fire after with `null` as value, unless event.preventDefault().
+  // To let `onChange` update form instance first before removing the field,
+  // use setTimeout to execute code inside `onRemove` handler.
   onRemove: type.Function,
   // Label to show before the input (or after with `reverse` true)
   label: type.NodeOrFunction,
@@ -129,7 +131,7 @@ InputNative.propTypes = {
  */
 export function useInputSetup ({
   type, id = useId(), compact, format = formatByType[type], parse = parseByType[type],
-  icon, iconEnd, onRemove, noSpellCheck,
+  icon, iconEnd, onRemove, noSpellCheck = type === 'password',
   inputRef, ...props
 }) {
   props.id = id
@@ -172,8 +174,9 @@ export function useInputSetup ({
     }
     self.remove = function (e) {
       const {name, onRemove, value} = self.props
+      if (onRemove) onRemove.call(this, value, name, e, self)
+      if (e.defaultPrevented) return
       self.change(e, null)
-      if (onRemove) onRemove.call(this, value, name, e, self) // call with value before removal
     }
     // Fix for Safari/Firefox bug returning empty input value when typing invalid characters
     if (type === 'number' && __CLIENT__) self.keyPress = function (e) {
