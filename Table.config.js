@@ -6,28 +6,28 @@ export default {
   // Custom Edit Actions when Table is selected (can be applied to any element in UI?)
   actions: [
     {
-      action: onAddHeader, // (state: view.json, args: object)
+      action: onAddHeader, // (state: ui.json, args: object)
       // Action triggers on `click` event by default, if label returns primitive value
-      label: ({ vertical }) => interpolateString('+ Add {v}', { v: vertical ? 'Row' : 'Column' }),
+      label: ({vertical}) => interpolateString('+ Add {v}', {v: vertical ? 'Row' : 'Column'}),
     },
     {
-      action: onAddCells, // (state: view.json, args: object)
-      label: ({ vertical }) => interpolateString('+ Add {v}', { v: vertical ? 'Column' : 'Row' }),
+      action: onAddCells, // (state: ui.json, args: object)
+      label: ({vertical}) => interpolateString('+ Add {v}', {v: vertical ? 'Column' : 'Row'}),
     },
     {
-      action: onRemoveHeader, // (state: view.json, args: object)
-      label: ({ vertical }) => interpolateString('- Reduce {v}', { v: vertical ? 'Row' : 'Column' }),
+      action: onRemoveHeader, // (state: ui.json, args: object)
+      label: ({vertical}) => interpolateString('- Reduce {v}', {v: vertical ? 'Row' : 'Column'}),
     },
     {
-      action: onRemoveCells, // (state: view.json, args: object)
-      label: ({ vertical }) => interpolateString('- Reduce {v}', { v: vertical ? 'Column' : 'Row' }),
+      action: onRemoveCells, // (state: ui.json, args: object)
+      label: ({vertical}) => interpolateString('- Reduce {v}', {v: vertical ? 'Column' : 'Row'}),
     },
     {
-      action: onToggleLayout, // (state: view.json, args: object)
-      // If label returns an object (view.json), action needs to be triggered manually
-      label: ({ vertical }) => ({
-        '@view': 'Input',
-        name: 'vertical', // view.json attribute to modify
+      action: onToggleLayout, // (state: ui.json, args: object)
+      // If label returns an object (ui.json), action needs to be triggered manually
+      label: ({vertical}) => ({
+        '#view': 'Input',
+        name: 'vertical', // ui.json attribute to modify
         type: 'tabs',
         label: 'Table Layout',
         onChange: '@action', // => action will receive {formValues: {vertical: true}, event} as args
@@ -47,33 +47,35 @@ export default {
     },
   ],
 
-  // default view.json attributes
+  // default ui.json attributes
   defaultProps: {
     class: 'table',
-    '@list': [
-      {
-        '@view': 'slot',
+    '#items': [
+      { // all private attributes (starting with #) will be ignored in production
+        '#view': 'slot',
+        '#dnd': false, // dnd is enabled by default in Edit mode
         name: 'head',
-        '@list': [
+        '#items': [
           {
-            '@view': 'tr',
-            '@list': [
+            '#view': 'tr',
+            '#drop': false,
+            '#items': [
               {
-                '@view': 'th', // `@id` is to be injected by the platform automatically
-                '@dnd': true,
-                '@list': [
+                '#view': 'th', // `@id` is to be injected by the platform automatically
+                '#drag': false,
+                '#items': [
                   {
-                    '@view': 'Text',
+                    '#view': 'Text',
                     children: 'Header A',
                   },
                 ],
               },
               {
-                '@view': 'th',
-                '@dnd': true,
-                '@list': [
+                '#view': 'th',
+                '#drag': false,
+                '#items': [
                   {
-                    '@view': 'Text',
+                    '#view': 'Text',
                     children: 'Header B',
                   },
                 ],
@@ -83,28 +85,30 @@ export default {
         ],
       },
       {
-        '@view': 'slot',
+        '#view': 'slot',
+        '#dnd': false,
         name: 'body',
-        '@list': [
+        '#items': [
           {
-            '@view': 'tr',
-            '@list': [
+            '#view': 'tr',
+            '#drop': false,
+            '#items': [
               {
-                '@view': 'td',
-                '@dnd': true,
-                '@list': [
+                '#view': 'td',
+                '#drag': false,
+                '#items': [
                   {
-                    '@view': 'Text',
+                    '#view': 'Text',
                     children: 'Cell A1',
                   },
                 ],
               },
               {
-                '@view': 'td',
-                '@dnd': true,
-                '@list': [
+                '#view': 'td',
+                '#drag': false,
+                '#items': [
                   {
-                    '@view': 'Text',
+                    '#view': 'Text',
                     children: 'Cell B1',
                   },
                 ],
@@ -112,24 +116,25 @@ export default {
             ],
           },
           {
-            '@view': 'tr',
-            '@list': [
+            '#view': 'tr',
+            '#drop': false,
+            '#items': [
               {
-                '@view': 'td',
-                '@dnd': true,
-                '@list': [
+                '#view': 'td',
+                '#drag': false,
+                '#items': [
                   {
-                    '@view': 'Text',
+                    '#view': 'Text',
                     children: 'Cell A2',
                   },
                 ],
               },
               {
-                '@view': 'td',
-                '@dnd': true,
-                '@list': [
+                '#view': 'td',
+                '#drag': false,
+                '#items': [
                   {
-                    '@view': 'Text',
+                    '#view': 'Text',
                     children: 'Cell B2',
                   },
                 ],
