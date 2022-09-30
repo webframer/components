@@ -6,38 +6,38 @@
 }
 
 .spinner.smallest {
-    width: 16px;
-    height: 16px;
+    width: 1em;
+    height: 1em;
 }
 
 .spinner.smaller {
-    width: 24px;
-    height: 24px;
+    width: 1.5em;
+    height: 1.5em;
 }
 
 .spinner.small {
-    width: 32px;
-    height: 32px;
+    width: 2em;
+    height: 2em;
 }
 
 .spinner.base {
-    width: 48px;
-    height: 48px;
+    width: 3em;
+    height: 3em;
 }
 
 .spinner.large {
-    width: 64px;
-    height: 64px;
+    width: 4em;
+    height: 4em;
 }
 
 .spinner.larger {
-    width: 80px;
-    height: 80px;
+    width: 5em;
+    height: 5em;
 }
 
 .spinner.largest {
-    width: 96px;
-    height: 96px;
+    width: 6em;
+    height: 6em;
 }
 
 .spinner div {

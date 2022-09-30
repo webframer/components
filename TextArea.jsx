@@ -49,9 +49,9 @@ export function TextArea ({
   </>)
 }
 
-TextArea.defaultProps = {
-  // rows: 2, // default in the browser is 2
-}
+// TextArea.defaultProps = {
+// rows: 2, // default in the browser is 2
+// }
 
 TextArea.propTypes = {
   // Whether to use minimal width that fits content, pass number for additional character offset

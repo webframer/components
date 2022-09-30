@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 /**
  * PROPTYPES PROXY =================================================================================
  * For clear semantic meaning without documentation and cross platform unified API.
+ * All types should follow CapCase convention for readability and consistency.
  * =================================================================================================
  */
 
@@ -19,7 +20,7 @@ type.Boolean = PropTypes.bool
 // Data size equivalent to 8 Bits
 type.Byte = PropTypes.number
 // Unitless Pixel number or CSS value as string
-type.CSSValue = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+type.CSSLength = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 // Object or Array
 type.Collection = PropTypes.oneOfType([PropTypes.object, PropTypes.array])
 // Rotation Degree
@@ -86,6 +87,8 @@ type.Promise = PropTypes.shape({
 })
 // Pixel screen unit
 type.Px = PropTypes.number
+// A fraction number between 0 and 1
+type.Percent = PropTypes.number
 type.PrimitiveOrObject = PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.object])
 // Function or the Object created by React.useRef() or React.createRef()
 type.Ref = type.OneOf(type.Function, type.Of({current: type.Any}))

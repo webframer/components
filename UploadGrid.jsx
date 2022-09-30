@@ -276,7 +276,7 @@ UploadGrid.propTypes = {
   // Maximum number of grid columns, default is the divisor of `maxFiles` closest to its square root
   maxColumns: type.Number,
   // Spacing between grid slots, can be any CSS value, required if maxFiles > 1
-  gap: type.CSSValue,
+  gap: type.CSSLength,
   // Type of file (added as attribute to new FileInput uploads)
   kind: type.Any,
   // Whether to disable selected/uploaded file(s) preview (aka images, video, etc.)
