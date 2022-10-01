@@ -24,7 +24,8 @@ import { View } from './View.jsx'
  */
 export function Input ({
   compact, error, info, id = useId(), idHelp = `${id}-help`,
-  fill, className, style, tooltip, _ref,
+  className, style, tooltip, _ref,
+  col, row, rtl, fill, left, right, top, bottom, center, middle,
   ...props
 }) {
   if (props.type === 'hidden') return <input {...{id, className, style, ref: _ref, ...props}} />
@@ -48,7 +49,7 @@ export function Input ({
 
   return (
     <View className={cn(className, 'input-group', {compact, error, required})}
-          {...{fill, style, tooltip, _ref}}>
+          {...{style, tooltip, _ref, col, row, rtl, fill, left, right, top, bottom, center, middle}}>
       {(() => {
         switch (props.type) {
           case 'select':

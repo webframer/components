@@ -13,7 +13,7 @@ import { useInstance } from './react/hooks.js'
 import { type } from './types.js'
 
 /**
- * todo: fix Tooltip position: 'right' toggles between top and right positions
+ * todo: fix Tooltip position: 'right' toggles between top and right positions when content overflows
  * todo: component improvement 3 - align tooltip
  * Tooltip Component
  * @notes:

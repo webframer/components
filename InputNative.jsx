@@ -223,9 +223,12 @@ export function useInputSetup ({
 
 // Default formatter for Input value
 const formatByType = {
-  number: (value, name, event, self) => {
-    if (self.inputValue === void 0) return value
-    return self.inputValue // use the same value user typed in (`value` is the result of parseNumber)
+  number: (value, name, event, {inputCache}) => {
+    if (inputCache === void 0) return value
+    // use the same value user typed in (`value` is the result of parseNumber),
+    // if it equals controlled value, for use cases when user enters a number
+    // with leading zeros after the decimal, such as 1.000
+    return inputCache.value === value ? inputCache.valueString : value
   },
 }
 
@@ -235,8 +238,11 @@ const parseByType = {
     // Note: in Safari, if user types in a comma, onChange event only fires once with value = '',
     // even with valid values, like 1,000 - this is clearly a bug for input type number from Safari.
     // => on Safari, perform sanitization of all none numeric characters, to behave like Chrome
-    self.inputValue = value // cache user typed in value for formatting later
-    return parseNumber(value)
+    self.inputCache = {
+      valueString: value, // cache user typed in value for formatting later
+      value: parseNumber(value),
+    }
+    return self.inputCache.value
   },
 }
 
