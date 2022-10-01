@@ -2,8 +2,10 @@ import PropTypes from 'prop-types'
 
 /**
  * PROPTYPES PROXY =================================================================================
+ *
  * For clear semantic meaning without documentation and cross platform unified API.
  * All types should follow CapCase convention for readability and consistency.
+ *
  * =================================================================================================
  */
 
@@ -108,6 +110,21 @@ type.UrlOrObject = type.OneOf(type.String, type.Object)
  * Component Types ---------------------------------------------------------------------------------
  */
 
+// Input Control config object
+type.Control = type.Of({
+  // One of supported `<Input/>` types (eg. 'text', 'email', 'slider', etc.), default is 'text'
+  type: type.String,
+  // Human-readable label for the input type
+  text: type.NodeOrFunction,
+  // Brief explanation of the input type (supports Markdown)
+  desc: type.NodeOrFunction,
+  // CSS color value (eg. 'rgba(0,0,0,1)', 'linear-gradient(to bottom, white, black)', etc.)
+  color: type.String,
+  // Function(value) => boolean - function to check if value belongs to this control type
+  ofType: type.Function,
+  // ...other props to pass to `<Input/>` component
+})
+
 // Localised definition (example: LANGUAGE.ENGLISH object)
 type.Definition = type.Of({
   _: type.Any.isRequired, // identifier code that is language agnostic
@@ -172,6 +189,9 @@ type.Option = type.OneOf(
 )
 // Select options
 type.Options = type.ListOf(type.Option.isRequired)
+
+// Component.propTypes object
+type.PropTypes = type.ObjectOf(type.Function)
 
 // Tag entry
 type.Tag = type.Of({
