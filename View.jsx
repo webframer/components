@@ -166,7 +166,7 @@ export function createView (defaultProp) {
     middle: type.Boolean,
     sound: type.Object,
     children: type.Any,
-    className: type.String,
+    className: type.ClassName,
     // Ref for the View or outer Scroll container
     _ref: type.Ref,
     // Whether to use Scroll View

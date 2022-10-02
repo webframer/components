@@ -21,6 +21,8 @@ type.Any = PropTypes.any
 type.Boolean = PropTypes.bool
 // Data size equivalent to 8 Bits
 type.Byte = PropTypes.number
+// CSS class names, separated by space
+type.ClassName = PropTypes.string
 // Unitless Pixel number or CSS value as string
 type.CSSLength = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 // Object or Array

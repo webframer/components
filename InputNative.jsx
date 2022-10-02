@@ -230,6 +230,14 @@ const formatByType = {
     // with leading zeros after the decimal, such as 1.000
     return inputCache.value === value ? inputCache.valueString : value
   },
+  // Unused - this logic moved to useInputSetup() for guaranteed output and better performance
+  // [undefined]: (value) => {
+  //   // The default behavior is to convert `undefined` to '',
+  //   // to prevent React error related to Controlled state.
+  //   // This is the same behavior from 'final-form' package.
+  //   // https://final-form.org/docs/react-final-form/types/FieldProps
+  //   return (value === undefined) ? '' : value
+  // },
 }
 
 // Default parser for Input value

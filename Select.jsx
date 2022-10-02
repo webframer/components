@@ -48,31 +48,70 @@ import { onEventStopPropagation } from './utils/interactions.js'
  *    - Options use position `absolute` initially, then `fixed` if `defaultOpen` = false,
  *      to remain visible inside overflow hidden Scroll
  *      => `.select__options` class must have `max-height` set to explicit unit, such as `px`
+ *    - There are use cases when Select is used to concatenate string value from array.
+ *      The parse function will convert array into a single string,
+ *      But Select will need to split the string back to array value for internal state,
+ *      possibly including mapping to the actual values.
+ *      Select.value should always point to the source of truth,
+ *      which in this case is a concatenated string, not array.
+ *      But that complicates its internal logic.
+ *      => What we need instead, is a serializer that
+ *         converts form.values to individual input type value for each UI component.
+ *         This way backend can store a different value format from UI internal state.
+ *      @see https://www.django-rest-framework.org/api-guide/serializers/
+ *
+ * @example:
+ *    // Format backend data to frontend value
+ *    serialize('row reverse')
+ *    >>> ['row', 'reverse']
+ *
+ *    // Parse frontend value to backend data
+ *    deserialize(['row', 'reverse'])
+ *    >>> 'row reverse'
  */
 export function Select ({
-  options, value, query, search, defaultOpen, compact, fuzzyOpt, focusIndex,
-  forceRender, fixed, upward,
-  childBefore, childAfter, className, style, row,
-  multiple, onClickValue, onChange, onSearch, onSelect,
+  options, defaultValue, name, defaultOpen, fuzzyOpt, focusIndex,
+  multiple, query, search, compact, forceRender, fixed, upward,
+  onChange, onFocus, onBlur, onSearch, onSelect, onClickValue,
   icon, iconEnd, iconProps,
   addOption, addOptionMsg, noOptionsMsg,
+  format, parse, // these are serializer and deserializer
+  type, // not used
+  childBefore, childAfter, className, style, row,
   _ref, inputRef, ...props
 }) {
+  props = toReactProps(props)
+  let {value = defaultValue} = props
   const [self, state] = useInstance({options, query, value, focusIndex})
   let [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
-  useEffect(() => (self.didMount = true) && (() => {self.willUnmount = true}), [])
-  props = toReactProps(props)
-  Object.assign(self, {
-    addOption, multiple, search, query, options,
-    onChange, onSearch, onSelect,
-  }, props)
   self.open = open // for internal logic
   open = open || animating // for rendering and styling
+  useEffect(() => (self.didMount = true) && (() => {self.willUnmount = true}), [])
 
-  // State should store pure value as is, because `value` can be an array for multiple selection
-  // Then let the render logic compute what to display based on given value.
-  // For single selection, when no custom option render exists, input shows text value.
-  if (value != null) state.value = value // controlled state if value is defined
+  // Initialize once
+  if (!self.props && value != null && format)
+    state.value = format(value, name, void 0, self)
+
+  // Controlled state
+  else if (props.value != null)
+    // State should store pure value as is, because `value` can be an array for multiple selection
+    // Then let the render logic compute what to display based on given value.
+    // For single selection, when no custom option render exists, input shows text value.
+    state.value = format ? format(props.value, name, void 0, self) : props.value
+
+  // Simulate class instance props
+  self.props = {
+    options, defaultValue, name, defaultOpen, fuzzyOpt, focusIndex,
+    multiple, query, search, compact, forceRender, fixed, upward,
+    onChange, onFocus, onBlur, onSearch, onSelect, onClickValue,
+    icon, iconEnd, iconProps,
+    addOption, addOptionMsg, noOptionsMsg,
+    format, parse, // these are serializer and deserializer
+    type, // not used
+    childBefore, childAfter, className, style, row,
+    _ref, inputRef, ...props,
+  }
+  Object.assign(self, {}, props)
 
   // Node Handlers ---------------------------------------------------------------------------------
   if (!self.ref) self.ref = function (node) {
@@ -95,46 +134,54 @@ export function Select ({
   if (!self.focus) self.focus = function (e) {
     self.hasFocus = true
     self.openOptions.apply(this, arguments)
-    if (self.onFocus) return self.onFocus.apply(this, arguments)
   }
   // if (!self.focusInput) self.focusInput = function () {
   //   if (!self.inputNode) return
   //   self.inputNode.focus() // setting focus on input will trigger input.onFocus handler
   // }
-  if (!self.focusOption) self.focusOption = function () {
+  if (!self.focusOption) self.focusOption = function (item, e) {
+    const {onSelect, name} = self.props
     self.hasFocus = true
-    if (self.onSelect) return self.onSelect.apply(this, arguments) // pass selected item by reference
+    if (onSelect) onSelect.call(this, item, name, e, self) // pass selected item by reference
   }
-  if (!self.blur) self.blur = function () {
+  if (!self.blur) self.blur = function (e) {
     self.hasFocus = false
-    if (self.open) setTimeout(self.closeOptions, 0)
-    if (self.onBlur) return self.onBlur.apply(this, arguments)
+    if (self.open) setTimeout(() => self.closeOptions.call(this, e), 0)
   }
-  if (!self.blurOption) self.blurOption = function () {
+  if (!self.blurOption) self.blurOption = function (e) {
     self.hasFocus = false
-    if (self.open) setTimeout(self.closeOptions, 0)
+    if (self.open) setTimeout(() => self.closeOptions.call(this, e), 0)
   }
-  if (!self.selectOption) self.selectOption = function (item, ...args) { // options clicked
-    const {multiple} = self
+  if (!self.selectOption) self.selectOption = function (item, e) { // options clicked
+    const {multiple, onChange, name, parse} = self.props
     self.hasFocus = multiple
     let {text = item, value = text} = isObject(item) ? item : {}
     if (multiple) value = toUniqueListFast((self.state.value || []).concat(value))
+    if (onChange) onChange.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
+    if (e.defaultPrevented) return
     const options = getOptionsFiltered(self)
     self.setState({
       value, query: multiple ? '' : String(text), options,
       focusIndex: options.findIndex(i => i === item),
     })
     if (multiple && self.inputNode) self.inputNode.focus()
-    if (self.open) setTimeout(self.closeOptions, 0)
-    if (self.onChange) return self.onChange.call(this, value, ...args)
+    if (self.open) setTimeout(() => self.closeOptions.call(this, e), 0)
   }
-  if (multiple && !self.deleteValue) self.deleteValue = function (val, ...args) {
+  if (multiple && !self.deleteValue) self.deleteValue = function (val, e) {
+    const {onChange, name, parse} = self.props
     const value = self.state.value.filter(v => v !== val)
+    if (onChange) onChange.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
+    if (e.defaultPrevented) return
     self.setState({value})
-    if (self.onChange) return self.onChange.call(this, value, ...args)
   }
-  if (!self.closeOptions) self.closeOptions = function () {
+  if (!self.closeOptions) self.closeOptions = function (e) {
     if (self.willUnmount || self.hasFocus || !self.open) return
+    const {onBlur, name, parse} = self.props
+    if (onBlur) {
+      const {value} = self.state
+      onBlur.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
+    }
+    if (e.defaultPrevented) return
     // Input query on close use-cases:
     // Single search query
     //    - match selected value if selected,
@@ -142,39 +189,50 @@ export function Select ({
     // Multiple search query
     //    - reset to query from props (empty by default)
     // Single/Multiple select query (no logic needed because user cannot change query)
-    if (self.search) {
+    const {multiple, search, options} = self.props
+    if (search) {
       const {value, query} = self.state
-      if (!self.multiple && value != null && String(value) !== query) // single search
-        self.state.query = String(getValueText(value, self.options))
-      else if (self.multiple || value == null) // multiple or unselected single search
-        self.state.query = self.query
+      if (!multiple && value != null && String(value) !== query) // single search
+        self.state.query = String(getValueText(value, options))
+      else if (multiple || value == null) // multiple or unselected single search
+        self.state.query = self.props.query
       if (query !== self.state.query) self.state.options = self.getOptions(self.state.query)
     }
     toggleOpen.apply(this, arguments)
     self.unsubscribeEvents()
   }
-  if (!self.openOptions) self.openOptions = function () {
+  if (!self.openOptions) self.openOptions = function (e) {
     if (self.open) return
+    const {onFocus, name, parse} = self.props
+    if (onFocus) {
+      const {value} = self.state
+      onFocus.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
+    }
+    if (e.defaultPrevented) return
     toggleOpen.apply(this, arguments)
     self.subscribeToEvents()
   }
 
   // Fuzzy Search ----------------------------------------------------------------------------------
-  if (search && !self.fuse) self.fuse = new Fuse([], fuzzyOpt)
-  if (search && !self.getOptions) self.getOptions = function (query) {
-    return self.fuse.search(query).map(v => v.item)
+  if (search) {
+    if (!self.fuse) self.fuse = new Fuse([], fuzzyOpt)
+    if (!self.getOptions) self.getOptions = function (query) {
+      return self.fuse.search(query).map(v => v.item)
+    }
+    if (!self.searchQuery) self.searchQuery = function (e) {
+      const {onSearch, name} = self.props
+      const query = e.target.value
+      if (onSearch) onSearch.call(this, query, name, e, self)
+      if (e.defaultPrevented) return
+      self.setState({query, focusIndex: 0})
+      self.openOptions.apply(this, arguments) // reopen if it was closed when Enter pressed
+      self.updateOptions(query)
+    }
+    if (!self.updateOptions) self.updateOptions = debounce((query) => {
+      if (self.willUnmount) return
+      self.setState({options: query ? self.getOptions(query) : getOptionsFiltered(self), query})
+    }, TIME_DURATION_INSTANT)
   }
-  if (search && !self.searchQuery) self.searchQuery = function (e) {
-    const query = e.target.value
-    self.setState({query, focusIndex: 0})
-    self.openOptions.apply(this, arguments) // reopen if it was closed when Enter pressed
-    self.updateOptions(query)
-    if (self.onSearch) return self.onSearch.call(this, query, ...arguments)
-  }
-  if (search && !self.updateOptions) self.updateOptions = debounce((query) => {
-    if (self.willUnmount) return
-    self.setState({options: query ? self.getOptions(query) : getOptionsFiltered(self), query})
-  }, TIME_DURATION_INSTANT)
 
   // Sync Options prop with state ------------------------------------------------------------------
   options = useMemo(() => getOptionsFiltered(self), [state.value, options])
@@ -218,31 +276,34 @@ export function Select ({
       return
     switch (e.keyCode) {
       case KEY.ArrowDown:
-        e.preventDefault()
+        e.preventDefault() // prevent scrolling within outer parent
         return self.setOptionFocus(self.state.focusIndex + (self.upward ? -1 : 1))
       case KEY.ArrowUp:
-        e.preventDefault()
+        e.preventDefault() // prevent scrolling within outer parent
         return self.setOptionFocus(self.state.focusIndex + (self.upward ? 1 : -1))
       case KEY.Enter: {// Enter will select the focusIndex option in the result
         if (e.target !== self.inputNode && e.target !== self.node) return
-        e.preventDefault() // prevent event propagation that toggles open state
         const {query, options, focusIndex} = self.state
-        if (!options.length && !self.addOption) return
+        const {addOption} = self.props
+        // prevent event propagation that toggles open state and selects accidentally
+        if (!options.length && !addOption) return e.preventDefault()
         let selected = options.length ? options[focusIndex] : null
-        if (selected == null && self.addOption && query) selected = trimSpaces(query)
-        if (selected == null) return
-        return self.selectOption.call(this, selected, ...arguments)
+        if (selected == null && addOption && query) selected = trimSpaces(query)
+        if (selected == null) return e.preventDefault()
+        self.selectOption.call(this, selected, ...arguments)
+        return e.preventDefault()
       }
       case KEY.Backspace: {// input search Backspace will delete the last selected option
-        if (!self.search || !self.multiple || e.target !== self.inputNode) return
+        const {multiple} = self.props
+        if (!multiple || e.target !== self.inputNode) return
         const {query, value} = self.state
         if (query || !value || !value.length) return
-        e.preventDefault()
-        return self.deleteValue.call(this, last(value), ...arguments)
+        self.deleteValue.call(this, last(value), ...arguments)
+        return e.preventDefault()
       }
       case KEY.Escape: {
         if (e.target !== self.inputNode && e.target !== self.node) return
-        e.preventDefault()
+        e.stopPropagation()
         self.hasFocus = false
         return self.closeOptions.apply(this, arguments)
       }
@@ -325,10 +386,10 @@ export function Select ({
 
       {/* Multiple selected items */}
       {multiple && value && value.map(v => {
-        const {text, key = v} = getOptionByValue(v, self.options)
+        const {text, key = v} = getOptionByValue(v, self.props.options)
         // Use <a> tag, so it can link to another page as selected Tag
-        return <a key={key} onClick={onClickValue && onEventStopPropagation(function () {
-          onClickValue.call(this, v, ...arguments)
+        return <a key={key} onClick={onClickValue && onEventStopPropagation(function (e) {
+          onClickValue.call(this, v, name, e, self)
         })}>
           <Text>{text}</Text><Icon name='delete' onClick={onEventStopPropagation(function () {
           self.deleteValue.call(this, v, ...arguments)
@@ -384,22 +445,31 @@ Select.propTypes = {
       key: type.Any,
     }),
   )),
-  // Handler(value: string | number | object, event) when selected value changes
+  // Handler(value: any, name?, event, self) when selected value changes
   onChange: type.Function,
-  // Handler(query, event) when search input value changes
+  // Handler(value: any, name?: string, event: Event, self) on select focus
+  onFocus: type.Function,
+  // Handler(value: any, name?: string, event: Event, self) on select blur
+  onBlur: type.Function,
+  // Handler(query: string, name?, event, self) when search input value changes
   onSearch: type.Function,
-  // Handler(value: string | number | object, event) when an option gets focus
+  // Handler(value: any, name?, event, self) when an option gets focus
   onSelect: type.Function,
-  // Handler(value: string | number | object, event) when a multiple selected value is clicked
+  // Handler(value: any, name?, event, self) when a multiple selected value is clicked
   onClickValue: type.Function,
   // Handler(value, name) when a new option is added
   // onAddOption: type.Function,
+
   // Whether to allow users to add new options (in combination with search)
   addOption: type.OneOf(type.Boolean, type.Object),
   // Whether to use minimal width that fits content, pass number for additional character offset
   compact: type.OneOf(type.Boolean, type.Number),
   // Whether to open options initially
   defaultOpen: type.Boolean,
+  // Function(value, name?, event?, self) => any - Serializer for internal Select value
+  format: type.Function,
+  // Function(value, name?, event, self) => any - Deserializer for onChange value
+  parse: type.Function,
   // Whether to always render options, even when closed
   forceRender: type.Boolean,
   // Whether to use an icon, pass Icon name for custom Icon
@@ -497,9 +567,9 @@ function getOptionByValue (value, options) {
 function getOptionsFiltered (self) {
   // given options should the original prop to reduce re-calculation
   // then feed fuzzy search with filtered options.
-  let options = self.options
+  let {options, multiple} = self.props
   const {value: v} = self.state
-  if (self.multiple && v && v.length && options.length) {
+  if (multiple && v && v.length && options.length) {
     if (isObject(options[0])) options = options.filter(({text, value = text}) => !v.includes(value))
     else options = options.filter(value => value !== v)
   }
