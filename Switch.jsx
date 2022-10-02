@@ -13,9 +13,9 @@ import { type } from './types.js'
  */
 export function Switch ({
   value, defaultValue, checkedValue, uncheckedValue, label, checkedLabel, uncheckedLabel,
-  id = useId(), onChange, title, danger, className, style, reverse,
-  float: _0, // not used
-  initialValues: _1, // not used
+  id = useId(), onChange, title, danger,
+  childBefore, childAfter, className, style, reverse,
+  float, compact, // not used
   ...props
 }) {
   const {current: self} = useRef({onChange})
@@ -46,10 +46,12 @@ export function Switch ({
         <Label className='switch__label'>{renderProp(label, self)}</Label>
         <Spacer />
       </>}
+      {childBefore != null && renderProp(childBefore, self)}
       <input id={id} className='sr-only' {...props} />
       <Label className='switch__toggle' title={title} {...!props.readOnly && {htmlFor: id}}>
         <SwitchLabels {...{checked, checkedLabel, uncheckedLabel, self}} />
       </Label>
+      {childAfter != null && renderProp(childAfter, self)}
     </Row>
   )
 }

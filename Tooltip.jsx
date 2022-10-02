@@ -150,8 +150,8 @@ Tooltip.propTypes = {
 
 Tooltip.defaultProps = {
   animation: 'fade-in',
-  delay: 700,
-  on: 'hover',
+  delay: 1000,
+  on: 'hover,click',
   open: false,
   position: 'top',
   theme: 'dark',
