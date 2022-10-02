@@ -167,6 +167,7 @@ export function createView (defaultProp) {
     sound: type.Object,
     children: type.Any,
     className: type.ClassName,
+    style: type.Style,
     // Ref for the View or outer Scroll container
     _ref: type.Ref,
     // Whether to use Scroll View
@@ -194,6 +195,31 @@ export const [View, ViewRef] = createView()
  * will have its `children` prop changed. Thus, it will generally be slower when memoized.
  */
 export default React.memo(View)
+
+/**
+ * Extract View.jsx props from `props` object by mutation
+ * @example:
+ *    function Component ({...props}) {
+ *      return (
+ *        <View {...extractViewProps(props)}>
+ *          // The `props` now has View.jsx props removed
+ *          <OtherComponent {...props}/>
+ *        </View>
+ *      )
+ *    }
+ *
+ * @param {object} props - original Component props
+ * @returns {object} props - to use with View.jsx, with keys removed from the original `props`
+ */
+export function extractViewProps (props) {
+  const viewProps = {}
+  for (const key in View.propTypes) {
+    if (!hasProp(props, key)) continue
+    viewProps[key] = props[key]
+    delete props[key]
+  }
+  return viewProps
+}
 
 /**
  * Check whether given Node element contains a Scroll component by its className

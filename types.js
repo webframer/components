@@ -99,6 +99,8 @@ type.Ref = type.OneOf(type.Function, type.Of({current: type.Any}))
 // String primitive value
 type.String = PropTypes.string
 type.StringOrNumber = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+// CSS style object with camelCase attribute keys
+type.Style = PropTypes.object
 // UNIX Timestamp in milliseconds
 type.Timestamp = PropTypes.number
 // Uniform Resource Locator

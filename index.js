@@ -11,6 +11,7 @@ export * from './Input.jsx'
 export * from './JsonView.jsx' // 'react-json-tree' is tree shaked if not used
 export * from './Label.jsx'
 export * from './Loader.jsx'
+export * from './Markdown.jsx'
 export * from './Modal.jsx'
 export * from './Row.jsx'
 export * from './Select.jsx'
