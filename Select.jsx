@@ -21,7 +21,7 @@ import cn from 'classnames'
 import Fuse from 'fuse.js'
 import React, { useEffect, useMemo } from 'react'
 import Icon from './Icon.jsx'
-import { assignRef, toReactProps, useExpandCollapse, useInstance } from './react.js'
+import { assignRef, toReactProps, useExpandCollapse, useInstance, useSyncedState } from './react.js'
 import { renderProp } from './react/render.js'
 import { Row } from './Row.jsx'
 import { Scroll } from './Scroll.jsx'
@@ -88,17 +88,22 @@ export function Select (_props) {
   self.open = open // for internal logic
   open = open || animating // for rendering and styling
   useEffect(() => (self.didMount = true) && (() => {self.willUnmount = true}), [])
+  const [, changedValue] = useSyncedState({value: props.value})
 
   // Initialize once
-  if (!self.props && value != null && format)
-    state.value = format(value, name, void 0, self)
+  if (!self.props && value != null) {
+    if (format) state.value = format(value, name, void 0, self)
+    if (!multiple) state.query = getValueText(value, options)
+  }
 
   // Controlled state
-  else if (props.value != null)
+  else if (props.value != null && changedValue) {
     // State should store pure value as is, because `value` can be an array for multiple selection
     // Then let the render logic compute what to display based on given value.
     // For single selection, when no custom option render exists, input shows text value.
     state.value = format ? format(props.value, name, void 0, self) : props.value
+    if (!multiple) state.query = getValueText(props.value, options)
+  }
 
   // Simulate class instance props
   self.props = _props
@@ -480,7 +485,7 @@ Select.propTypes = {
   // Whether options menu should try to open from the top, default is from the bottom
   upward: type.Boolean,
   // Selected value(s) - if passed, becomes a controlled component
-  value: type.OneOf(type.String, type.Number, type.Boolean, type.List),
+  value: type.OneOf(type.String, type.Number, type.Boolean, type.Object, type.List),
   // Message to display when there are no options left for multiple select
   noOptionsMsg: type.String,
   // Message to display when there are no matching results for search select

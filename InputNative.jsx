@@ -11,6 +11,7 @@ import Text from './Text.jsx'
 import { type } from './types.js'
 
 /**
+ * todo: fix Controlled input to allow changing value until props.value change
  * Wrapper for Native HTML Input, such as: 'text', 'number', 'email', etc. where value is text.
  * Features:
  *  - Label added before input
