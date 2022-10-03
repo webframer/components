@@ -260,7 +260,7 @@ UploadGrid.defaultProps = {
 
 UploadGrid.propTypes = {
   // Uploaded FileInput(s) value to render initially or to sync with
-  initialValues: type.OneOf(type.ListOf(type.FileInput), type.FileInput),
+  initialValues: type.OneOf([type.ListOf(type.FileInput), type.FileInput]),
   // Handler(fileInput(s), name, event) when file(s) change, receives all changed file(s) since initialization
   onChange: type.Function,
   // Similar to `onChange` callback, but receives only last changed file(s), will not call `onChange` if given
@@ -295,7 +295,7 @@ UploadGrid.propTypes = {
   // Pass `false` to disable File label (note: Upload component may still show list of files)
   // Pass `i` string to always show incremental count or type.name (if `types` given)
   // By default, File.name is shown when it has preview.
-  slotLabel: type.OneOf(type.Boolean, type.Enum(['i'])),
+  slotLabel: type.OneOf([type.Boolean, type.Enum(['i'])]),
   // Named Identifier definitions for each upload type in the grid, default is incremental count
   types: type.ListOf(type.Definition.isRequired),
   // ...other Upload props to pass

@@ -428,7 +428,7 @@ Select.defaultProps = {
 
 Select.propTypes = {
   // Selectable values
-  options: type.ListOf(type.OneOf(
+  options: type.ListOf(type.OneOf([
     type.String,
     type.Number,
     type.Boolean,
@@ -440,7 +440,7 @@ Select.propTypes = {
       // Required by React, if String(value) does not result in unique `key` string
       key: type.Any,
     }),
-  )).isRequired,
+  ])).isRequired,
   // Handler(value: any, name?, event, self) when selected value changes
   onChange: type.Function,
   // Handler(value: any, name?: string, event: Event, self) on select focus
@@ -453,13 +453,10 @@ Select.propTypes = {
   onSelect: type.Function,
   // Handler(value: any, name?, event, self) when a multiple selected value is clicked
   onClickValue: type.Function,
-  // Handler(value, name) when a new option is added
-  // onAddOption: type.Function,
-
   // Whether to allow users to add new options (in combination with search)
-  addOption: type.OneOf(type.Boolean, type.Object),
+  addOption: type.OneOf([type.Boolean, type.Object]),
   // Whether to use minimal width that fits content, pass number for additional character offset
-  compact: type.OneOf(type.Boolean, type.Number),
+  compact: type.OneOf([type.Boolean, type.Number]),
   // Whether to open options initially
   defaultOpen: type.Boolean,
   // Function(value, name?, event?, self) => any - Serializer for internal Select value
@@ -469,7 +466,7 @@ Select.propTypes = {
   // Whether to always render options, even when closed
   forceRender: type.Boolean,
   // Whether to use an icon, pass Icon name for custom Icon
-  icon: type.OneOf(type.String, type.Boolean),
+  icon: type.OneOf([type.String, type.Boolean]),
   // Whether to place Icon after input, default is before input for custom Icon name
   iconEnd: type.Boolean,
   // Icon component props to pass over
@@ -481,11 +478,11 @@ Select.propTypes = {
   // Default search query to use
   query: type.String,
   // Whether to enable search by options, pass Handler(query, options) => value for custom search
-  search: type.OneOf(type.Boolean, type.Function),
+  search: type.OneOf([type.Boolean, type.Function]),
   // Whether options menu should try to open from the top, default is from the bottom
   upward: type.Boolean,
   // Selected value(s) - if passed, becomes a controlled component
-  value: type.OneOf(type.String, type.Number, type.Boolean, type.Object, type.List),
+  value: type.OneOf([type.String, type.Number, type.Boolean, type.Object, type.List]),
   // Message to display when there are no options left for multiple select
   noOptionsMsg: type.String,
   // Message to display when there are no matching results for search select

@@ -1,18 +1,54 @@
+import { Active } from '@webframer/js'
 import PropTypes from 'prop-types'
 
 /**
  * PROPTYPES PROXY =================================================================================
  *
- * For clear semantic meaning without documentation and cross platform unified API.
+ * A type system for clear semantic meaning without documentation and a cross-platform unified API.
  * All types should follow CapCase convention for readability and consistency.
+ * Important:
+ *  - Do not use numeric keys for object types, because new form values will be generated as array.
+ *    @see https://github.com/lodash/lodash/issues/1316
  *
  * =================================================================================================
  */
-
 export const type = {}
 
 /**
- * Common Types ------------------------------------------------------------------------------------
+ * Type Composers ----------------------------------------------------------------------------------
+ */
+
+/**
+ * Array of values.
+ * @example:
+ *  type.ListOf(type.Number)
+ *  >>> number[]
+ */
+type.ListOf = PropTypes.arrayOf
+
+/**
+ * Object containing given keys.
+ * @example:
+ *  type.Of({
+ *    key: type.Number
+ *  })
+ *  >>> {key: number}
+ */
+type.Of = PropTypes.shape
+
+/**
+ * One of given types.
+ * @example:
+ *  type.OneOf([type.String, type.Number])
+ *  >>> string | number
+ */
+type.OneOf = PropTypes.oneOfType
+
+// This can be used to make type composers automatically attach input controls definition
+if (typeof Active.typePredefine === 'function') Active.typePredefine(type)
+
+/**
+ * Base Types --------------------------------------------------------------------------------------
  */
 
 // Any value type
@@ -23,6 +59,11 @@ type.Boolean = PropTypes.bool
 type.Byte = PropTypes.number
 // CSS class names, separated by space
 type.ClassName = PropTypes.string
+
+/**
+ * Extended Types ------------------------------------------------------------------------------------
+ */
+
 // Unitless Pixel number or CSS value as string
 type.CSSLength = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 // Object or Array
@@ -58,8 +99,6 @@ type.Id = PropTypes.string
 type.Int = PropTypes.number
 // Array
 type.List = PropTypes.array
-// Array of values
-type.ListOf = PropTypes.arrayOf
 // File MIME type
 type.MIME = PropTypes.string
 // A floating number that is to be multiplied with
@@ -80,10 +119,6 @@ type.NumberOrString = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 type.Object = PropTypes.object
 // `key` -> `value` Map of objects
 type.ObjectOf = type.MapOf = PropTypes.objectOf
-// Object containing given keys. Example: type.Of({key: type.Any})
-type.Of = PropTypes.shape
-// One of given types
-type.OneOf = (...types) => PropTypes.oneOfType(types)
 // Javascript Promise object
 type.Promise = PropTypes.shape({
   then: PropTypes.func.isRequired,
@@ -95,7 +130,7 @@ type.Px = PropTypes.number
 type.Percent = PropTypes.number
 type.PrimitiveOrObject = PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.object])
 // Function or the Object created by React.useRef() or React.createRef()
-type.Ref = type.OneOf(type.Function, type.Of({current: type.Any}))
+type.Ref = type.OneOf([type.Function, type.Of({current: type.Any})])
 // String primitive value
 type.String = PropTypes.string
 type.StringOrNumber = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
@@ -106,9 +141,9 @@ type.Timestamp = PropTypes.number
 // Uniform Resource Locator
 type.Url = PropTypes.string
 type.UrlOrBase64 = type.String
-type.UrlOrBase64OrPreview = type.OneOf(type.String, type.Object) // `preview` is new String() object
-type.UrlOrNode = type.OneOf(type.String, type.Object, type.Function)
-type.UrlOrObject = type.OneOf(type.String, type.Object)
+type.UrlOrBase64OrPreview = type.OneOf([type.Url, type.Object]) // `preview` is new String() object
+type.UrlOrNode = type.OneOf([type.Url, type.Node])
+type.UrlOrObject = type.OneOf([type.Url, type.Object])
 
 /**
  * Component Types ---------------------------------------------------------------------------------
@@ -179,7 +214,7 @@ type.FieldForList = type.ListOf(type.Of({
 type.FormValueType = type.Enum(['changedValues', 'registeredValues', 'formValues'])
 
 // Select option
-type.Option = type.OneOf(
+type.Option = type.OneOf([
   type.String,
   type.Number,
   type.Of({
@@ -190,7 +225,7 @@ type.Option = type.OneOf(
     // Option's displayed UI
     children: type.Any,
   }),
-)
+])
 // Select options
 type.Options = type.ListOf(type.Option.isRequired)
 
@@ -208,7 +243,7 @@ type.TagById = type.ObjectOf(type.Tag.isRequired)
 type.TagOptions = type.Options
 
 // Tooltip props
-type.Tooltip = type.OneOf(
+type.Tooltip = type.OneOf([
   type.String,
   type.Number,
   type.Node,
@@ -222,4 +257,4 @@ type.Tooltip = type.OneOf(
     animation: type.String,
     theme: type.String,
   }),
-)
+])

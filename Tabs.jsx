@@ -101,9 +101,9 @@ export function Tabs ({
 
 Tabs.propTypes = {
   // Selected tab index number or key string (for controlled state)
-  activeId: type.OneOf(type.String, type.Number),
+  activeId: type.OneOf([type.String, type.Number]),
   // Default selected tab index number or key string (for uncontrolled state to load initially)
-  defaultId: type.OneOf(type.String, type.Number),
+  defaultId: type.OneOf([type.String, type.Number]),
   // Tab content (see example)
   children: type.NodeOrFunction,
   // Callback(activeId: string, lastId: string, event) whenever tab changes, where ids could be indices
@@ -120,13 +120,13 @@ Tabs.propTypes = {
     // Optional unique identifier for the Tab and Panel
     id: type.String,
     // Tab Label - clickable buttons
-    tab: type.OneOf(
+    tab: type.OneOf([
       type.String,
       type.Number,
       type.Node,
       type.Of({
         text: type.String.isRequired,
-        icon: type.OneOf(
+        icon: type.OneOf([
           type.String,
           type.Of({
             // Icon name and other ...props
@@ -134,17 +134,17 @@ Tabs.propTypes = {
             className: type.String,
             style: type.Object,
           }),
-        ),
+        ]),
       }),
-    ).isRequired,
+    ]).isRequired,
     // Tab Content
-    panel: type.OneOf(
+    panel: type.OneOf([
       type.NodeOrFunction,
       type.Of({
         // Child node(s) and other props to pass to TabPanel
         children: type.NodeOrFunction.isRequired,
       }),
-    ).isRequired,
+    ]).isRequired,
   })),
 }
 

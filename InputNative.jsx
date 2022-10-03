@@ -84,7 +84,7 @@ InputNative.defaultProps = {
 
 InputNative.propTypes = {
   // Whether to use minimal width that fits content, pass number for additional character offset
-  compact: type.OneOf(type.Boolean, type.Number),
+  compact: type.OneOf([type.Boolean, type.Number]),
   // Initial value for uncontrolled state
   defaultValue: type.Any,
   // Internal value for controlled state
@@ -121,9 +121,9 @@ InputNative.propTypes = {
   // Custom UI to render after input node (inside .input wrapper with focus state)
   childAfter: type.NodeOrFunction,
   // Custom Icon name or props to render before input node
-  icon: type.OneOf(type.String, type.Object),
+  icon: type.OneOf([type.String, type.Object]),
   // Custom Icon name or props to render after input node (if `onRemove` not defined)
-  iconEnd: type.OneOf(type.String, type.Object),
+  iconEnd: type.OneOf([type.String, type.Object]),
   // ...other native HTML `<input/>` props
 }
 

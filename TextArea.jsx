@@ -55,7 +55,7 @@ export function TextArea ({
 
 TextArea.propTypes = {
   // Whether to use minimal width that fits content, pass number for additional character offset
-  compact: type.OneOf(type.Boolean, type.Number),
+  compact: type.OneOf([type.Boolean, type.Number]),
   // Initial value for uncontrolled state
   defaultValue: type.Any,
   // Internal value for controlled state
@@ -88,9 +88,9 @@ TextArea.propTypes = {
   // Custom UI to render after textarea node (inside .textarea wrapper with focus state)
   childAfter: type.NodeOrFunction,
   // Custom Icon name or props to render before textarea node
-  icon: type.OneOf(type.String, type.Object),
+  icon: type.OneOf([type.String, type.Object]),
   // Custom Icon name or props to render after textarea node (if `onRemove` not defined)
-  iconEnd: type.OneOf(type.String, type.Object),
+  iconEnd: type.OneOf([type.String, type.Object]),
   // ...other native HTML `<textarea/>` props
 }
 
