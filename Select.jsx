@@ -428,19 +428,7 @@ Select.defaultProps = {
 
 Select.propTypes = {
   // Selectable values
-  options: type.ListOf(type.OneOf([
-    type.String,
-    type.Number,
-    type.Boolean,
-    type.Of({
-      // Searchable option string, will be used as value, if `value` not defined
-      text: type.String.isRequired,
-      // Internal option value to store as selected value and to call handlers with
-      value: type.Any,
-      // Required by React, if String(value) does not result in unique `key` string
-      key: type.Any,
-    }),
-  ])).isRequired,
+  options: type.Options.isRequired,
   // Handler(value: any, name?, event, self) when selected value changes
   onChange: type.Function,
   // Handler(value: any, name?: string, event: Event, self) on select focus

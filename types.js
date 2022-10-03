@@ -1,12 +1,13 @@
-import { Active } from '@webframer/js'
+import { Active } from '@webframer/js/_envs.js'
 import PropTypes from 'prop-types'
 
 /**
  * PROPTYPES PROXY =================================================================================
  *
- * A type system for clear semantic meaning without documentation and a cross-platform unified API.
+ * A type system for clear semantic meaning without documentation and cross-platform unified API.
  * All types should follow CapCase convention for readability and consistency.
- * Important:
+ *
+ * **Important**:
  *  - Do not use numeric keys for object types, because new form values will be generated as array.
  *    @see https://github.com/lodash/lodash/issues/1316
  *
@@ -14,9 +15,20 @@ import PropTypes from 'prop-types'
  */
 export const type = {}
 
+// Define this custom type generators on initialisation to override `type` behaviors
+const {defineCreator, defineBase, defineCommon, defineExtended, defineComponent} = Active.type || {}
+
 /**
- * Type Composers ----------------------------------------------------------------------------------
+ * Type Creators -----------------------------------------------------------------------------------
  */
+
+/**
+ * Enumerable value.
+ * @example:
+ *  type.Enum(['a', 5])
+ *  >>> 'a' | 5
+ */
+type.Enum = PropTypes.oneOf
 
 /**
  * Array of values.
@@ -27,14 +39,15 @@ export const type = {}
 type.ListOf = PropTypes.arrayOf
 
 /**
- * Object containing given keys.
+ * Map of `key -> value` pairs, where `key` and `value` correspond to given `type`
  * @example:
- *  type.Of({
- *    key: type.Number
- *  })
- *  >>> {key: number}
+ *  type.MapOf(new Map([
+ *    [type.String, type.Number],
+ *    [type.Number, type.Boolean],
+ *  ])),
+ *  >>> Map {'string': number, 4: boolean,...}
  */
-type.Of = PropTypes.shape
+type.MapOf = PropTypes.objectOf
 
 /**
  * One of given types.
@@ -44,8 +57,26 @@ type.Of = PropTypes.shape
  */
 type.OneOf = PropTypes.oneOfType
 
-// This can be used to make type composers automatically attach input controls definition
-if (typeof Active.typePredefine === 'function') Active.typePredefine(type)
+/**
+ * Object of custom shape (`key -> value` pairs).
+ * @example:
+ *  type.Obj({
+ *    key: type.Number
+ *  })
+ *  >>> {key: number}
+ */
+type.Obj = PropTypes.shape
+
+/**
+ * Object of `key -> value` pairs, where `key` is dynamic, and `value` is of given `type`
+ * @example:
+ *  type.ObjectOf(type.Number)
+ *  >>> {key1: number, key2: number,...}
+ */
+type.ObjectOf = PropTypes.objectOf
+
+// This can be used to make type creators automatically attach input controls for nested types
+if (typeof defineCreator === 'function') defineCreator(type)
 
 /**
  * Base Types --------------------------------------------------------------------------------------
@@ -53,138 +84,264 @@ if (typeof Active.typePredefine === 'function') Active.typePredefine(type)
 
 // Any value type
 type.Any = PropTypes.any
-// True or False
+
+// Big Integer value
+type.BigInt = PropTypes.number
+
+// True or False value
 type.Boolean = PropTypes.bool
-// Data size equivalent to 8 Bits
-type.Byte = PropTypes.number
-// CSS class names, separated by space
-type.ClassName = PropTypes.string
+
+// Floating point number
+type.Float = PropTypes.number
+
+// Function or class method
+type.Function = PropTypes.func
+
+// A whole number value
+type.Integer = PropTypes.number
+
+// Array value
+type.List = PropTypes.array
+
+// Map value
+type.Map = PropTypes.object
+
+// Number value (Integer or Float)
+type.Number = PropTypes.number
+
+// Object value
+type.Object = PropTypes.object
+
+// String value
+type.String = PropTypes.string
+
+// String object (eg. `new String(value)`)
+type.StringObject = PropTypes.object
+
+// Javascript getter function (eg. `{get () {return ''}}`)
+type.StringGetter = type.String
+
+// A positive whole number
+type.UnsignedInteger = PropTypes.number
+
+// This can be used to attach input controls or custom validators to types defined above
+if (typeof defineBase === 'function') defineBase(type)
 
 /**
- * Extended Types ------------------------------------------------------------------------------------
+ * Common Types ------------------------------------------------------------------------------------
  */
 
-// Unitless Pixel number or CSS value as string
-type.CSSLength = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-// Object or Array
-type.Collection = PropTypes.oneOfType([PropTypes.object, PropTypes.array])
-// Rotation Degree
-type.Degree = PropTypes.number
-// Precision decimal points count
-type.Decimal = PropTypes.number
-// HTMLElement or native app Node Element
-type.Element = PropTypes.shape({
-  getBoundingClientRect: PropTypes.func.isRequired,
+// Base64 encoded string
+type.Base64 = type.String
+
+// Data size number equivalent to 8 Bits
+type.Byte = type.Number
+
+// CSS class names string, separated by space
+type.ClassName = type.String
+
+// CSS length string, such as `10%`, `2em`, etc.
+type.CSSLength = type.String
+
+// Object or Array value
+type.Collection = type.OneOf([type.Object, type.List])
+
+// Any valid CSS color string, such as `red`, `rgb(0,0,0)`, `hsla(22, 7%, 6%, 1)`, `var(--color)`...
+type.Color = type.String
+
+// Precision decimal points number
+type.Decimal = type.UnsignedInteger
+
+// Rotation degree number
+type.Degree = type.Number
+
+// HTMLElement or native app Node Element object
+type.Element = type.Obj({
+  getBoundingClientRect: type.Function.isRequired,
 })
-// Enumerable. Example: type.Enum(['a', 'b'])
-type.Enum = PropTypes.oneOf
-// File object https://developer.mozilla.org/en-US/docs/Web/API/File
-type.File = PropTypes.shape({
-  // File name with extension
-  name: PropTypes.string.isRequired,
-  // File size in bytes
-  size: PropTypes.number.isRequired,
-  // MIME type
-  type: PropTypes.string.isRequired,
-})
-// Number with decimal points
-type.Float = PropTypes.number
-// A floating point number between 0 - 1
-type.Fraction = PropTypes.number
-// Javascript getter function
-type.GetterString = PropTypes.string
-// Unique Identifier
-type.Id = PropTypes.string
-// Integer (a whole number without decimal points)
-type.Int = PropTypes.number
-// Array
-type.List = PropTypes.array
-// File MIME type
-type.MIME = PropTypes.string
+
+// A floating point number between 0 and 1
+type.Fraction = type.Float
+
+// One of `withForm()` HOC or `useForm` hook value getters
+type.FormValueType = type.Enum(['changedValues', 'registeredValues', 'formValues'])
+
+// Unique identifier string
+type.Id = type.String
+
+// Time duration number which is 1/1000th of a second
+type.Millisecond = type.UnsignedInteger
+
+// File MIME type string
+type.MIME = type.String
+
+// Millimeter unit number for measuring length
+type.Mm = type.Number
+
 // A floating number that is to be multiplied with
-type.Multiplier = PropTypes.number
-// Method
-type.Function = PropTypes.func
-// Time duration which is 1/1000th of a second
-type.Milliseconds = PropTypes.number
-// Millimeter length
-type.Mm = PropTypes.number
+type.Multiplier = type.Number
+
 // Anything that can be rendered, such as number, string, DOM element, array, or fragment
 type.Node = PropTypes.node
-// Anything that can be rendered, such as number, string, function, DOM element, array, or fragment
-type.NodeOrFunction = PropTypes.oneOfType([PropTypes.node, PropTypes.func])
-// Integer or Float
-type.Number = PropTypes.number
-type.NumberOrString = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-type.Object = PropTypes.object
-// `key` -> `value` Map of objects
-type.ObjectOf = type.MapOf = PropTypes.objectOf
+
+// A fraction number between 0 and 1 (to be used with slider).
+// For values outside the 0 and 1 range, use **type.Percentage**
+type.Percent = type.Float
+
+// Percentage number, where `1% = 0.01`, `200% = 2`, etc.
+type.Percentage = type.Number
+
+// File path string, or string object with paths for different sizes/versions of the same file
+type.Preview = type.OneOf([type.String, type.StringObject])
+
 // Javascript Promise object
-type.Promise = PropTypes.shape({
-  then: PropTypes.func.isRequired,
-  catch: PropTypes.func.isRequired,
+type.Promise = type.Obj({
+  then: type.Function.isRequired,
+  catch: type.Function.isRequired,
 })
-// Pixel screen unit
-type.Px = PropTypes.number
-// A fraction number between 0 and 1
-type.Percent = PropTypes.number
-type.PrimitiveOrObject = PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.object])
+
+// React Component.propTypes object
+type.PropTypes = type.ObjectOf(type.Function)
+
+// Pixel unit number for measuring display dimension or location
+type.Px = type.Number
+
+// UNIX Timestamp number in milliseconds
+type.Timestamp = type.UnsignedInteger
+
+// Uniform Resource Locator string
+type.Url = type.String
+
+// This can be used to attach input controls or custom validators to types defined above
+if (typeof defineCommon === 'function') defineCommon(type)
+
+/**
+ * Extended Types ----------------------------------------------------------------------------------
+ */
+
+// CSS length string or Pixel number
+type.CSSLengthOrPx = type.OneOf([type.CSSLength, type.Px])
+
+// Localised definition object (example: `LANGUAGE.ENGLISH`)
+type.Definition = type.Obj({
+  // Internal value that is language agnostic
+  _: type.Any.isRequired,
+  // Displayed name string getter for the currently active Language
+  name: type.StringGetter.isRequired,
+  // Displayed name string in English (where `en` is an ISO 639-1 code)
+  en: type.String,
+  // 'ru': other displayed name strings by their language ISO 639-1 code
+})
+
+// Set of localised definitions object (example: `LANGUAGE`)
+type.DefinitionMap = type.ObjectOf(type.Definition.isRequired)
+
+// File object https://developer.mozilla.org/en-US/docs/Web/API/File
+type.File = type.Obj({
+  // File name with extension
+  name: type.String.isRequired,
+  // File size in bytes
+  size: type.Byte.isRequired,
+  // MIME type
+  type: type.MIME.isRequired,
+})
+
+// Anything that React can render, such as number, string, function, DOM element, array, or fragment
+type.NodeOrFunction = type.OneOf([type.Node, type.Function])
+
 // Function or the Object created by React.useRef() or React.createRef()
-type.Ref = type.OneOf([type.Function, type.Of({current: type.Any})])
-// String primitive value
-type.String = PropTypes.string
-type.StringOrNumber = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+type.Ref = type.OneOf([type.Function, type.Obj({current: type.Any})])
+
 // CSS style object with camelCase attribute keys
-type.Style = PropTypes.object
-// UNIX Timestamp in milliseconds
-type.Timestamp = PropTypes.number
-// Uniform Resource Locator
-type.Url = PropTypes.string
-type.UrlOrBase64 = type.String
-type.UrlOrBase64OrPreview = type.OneOf([type.Url, type.Object]) // `preview` is new String() object
-type.UrlOrNode = type.OneOf([type.Url, type.Node])
-type.UrlOrObject = type.OneOf([type.Url, type.Object])
+type.Style = type.ObjectOf(type.OneOf([
+  type.CSSLength,
+  type.Color,
+  type.Px,
+]))
+
+// File `src` string in flexible data format
+type.UrlOrBase64OrPreview = type.OneOf([type.Url, type.Base64, type.Preview])
+
+// This can be used to attach input controls or custom validators to types defined above
+if (typeof defineExtended === 'function') defineExtended(type)
 
 /**
  * Component Types ---------------------------------------------------------------------------------
  */
 
 // Input Control config object
-type.Control = type.Of({
-  // One of supported `<Input/>` types (eg. 'text', 'email', 'slider', etc.), default is 'text'
-  type: type.String,
+type.Control = type.Obj({
+  /**
+   * One of `<Input/>` types (eg. 'text', 'slider', etc.), default is 'text'; or an:
+   *  - array of type.Control for `type.ListOf`
+   *  - object of type.Control for `type.Obj`
+   *  - map of type.Control for `type.ObjectOf`, `type.MapOf`.
+   *
+   * @example:
+   *  // type.ListOf(type.Number)
+   *  {
+   *    type: [{type: 'number'...}],
+   *    limit: 9, // limit the list to 9 items
+   *  }
+   *
+   *  // type.ListOf(type.OneOf([type.Number, type.String]))
+   *  {
+   *    type: [{type: 'number'...}, {type: 'text'...}],
+   *    mixedTypes: true, // allow the list to have both numbers and strings
+   *  }
+   *
+   *  // type.Obj({key1: type.Number, key2: type.String})
+   *  {
+   *    type: {
+   *      key1: {type: 'number'...},
+   *      key2: {type: 'text'...}
+   *    },
+   *  }
+   *
+   *  // type.ObjectOf(type.Number)
+   *  {
+   *    type: new Map([[{type: 'text'...}, {type: 'number'...}]]),
+   *  }
+   *
+   *  // type.MapOf(new Map([[type.String, type.Number], [type.Number, type.Boolean]]))
+   *  {
+   *    type: new Map([
+   *      [{type: 'text'...}, {type: 'number'...}],
+   *      [{type: 'number'...}, {type: 'switch'...}],
+   *    ]),
+   *  }
+   */
+  type: type.OneOf([
+    type.String,
+    type.ObjectOf(type.Object),
+    type.ListOf(type.Object),
+    type.Map,
+  ]).isRequired,
   // Human-readable label for the input type
-  text: type.NodeOrFunction,
+  text: type.NodeOrFunction.isRequired,
   // Brief explanation of the input type (supports Markdown)
   desc: type.NodeOrFunction,
   // CSS color value (eg. 'rgba(0,0,0,1)', 'linear-gradient(to bottom, white, black)', etc.)
   color: type.String,
   // Function(value) => boolean - function to check if value belongs to this control type
-  ofType: type.Function,
+  ofType: type.Function.isRequired,
+  // Maximum number of control items in the list (for type.ListOf/ObjectOf/MapOf)
+  limit: type.Number,
+  // Whether to allow mixing item types (when `type` is a list of controls)
+  mixedTypes: type.Boolean,
   // ...other props to pass to `<Input/>` component
 })
 
-// Localised definition (example: LANGUAGE.ENGLISH object)
-type.Definition = type.Of({
-  _: type.Any.isRequired, // identifier code that is language agnostic
-  name: type.GetterString.isRequired, // definition's `name` string for currently active Language
-  en: type.String, // `name` string in English
-  // 'ru': other definition's `name` strings by their language code
-})
-
-// Set of localised definitions (example: LANGUAGE object)
-type.DefinitionMap = type.ObjectOf(type.Definition.isRequired)
-
 // File Input object
-type.FileInput = type.Of({
-  // File source URL or base64 encoded string
-  src: type.UrlOrBase64,
+type.FileInput = type.Obj({
+  // File path, source URL, Base64 encoded data, or Preview string/object
+  src: type.UrlOrBase64OrPreview,
   // Type of file (ex: public/private...)
   kind: type.Any,
   // Identifier or index position of the file in the grid (ex. thumb/small/large/0/1...)
   i: type.Any,
   // Optional ID
-  id: type.String,
+  id: type.Id,
   // File name with extension
   name: type.String,
   // Selected File object to send to backend for upload (example: Upload input file object)
@@ -198,7 +355,7 @@ type.FileInput = type.Of({
   // Optional size in Bytes
   size: type.Byte,
   // Available file sizes (i.e. ImageInput)
-  sizes: type.ListOf(type.Of({
+  sizes: type.ListOf(type.Obj({
     // resKey (ex. 'thumb', 'medium', '')
     key: type.String,
     // Size in bytes
@@ -207,54 +364,57 @@ type.FileInput = type.Of({
 })
 
 // FIELD.FOR.TAG for example
-type.FieldForList = type.ListOf(type.Of({
+type.FieldForList = type.ListOf(type.Obj({
   id: type.String.isRequired,
 }))
-// One of @withForm() value getters
-type.FormValueType = type.Enum(['changedValues', 'registeredValues', 'formValues'])
 
-// Select option
+// Select option value
 type.Option = type.OneOf([
   type.String,
   type.Number,
-  type.Of({
-    // Internal option value
-    value: type.Any.isRequired,
+  type.Boolean,
+  type.Obj({
     // Searchable text (used as displayed label if `children` not defined)
     text: type.String.isRequired,
+    // Internal option value to store as selected value (derived from `text` if undefined)
+    value: type.Any,
+    // Required by React if String(value) does not result in unique `key` (derived from `value` if undefined)
+    key: type.Any,
     // Option's displayed UI
-    children: type.Any,
+    children: type.NodeOrFunction,
   }),
 ])
-// Select options
+
+// Select options array of option values
 type.Options = type.ListOf(type.Option.isRequired)
 
-// Component.propTypes object
-type.PropTypes = type.ObjectOf(type.Function)
-
-// Tag entry
-type.Tag = type.Of({
+// Tag entry object
+type.Tag = type.Obj({
   id: type.Id.isRequired,
   name: type.String.isRequired, // may be retrieved dynamically with translation
 })
+
 // List of Tag ID strings
 type.TagIds = type.ListOf(type.Id.isRequired)
 type.TagById = type.ObjectOf(type.Tag.isRequired)
 type.TagOptions = type.Options
 
-// Tooltip props
+// Tooltip props object
 type.Tooltip = type.OneOf([
   type.String,
   type.Number,
   type.Node,
   type.Function,
-  type.Of({
+  type.Obj({
     children: type.Any.isRequired,
     position: type.String,
     on: type.String,
     open: type.Boolean,
-    delay: type.Milliseconds,
+    delay: type.Millisecond,
     animation: type.String,
     theme: type.String,
   }),
 ])
+
+// This can be used to attach input controls or custom validators to types defined above
+if (typeof defineComponent === 'function') defineComponent(type)

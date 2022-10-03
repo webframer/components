@@ -70,7 +70,7 @@ Expand.propTypes = {
   // Expand content (see example)
   children: type.NodeOrFunction.isRequired,
   // Expand/Collapse animation duration in milliseconds
-  duration: type.Milliseconds,
+  duration: type.Millisecond,
   // Optional unique identifier, will be passed to `onChange`, default is React.useId() string
   id: type.String,
   // Optional index identifier, will be passed to `onChange` (used by Accordion)

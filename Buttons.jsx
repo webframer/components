@@ -38,7 +38,7 @@ export function Buttons ({items, className, vertical, children, ...props}) {
 
 Buttons.propTypes = {
   // List of each Button props
-  items: type.ListOf(type.Of({
+  items: type.ListOf(type.Obj({
     icon: type.String,
     children: type.Any,
     active: type.Boolean,

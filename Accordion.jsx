@@ -67,7 +67,7 @@ Accordion.propTypes = {
   // Expandable content (see example)
   children: type.NodeOrFunction.isRequired,
   // Expand/Collapse animation duration in milliseconds
-  duration: type.Milliseconds,
+  duration: type.Millisecond,
   // Whether to allow opening multiple Expand components at once
   multiple: type.Boolean,
   // Callback(open: boolean, id: string, index?: number, event: Event) when `open` state changes

@@ -116,7 +116,7 @@ Tabs.propTypes = {
   // @see https://www.semrush.com/blog/html-hide-element/
   forceRender: type.Boolean,
   // Alternative way to define Tabs and Panels as a single array
-  items: type.ListOf(type.Of({
+  items: type.ListOf(type.Obj({
     // Optional unique identifier for the Tab and Panel
     id: type.String,
     // Tab Label - clickable buttons
@@ -124,11 +124,11 @@ Tabs.propTypes = {
       type.String,
       type.Number,
       type.Node,
-      type.Of({
+      type.Obj({
         text: type.String.isRequired,
         icon: type.OneOf([
           type.String,
-          type.Of({
+          type.Obj({
             // Icon name and other ...props
             name: type.String.isRequired,
             className: type.String,
@@ -140,7 +140,7 @@ Tabs.propTypes = {
     // Tab Content
     panel: type.OneOf([
       type.NodeOrFunction,
-      type.Of({
+      type.Obj({
         // Child node(s) and other props to pass to TabPanel
         children: type.NodeOrFunction.isRequired,
       }),
