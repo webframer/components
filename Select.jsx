@@ -69,17 +69,18 @@ import { onEventStopPropagation } from './utils/interactions.js'
  *    deserialize(['row', 'reverse'])
  *    >>> 'row reverse'
  */
-export function Select ({
-  options, defaultValue, name, defaultOpen, fuzzyOpt, focusIndex,
-  multiple, query, search, compact, forceRender, fixed, upward,
-  onChange, onFocus, onBlur, onSearch, onSelect, onClickValue,
-  icon, iconEnd, iconProps,
-  addOption, addOptionMsg, noOptionsMsg,
-  format, parse, // these are serializer and deserializer
-  type, // not used
-  childBefore, childAfter, className, style, row,
-  _ref, inputRef, ...props
-}) {
+export function Select (_props) {
+  let {
+    options, defaultValue, name, defaultOpen, fuzzyOpt, focusIndex,
+    multiple, query, search, compact, forceRender, fixed, upward,
+    onChange, onFocus, onBlur, onSearch, onSelect, onClickValue,
+    icon, iconEnd, iconProps,
+    addOption, addOptionMsg, noOptionsMsg,
+    format, parse, // these are serializer and deserializer
+    type, // not used
+    childBefore, childAfter, className, style, row,
+    _ref, inputRef, ...props
+  } = _props
   props = toReactProps(props)
   let {value = defaultValue} = props
   const [self, state] = useInstance({options, query, value, focusIndex})
@@ -100,18 +101,7 @@ export function Select ({
     state.value = format ? format(props.value, name, void 0, self) : props.value
 
   // Simulate class instance props
-  self.props = {
-    options, defaultValue, name, defaultOpen, fuzzyOpt, focusIndex,
-    multiple, query, search, compact, forceRender, fixed, upward,
-    onChange, onFocus, onBlur, onSearch, onSelect, onClickValue,
-    icon, iconEnd, iconProps,
-    addOption, addOptionMsg, noOptionsMsg,
-    format, parse, // these are serializer and deserializer
-    type, // not used
-    childBefore, childAfter, className, style, row,
-    _ref, inputRef, ...props,
-  }
-  Object.assign(self, {}, props)
+  self.props = _props
 
   // Node Handlers ---------------------------------------------------------------------------------
   if (!self.ref) self.ref = function (node) {
@@ -281,17 +271,18 @@ export function Select ({
       case KEY.ArrowUp:
         e.preventDefault() // prevent scrolling within outer parent
         return self.setOptionFocus(self.state.focusIndex + (self.upward ? 1 : -1))
-      case KEY.Enter: {// Enter will select the focusIndex option in the result
+      case KEY.Enter: {// Enter will open dropdown or select the focusIndex option in the result
         if (e.target !== self.inputNode && e.target !== self.node) return
+        if (!self.open) return self.openOptions.call(this, e)
         const {query, options, focusIndex} = self.state
         const {addOption} = self.props
-        // prevent event propagation that toggles open state and selects accidentally
+        // prevent event propagation to onClick that toggles open state, or selects accidentally
         if (!options.length && !addOption) return e.preventDefault()
         let selected = options.length ? options[focusIndex] : null
         if (selected == null && addOption && query) selected = trimSpaces(query)
         if (selected == null) return e.preventDefault()
         self.selectOption.call(this, selected, ...arguments)
-        return e.preventDefault()
+        return e.stopPropagation() // allow closing after selection for single select
       }
       case KEY.Backspace: {// input search Backspace will delete the last selected option
         const {multiple} = self.props
@@ -444,7 +435,7 @@ Select.propTypes = {
       // Required by React, if String(value) does not result in unique `key` string
       key: type.Any,
     }),
-  )),
+  )).isRequired,
   // Handler(value: any, name?, event, self) when selected value changes
   onChange: type.Function,
   // Handler(value: any, name?: string, event: Event, self) on select focus
@@ -494,7 +485,7 @@ Select.propTypes = {
   noOptionsMsg: type.String,
   // Message to display when there are no matching results for search select
   // noResultsMsg: type.String, // not needed, use the same `noOptionsMsg`
-  // Other native `<input>` props
+  // ...other native `<input>` props
 }
 
 export default React.memo(Select)
