@@ -72,6 +72,8 @@ type.OneOf = PropTypes.oneOfType
  *    key: type.Number
  *  })
  *  >>> {key: number}
+ * @param {object} obj - the object shape with value being the type (e.g. `type.Number`)
+ * @returns {function} type checker
  */
 type.Obj = PropTypes.shape
 
@@ -125,6 +127,10 @@ type.List = PropTypes.array
 // Map value
 type.Map = PropTypes.object
 
+// Anything that can be rendered: numbers, strings, elements or an array
+// (or fragment) containing these types.
+type.Node = PropTypes.node
+
 // Number value (Integer or Float)
 type.Number = PropTypes.number
 
@@ -144,7 +150,7 @@ type.String = PropTypes.string
 type.StringObject = PropTypes.object
 
 // Javascript getter function (eg. `{get () {return ''}}`)
-type.StringGetter = type.String
+type.StringGetter = PropTypes.string
 
 // Symbol value
 type.Symbol = PropTypes.symbol
@@ -163,7 +169,7 @@ if (typeof defineBase === 'function') defineBase(type)
 type.Base64 = type.String
 
 // Data size number equivalent to 8 Bits
-type.Byte = type.Number
+type.Byte = type.UnsignedInteger
 
 // CSS class names string, separated by space
 type.ClassName = type.String
@@ -188,8 +194,8 @@ type.Element = type.Obj({
   getBoundingClientRect: type.Function.isRequired,
 })
 
-// A floating point number between 0 and 1
-type.Fraction = type.Float
+// A fraction number in string format (eg. '1/2', '8/5', etc.)
+type.Fraction = type.String
 
 // One of `withForm()` HOC or `useForm` hook value getters
 type.FormValueType = type.Enum(['changedValues', 'registeredValues', 'formValues'])
@@ -209,11 +215,7 @@ type.Mm = type.Number
 // A floating number that is to be multiplied with
 type.Multiplier = type.Number
 
-// Anything that can be rendered: numbers, strings, elements or an array
-// (or fragment) containing these types.
-type.Node = PropTypes.node
-
-// A fraction number between 0 and 1 (to be used with slider).
+// A float number between 0 and 1 inclusive (to be used with slider).
 // For values outside the 0 and 1 range, use **type.Percentage**
 type.Percent = type.Float
 
@@ -232,8 +234,9 @@ type.Promise = type.Obj({
 // React Component.propTypes object
 type.PropTypes = type.ObjectOf(type.Function)
 
-// Pixel unit number for measuring display dimension or location
-type.Px = type.Number
+// Pixel unit number to represent a display dimension or location
+// (uses Integer type to ensure valid numbers for use as Image dimension).
+type.Px = type.Integer
 
 // UNIX Timestamp number in milliseconds
 type.Timestamp = type.UnsignedInteger
@@ -314,6 +317,7 @@ type.Control = type.Obj({
    *    limit: 9, // limit the list to 9 items
    *  }
    *
+   *  // type.OneOf([type.Number, type.String])
    *  // type.ListOf(type.OneOf([type.Number, type.String]))
    *  {
    *    type: [{type: 'number'...}, {type: 'text'...}],
@@ -347,13 +351,14 @@ type.Control = type.Obj({
     type.ListOf(type.Object),
     type.Map,
   ]).isRequired,
-  // Human-readable label for the input type
-  text: type.NodeOrFunction.isRequired,
+  // Human-readable label for the input type (required if `type` is a string)
+  text: type.NodeOrFunction,
   // Brief explanation of the input type (supports Markdown)
   desc: type.NodeOrFunction,
   // CSS color value (eg. 'rgba(0,0,0,1)', 'linear-gradient(to bottom, white, black)', etc.)
   color: type.String,
-  // Function(value) => boolean - function to check if value belongs to this control type
+  // Function(value) => boolean | number - function to check if value belongs to this control type.
+  // Return `true` to indicate a match, or number of matches for type.Obj/ObjEqual for sorting
   ofType: type.Function.isRequired,
   // Maximum number of control items in the list (for type.ListOf/ObjectOf/MapOf)
   limit: type.Number,
