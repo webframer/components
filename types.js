@@ -31,6 +31,14 @@ const {defineCreator, defineBase, defineCommon, defineExtended, defineComponent}
 type.Enum = PropTypes.oneOf
 
 /**
+ * Instance of a class. This uses JS instanceof operator.
+ * @example:
+ *  type.InstanceOf(Date),
+ *  >>> Mon Jun 06 2022 03:33:33 GMT+0000 (London Standard Time)
+ */
+type.InstanceOf = PropTypes.instanceOf
+
+/**
  * Array of values.
  * @example:
  *  type.ListOf(type.Number)
@@ -58,7 +66,7 @@ type.MapOf = PropTypes.objectOf
 type.OneOf = PropTypes.oneOfType
 
 /**
- * Object of custom shape (`key -> value` pairs).
+ * Object containing a particular shape (`key -> value` pairs).
  * @example:
  *  type.Obj({
  *    key: type.Number
@@ -66,6 +74,17 @@ type.OneOf = PropTypes.oneOfType
  *  >>> {key: number}
  */
 type.Obj = PropTypes.shape
+
+/**
+ * Object with the exact shape (`key -> value` pairs). Extra properties will raise warnings.
+ * @example:
+ *  type.ObjEqual({
+ *    key: type.Number
+ *  })
+ *  >>> {key: number}
+ *  >>> Warning {key: number, other: number} has extra property `other`
+ */
+type.ObjEqual = PropTypes.exact
 
 /**
  * Object of `key -> value` pairs, where `key` is dynamic, and `value` is of given `type`
@@ -112,6 +131,12 @@ type.Number = PropTypes.number
 // Object value
 type.Object = PropTypes.object
 
+// React JSX element (eg. `<View/>`)
+type.ReactElement = PropTypes.element
+
+// React JSX element type (eg. `View`)
+type.ReactElementType = PropTypes.elementType
+
 // String value
 type.String = PropTypes.string
 
@@ -120,6 +145,9 @@ type.StringObject = PropTypes.object
 
 // Javascript getter function (eg. `{get () {return ''}}`)
 type.StringGetter = type.String
+
+// Symbol value
+type.Symbol = PropTypes.symbol
 
 // A positive whole number
 type.UnsignedInteger = PropTypes.number
@@ -181,7 +209,8 @@ type.Mm = type.Number
 // A floating number that is to be multiplied with
 type.Multiplier = type.Number
 
-// Anything that can be rendered, such as number, string, DOM element, array, or fragment
+// Anything that can be rendered: numbers, strings, elements or an array
+// (or fragment) containing these types.
 type.Node = PropTypes.node
 
 // A fraction number between 0 and 1 (to be used with slider).
@@ -246,7 +275,8 @@ type.File = type.Obj({
   type: type.MIME.isRequired,
 })
 
-// Anything that React can render, such as number, string, function, DOM element, array, or fragment
+// Anything that can be rendered: numbers, strings, elements, an array, or function
+// (or fragment) containing these types.
 type.NodeOrFunction = type.OneOf([type.Node, type.Function])
 
 // Function or the Object created by React.useRef() or React.createRef()
