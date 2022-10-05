@@ -310,45 +310,48 @@ type.Control = type.Obj({
    *  - object of type.Control for `type.Obj`
    *  - map of type.Control for `type.ObjectOf`, `type.MapOf`.
    *
+   * Note: type.OneOf is like a regular control config object with multiple `controls`
+   *
    * @example:
    *  // type.ListOf(type.Number)
    *  {
-   *    type: [{type: 'number'...}],
+   *    type: [type.Number],
    *    maxInputs: 9, // limit the list to 9 items
    *  }
    *
-   *  // type.OneOf([type.Number, type.String])
    *  // type.ListOf(type.OneOf([type.Number, type.String]))
    *  {
-   *    type: [{type: 'number'...}, {type: 'text'...}],
+   *    type: [type.Number, type.String],
    *    mixedTypes: true, // allow the list to have both numbers and strings
    *  }
    *
    *  // type.Obj({key1: type.Number, key2: type.String})
    *  {
    *    type: {
-   *      key1: {type: 'number'...},
-   *      key2: {type: 'text'...}
+   *      key1: type.Number,
+   *      key2: type.String,
    *    },
    *  }
    *
    *  // type.ObjectOf(type.Number)
    *  {
-   *    type: new Map([[{type: 'text'...}, {type: 'number'...}]]),
+   *    type: new Map([
+   *      [type.String, type.Number],
+   *    ]),
    *  }
    *
    *  // type.MapOf(new Map([[type.String, type.Number], [type.Number, type.Boolean]]))
    *  {
    *    type: new Map([
-   *      [{type: 'text'...}, {type: 'number'...}],
-   *      [{type: 'number'...}, {type: 'switch'...}],
+   *      [type.String, type.Number],
+   *      [type.Number, type.Boolean],
    *    ]),
    *  }
    */
   type: type.OneOf([
     type.String,
-    type.ObjectOf(type.Object),
-    type.ListOf(type.Object),
+    type.ObjectOf(type.Function),
+    type.ListOf(type.Function),
     type.Map,
   ]).isRequired,
   // Human-readable label for the input type (required if `type` is a string)

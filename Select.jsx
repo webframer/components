@@ -392,11 +392,12 @@ export function Select (_props) {
         })} tabIndex={-1} />
         </a>
       })}
-      <input className={cn('select__input', {'fill-width': !compact && (multiple || !hasValue), iconEnd: isIconEnd})}
-             style={styleI}
-             readOnly={!search} {...props} ref={self.ref1}
-             value={query} onChange={self.searchQuery} onFocus={self.focus} onBlur={self.blur}
-             onClick={search ? onEventStopPropagation(self.openOptions, props.onClick) : void 0} />
+      <input
+        className={cn('select__input', {'fill-width': !compact && (multiple || !hasValue), iconEnd: icon && isIconEnd})}
+        style={styleI}
+        readOnly={!search} {...props} ref={self.ref1}
+        value={query} onChange={self.searchQuery} onFocus={self.focus} onBlur={self.blur}
+        onClick={search ? onEventStopPropagation(self.openOptions, props.onClick) : void 0} />
       {isIconEnd && iconNode}
       {childAfter != null && renderProp(childAfter, self)}
       <Scroll className={cn('select__options', {open, upward, fixed: listBox.style})}
