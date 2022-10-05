@@ -314,7 +314,7 @@ type.Control = type.Obj({
    *  // type.ListOf(type.Number)
    *  {
    *    type: [{type: 'number'...}],
-   *    limit: 9, // limit the list to 9 items
+   *    maxInputs: 9, // limit the list to 9 items
    *  }
    *
    *  // type.OneOf([type.Number, type.String])
@@ -361,7 +361,7 @@ type.Control = type.Obj({
   // Return `true` to indicate a match, or number of matches for type.Obj/ObjEqual for sorting
   ofType: type.Function.isRequired,
   // Maximum number of control items in the list (for type.ListOf/ObjectOf/MapOf)
-  limit: type.Number,
+  maxInputs: type.Number,
   // Whether to allow mixing item types (when `type` is a list of controls)
   mixedTypes: type.Boolean,
   // ...other props to pass to `<Input/>` component

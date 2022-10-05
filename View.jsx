@@ -16,24 +16,14 @@ export function createView (defaultProp) {
    * View Layout - Pure Component.
    * With default `display: flex` in column/row style
    * (to replace browser's `<div>` with a platform-agnostic component for React Native, etc.)
-   *
-   * @param {boolean} [scroll] - whether to make the view scrollable
-   * @param {boolean} [col] - whether to use column layout, true if `row` is falsy by default
-   * @param {boolean} [row] - whether to use row layout, false by default
-   * @param {string} [className] - optional css class
-   * @param {function} [onClick] - callback to fire on click or Enter press (if `onKeyPress` not given)
-   * @param {boolean} [fill] - whether to make the view fill up available height and width
-   * @param {boolean} [reverse] - whether to reverse the order of rendering
-   * @param {boolean} [rtl] - whether to use right to left text direction
-   * @param {object|HTMLAudioElement} [sound] - new Audio(URL) sound file
-   * @param {function|React.MutableRefObject} [_ref] - from React.useRef() or React.createRef()
-   * @param {*} props - other attributes to pass to `<div></div>`
-   * @param {function|React.MutableRefObject} [ref] - forwarding React.useRef() or React.createRef()
    */
   function View ({
-    className, scroll, row, col = !(row), fill, reverse, rtl,
+    row, col = !(row), fill, reverse, rtl,
     left, right, top, bottom, center, middle, sound,
-    children, _ref, scrollProps, ...props
+    className, children, _ref,
+    scroll, scrollClass, scrollStyle, scrollAlongDirectionOnly, scrollProps,
+    noScrollOffset, reverseScroll,
+    ...props
   }, ref) {
     const [tooltip] = useTooltip(props)
     props = accessibilitySupport(props, sound)
@@ -54,7 +44,7 @@ export function createView (defaultProp) {
 
     // Scrollable View -----------------------------------------------------------------------------
     // The wrapper should get rest props by default, because that's the expected behavior
-    let {scrollClass, scrollStyle, style, noScrollOffset, ..._props} = props
+    let {style, ..._props} = props
     scrollProps = {...scrollProps}
     if (hasProp(_props, '_id')) {
       Object.assign(_props, {_nodrop: ''})
@@ -77,6 +67,9 @@ export function createView (defaultProp) {
         col, row, fill, rtl,
         center: center && !(row), // avoid Tailwind bug by negation with brackets
         middle: middle && !(col),
+        'reverse-scroll': reverseScroll,
+        '!overflow-x-hidden': scrollAlongDirectionOnly && !(row),
+        '!overflow-y-hidden': scrollAlongDirectionOnly && row,
       },
       // 'max-size' class is to be extended inside _layout.less to reduce html footprint
       // 'max-size', // row ? 'max-width' : 'max-height', // a scroll can overflow in any direction
@@ -153,32 +146,65 @@ export function createView (defaultProp) {
   if (defaultProp) View.defaultProps = ViewRef.defaultProps = {[defaultProp]: true}
 
   View.propTypes = ViewRef.propTypes = {
+    // Whether to use column layout, true if `row` is falsy by default
     col: type.Boolean,
+    // Whether to use row layout, column by default
     row: type.Boolean,
+    // Whether to make the view fill up available height and width
     fill: type.Boolean,
+    // Whether to reverse the order of rendering
     reverse: type.Boolean,
+    /**
+     * Whether to use right to left scroll direction and place the scrollbar on the left.
+     *  - If `rtl` is true, the scroll direction is left to right and the scrollbar is on the right.
+     *  - To achieve left scrollbar without changing horizontal scroll direction,
+     *    restrict this Scroll component to allow only vertical scroll,
+     *    then create a nested Scroll component that can only scroll horizontally.
+     * @example:
+     *  <Scroll reverseScroll scrollAlongDirectionOnly>
+     *    <Scroll row scrollAlongDirectionOnly>...</Scroll>
+     *  </Scroll>
+     */
+    reverseScroll: type.Boolean,
+    // Whether to use right to left text, layout, and scroll direction
     rtl: type.Boolean,
+    // Align inner content to the start
     left: type.Boolean,
+    // Align inner content to the end
     right: type.Boolean,
+    // Align inner content to the top
     top: type.Boolean,
+    // Align inner content to the bottom
     bottom: type.Boolean,
+    // Align inner content to the center horizontally
     center: type.Boolean,
+    // Align inner content to the middle vertically
     middle: type.Boolean,
+    // @param {object|HTMLAudioElement} new Audio(URL) sound file to play on click
     sound: type.Object,
-    children: type.Any,
+    // Inner content to render
+    children: type.Node,
+    // CSS class names separated by space
     className: type.ClassName,
+    // CSS style object with camelCase attribute keys
     style: type.Style,
     // Ref for the View or outer Scroll container
     _ref: type.Ref,
-    // Whether to use Scroll View
+    // Whether to make the View scrollable
     scroll: type.Boolean,
+    // Whether to restrict scrolling along the layout direction.
+    // Scrollable in all directions by default.
+    scrollAlongDirectionOnly: type.Boolean,
     // CSS class for inner wrapper Scroll component
     scrollClass: type.String,
     // CSS style for inner wrapper Scroll component
     scrollStyle: type.Object,
     // Props for inner wrapper Scroll component
     scrollProps: type.Object,
-    // Whether to prevent Scroll from setting offset style to parent element
+    // Whether to prevent the Scroll element from setting offset style to its parent element.
+    // By default, the Scroll component may set max-width or max-height style to the parent
+    // element in order for it to calculate the maximum available space correctly.
+    // Sometimes, this behavior leads to false positives, and needs to be disabled manually.
     noScrollOffset: type.Boolean,
     // Tooltip props or value to display as tooltip on hover
     tooltip: type.Tooltip,
