@@ -8,6 +8,9 @@ import React from 'react'
 
 export * from './react/decorators.js'
 export * from './react/hooks.js'
+// Form class instance
+export const FormContext = React.createContext(null)
+// UI state, such as screen sizes
 export const UIContext = React.createContext({})
 
 /**

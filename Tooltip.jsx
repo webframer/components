@@ -14,6 +14,7 @@ import { type } from './types.js'
 
 /**
  * todo: fix Tooltip position: 'right' toggles between top and right positions when content overflows
+ * todo: fix Tooltip incorrect position after scroll
  * todo: component improvement 3 - align tooltip
  * Tooltip Component
  * @notes:

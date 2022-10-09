@@ -137,6 +137,9 @@ type.Number = PropTypes.number
 // Object value
 type.Object = PropTypes.object
 
+// A single type from React Component.propTypes object (eg. `type.Number`)
+type.PropType = PropTypes.func
+
 // React JSX element (eg. `<View/>`)
 type.ReactElement = PropTypes.element
 
@@ -215,6 +218,10 @@ type.Mm = type.Number
 // A floating number that is to be multiplied with
 type.Multiplier = type.Number
 
+// Anything that can be rendered: numbers, strings, elements, an array, or function
+// (or fragment) containing these types.
+type.NodeOrFunction = type.OneOf([type.Node, type.Function])
+
 // A float number between 0 and 1 inclusive (to be used with slider).
 // For values outside the 0 and 1 range, use **type.Percentage**
 type.Percent = type.Float
@@ -232,7 +239,7 @@ type.Promise = type.Obj({
 })
 
 // React Component.propTypes object
-type.PropTypes = type.ObjectOf(type.Function)
+type.PropTypes = type.ObjectOf(type.PropType)
 
 // Pixel unit number to represent a display dimension or location
 // (uses Integer type to ensure valid numbers for use as Image dimension).
@@ -278,9 +285,26 @@ type.File = type.Obj({
   type: type.MIME.isRequired,
 })
 
-// Anything that can be rendered: numbers, strings, elements, an array, or function
-// (or fragment) containing these types.
-type.NodeOrFunction = type.OneOf([type.Node, type.Function])
+// Select option value
+type.Option = type.OneOf([
+  type.String,
+  type.Number,
+  type.Boolean,
+  type.Obj({
+    // Searchable text (used as displayed label if `children` not defined)
+    // todo: refactor to make only `value` required, and auto derive text from value
+    text: type.String.isRequired,
+    // Internal option value to store as selected value (derived from `text` if undefined)
+    value: type.Any,
+    // Required by React if String(value) does not result in unique `key` (derived from `value` if undefined)
+    key: type.Any,
+    // Option's displayed UI
+    children: type.NodeOrFunction,
+  }),
+])
+
+// Select options array of option values
+type.Options = type.ListOf(type.Option.isRequired)
 
 // Function or the Object created by React.useRef() or React.createRef()
 type.Ref = type.OneOf([type.Function, type.Obj({current: type.Any})])
@@ -350,25 +374,41 @@ type.Control = type.Obj({
    */
   type: type.OneOf([
     type.String,
-    type.ObjectOf(type.Function),
-    type.ListOf(type.Function),
+    // Recursive definition
+    type.ObjectOf(type.OneOf([type.PropType, type.Object])),
+    type.ListOf(type.OneOf([type.PropType, type.Object])),
     type.Map,
   ]).isRequired,
-  // Human-readable label for the input type (required if `type` is a string)
-  text: type.NodeOrFunction,
+  // Unique identifier for the base type (eg. 'String' for type.Url),
+  '#_type': type.Id,
+  // Unique identifier for the type (eg. 'Url' for type.Url), fallback is `_type` if undefined
+  '#type': type.Id,
+  // Searchable human-readable label for the input type (required if `type` is a string)
+  '#text': type.String,
   // Brief explanation of the input type (supports Markdown)
-  desc: type.NodeOrFunction,
+  '#desc': type.NodeOrFunction,
   // CSS color value (eg. 'rgba(0,0,0,1)', 'linear-gradient(to bottom, white, black)', etc.)
-  color: type.String,
+  '#color': type.String,
   // Function(value) => boolean | number - function to check if value belongs to this control type.
   // Return `true` to indicate a match, or number of matches for type.Obj/ObjEqual for sorting
-  ofType: type.Function.isRequired,
+  '#ofType': type.Function.isRequired,
   // Maximum number of control items in the list (for type.ListOf/ObjectOf/MapOf)
-  maxInputs: type.Number,
+  '#maxInputs': type.Number,
   // Whether to allow mixing item types (when `type` is a list of controls)
-  mixedTypes: type.Boolean,
+  '#mixedTypes': type.Boolean,
   // ...other props to pass to `<Input/>` component
 })
+
+// type.PropType converted to controls
+type.ControlType = type.Obj({
+  controls: type.ListOf(type.Control),
+  controlOptions: type.Options,
+})
+
+type.ControlTypes = type.OneOf([
+  type.ListOf(type.ControlType),
+  type.ObjectOf(type.ControlType),
+])
 
 // File Input object
 type.FileInput = type.Obj({
@@ -405,26 +445,6 @@ type.FileInput = type.Obj({
 type.FieldForList = type.ListOf(type.Obj({
   id: type.String.isRequired,
 }))
-
-// Select option value
-type.Option = type.OneOf([
-  type.String,
-  type.Number,
-  type.Boolean,
-  type.Obj({
-    // Searchable text (used as displayed label if `children` not defined)
-    text: type.String.isRequired,
-    // Internal option value to store as selected value (derived from `text` if undefined)
-    value: type.Any,
-    // Required by React if String(value) does not result in unique `key` (derived from `value` if undefined)
-    key: type.Any,
-    // Option's displayed UI
-    children: type.NodeOrFunction,
-  }),
-])
-
-// Select options array of option values
-type.Options = type.ListOf(type.Option.isRequired)
 
 // Tag entry object
 type.Tag = type.Obj({
