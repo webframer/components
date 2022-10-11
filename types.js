@@ -378,10 +378,10 @@ type.Control = type.Obj({
     type.ListOf(type.OneOf([type.PropType, type.Object])),
     type.Map,
   ]).isRequired,
-  // Unique identifier for the base type (eg. 'String' for type.Url),
-  '#_type': type.Id,
-  // Unique identifier for the type (eg. 'Url' for type.Url), fallback is `_type` if undefined
-  '#type': type.Id,
+  // Unique identifier for the base type (eg. Symbol.for('String') for type.Url),
+  '#_type': type.Symbol,
+  // Unique identifier for the type (eg. Symbol.for('Url') for type.Url), fallback is `#_type` if undefined
+  '#type': type.Symbol,
   // Searchable human-readable label for the input type (required if `type` is a string)
   '#text': type.String,
   // Brief explanation of the input type (supports Markdown)

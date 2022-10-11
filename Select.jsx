@@ -468,7 +468,7 @@ Select.propTypes = {
   // Whether options menu should try to open from the top, default is from the bottom
   upward: type.Boolean,
   // Selected value(s) - if passed, becomes a controlled component
-  value: type.OneOf([type.String, type.Number, type.Boolean, type.Object, type.List]),
+  value: type.Any,
   // Message to display when there are no options left for multiple select
   noOptionsMsg: type.String,
   // Message to display when there are no matching results for search select
