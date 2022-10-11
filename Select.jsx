@@ -150,7 +150,7 @@ export function Select (_props) {
   if (!self.selectOption) self.selectOption = function (item, e) { // options clicked
     const {multiple, onChange, name, parse} = self.props
     self.hasFocus = multiple
-    let {text = item, value = text} = isObject(item) ? item : {}
+    let {value = item, text = value} = isObject(item) ? item : {}
     if (multiple) value = toUniqueListFast((self.state.value || []).concat(value))
     if (onChange) onChange.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
     if (e.defaultPrevented) return
@@ -188,7 +188,7 @@ export function Select (_props) {
     if (search) {
       const {value, query} = self.state
       if (!multiple && value != null && String(value) !== query) // single search
-        self.state.query = String(getValueText(value, options))
+        self.state.query = getValueText(value, options)
       else if (multiple || value == null) // multiple or unselected single search
         self.state.query = self.props.query
       if (query !== self.state.query) self.state.options = self.getOptions(self.state.query)
@@ -348,14 +348,11 @@ export function Select (_props) {
     if (!compact && !(multiple && hasValue)) return
     let maxContent = query || placeholder || ''
     if (!multiple && open && options.length) {
-      if (isObject(options[0])) {
-        for (const {text} of options) {
+      for (const o of options) {
+        if (isObject(o)) {
+          const {value, text = String(value)} = o
           if (text.length > maxContent.length) maxContent = text
-        }
-      } else {
-        for (const o of options) {
-          if (o.length > maxContent.length) maxContent = o
-        }
+        } else if (String(o).length > maxContent.length) maxContent = String(o)
       }
     }
     return resizeWidth(maxContent, {}, compact)
@@ -382,7 +379,7 @@ export function Select (_props) {
 
       {/* Multiple selected items */}
       {multiple && value && value.map(v => {
-        const {text, key = v} = getOptionByValue(v, self.props.options)
+        const {text = String(v), key = v} = getOptionByValue(v, self.props.options)
         // Use <a> tag, so it can link to another page as selected Tag
         return <a key={key} onClick={onClickValue && onEventStopPropagation(function (e) {
           onClickValue.call(this, v, name, e, self)
@@ -483,8 +480,7 @@ export default React.memo(Select)
 
 function toFuseList (options) {
   if (!options.length) return options
-  if (!isObject(options[0])) return options.map(v => String(v))
-  return options
+  return options.map(v => isObject(v) ? (v.text ? v : {...v, text: String(v.value)}) : String(v))
 }
 
 function getOptionsPosition (self = this) {
@@ -533,15 +529,19 @@ function getFixedOptionsStyle (optionsPosition, desiredPosition) {
   return {position: 'fixed', width, top: 'auto', bottom: 'auto', ...getStyle()}
 }
 
-function getValueText (val, options) {
-  if (!options.length) return val
-  if (isObject(options[0])) return (options.find(({text, value = text}) => value === val) || {}).text || val
-  return val
+/**
+ * @param {any} value
+ * @param {array} options
+ * @returns {string} text
+ */
+function getValueText (value, options) {
+  if (!options.length) return String(value)
+  const option = options.find(o => (o || {}).value === value)
+  return String(option ? (option.text || option.value) : value)
 }
 
 function getOptionByValue (value, options) {
-  return (options.length && isObject(options[0]) &&
-      options.find(({text, value: v = text}) => v === value)) ||
+  return (options.length && options.find(o => (o || {}).value === value)) ||
     {value, key: value, text: String(value)}
 }
 
@@ -552,8 +552,7 @@ function getOptionsFiltered (self) {
   let {options, multiple} = self.props
   const {value: v} = self.state
   if (multiple && v && v.length && options.length) {
-    if (isObject(options[0])) options = options.filter(({text, value = text}) => !v.includes(value))
-    else options = options.filter(value => value !== v)
+    options = options.filter(o => !v.includes(isObject(o) ? o.value : o))
   }
   return options
 }

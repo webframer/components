@@ -291,11 +291,10 @@ type.Option = type.OneOf([
   type.Number,
   type.Boolean,
   type.Obj({
-    // Searchable text (used as displayed label if `children` not defined)
-    // todo: refactor to make only `value` required, and auto derive text from value
-    text: type.String.isRequired,
-    // Internal option value to store as selected value (derived from `text` if undefined)
-    value: type.Any,
+    // Internal option value to store as selected value (required)
+    value: type.Any.isRequired,
+    // Searchable text as displayed label if `children` not defined (derived from `value` if undefined)
+    text: type.String,
     // Required by React if String(value) does not result in unique `key` (derived from `value` if undefined)
     key: type.Any,
     // Option's displayed UI

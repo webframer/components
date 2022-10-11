@@ -14,7 +14,7 @@ export function SelectOptions ({
   function renderItem (item, i) {
     let t, k, selected
     if (isObject(item)) {
-      const {text, value = text, key = String(value)} = item
+      const {value, text = String(value), key = String(value)} = item
       t = text
       k = key
       selected = isActive(value)
@@ -67,11 +67,10 @@ export function addOptionItem (query, options, addOptionMsg, value) {
   if (!query) return
   let q = query.toLowerCase()
   if (value != null && toList(value).find(v => String(v).toLowerCase() === q)) return
-  if (isObject(options[0])) {
-    if (options.find(o => o.text.toLowerCase() === q)) return
-  } else {
-    if (options.find(o => String(o).toLowerCase() === q)) return
-  }
+  if (options.find(o => isObject(o)
+    ? (o.text || String(o.value)).toLowerCase() === q
+    : String(o).toLowerCase() === q,
+  )) return
   return {text: ips(addOptionMsg, {term: query}), value: query}
 }
 
