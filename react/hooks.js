@@ -358,7 +358,7 @@ export function getUIState () {
 export function useInputValue (props) {
   let {value = props.defaultValue} = props
   const [valueState, setValue] = useState(value)
-  if (props.value == null) value = props.value = valueState // use state if uncontrolled value
+  if (props.value === void 0) value = props.value = valueState // use state if uncontrolled value
   delete props.defaultValue
   return [value, setValue, valueState]
 }
