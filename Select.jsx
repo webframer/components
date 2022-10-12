@@ -72,7 +72,7 @@ import { onEventStopPropagation } from './utils/interactions.js'
 export function Select (_props) {
   let {
     options, defaultValue, name, defaultOpen, fuzzyOpt, focusIndex,
-    multiple, query, search, compact, forceRender, fixed, upward,
+    multiple, query, search, compact, excludeSelected, forceRender, fixed, upward,
     onChange, onFocus, onBlur, onSearch, onSelect, onClickValue,
     icon, iconEnd, iconProps,
     addOption, addOptionMsg, noOptionsMsg,
@@ -445,6 +445,8 @@ Select.propTypes = {
   compact: type.OneOf([type.Boolean, type.Number]),
   // Whether to open options initially
   defaultOpen: type.Boolean,
+  // Whether to filter out selected value from options dropdown
+  excludeSelected: type.Boolean,
   // Function(value, name?, event?, self) => any - Serializer for internal Select value
   format: type.Function,
   // Function(value, name?, event, self) => any - Deserializer for onChange value
@@ -545,14 +547,16 @@ function getOptionByValue (value, options) {
     {value, key: value, text: String(value)}
 }
 
-// Options array without selected values for `multiple` Select
+// Options array without selected values for `multiple` Select or `excludeSelected`
 function getOptionsFiltered (self) {
   // given options should the original prop to reduce re-calculation
   // then feed fuzzy search with filtered options.
-  let {options, multiple} = self.props
+  let {options, multiple, excludeSelected} = self.props
   const {value: v} = self.state
   if (multiple && v && v.length && options.length) {
     options = options.filter(o => !v.includes(isObject(o) ? o.value : o))
+  } else if (excludeSelected && !multiple && v !== void 0) {
+    options = options.filter(o => isObject(o) ? o.value !== v : o !== v)
   }
   return options
 }
