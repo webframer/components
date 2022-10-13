@@ -72,7 +72,7 @@ import { onEventStopPropagation } from './utils/interactions.js'
 export function Select (_props) {
   let {
     options, defaultValue, name, defaultOpen, fuzzyOpt, focusIndex,
-    multiple, query, search, compact, excludeSelected, forceRender, fixed, upward,
+    multiple, query, search, compact, controlledValue, excludeSelected, forceRender, fixed, upward,
     onChange, onFocus, onBlur, onSearch, onSelect, onClickValue,
     icon, iconEnd, iconProps,
     addOption, addOptionMsg, noOptionsMsg,
@@ -91,13 +91,13 @@ export function Select (_props) {
   const [, changedValue] = useSyncedState({value: props.value})
 
   // Initialize once
-  if (!self.props && value != null) {
+  if (!self.props && value !== void 0) {
     if (format) state.value = format(value, name, void 0, self)
     if (!multiple) state.query = getValueText(value, options)
   }
 
   // Controlled state
-  else if (props.value != null && changedValue) {
+  else if (props.value !== void 0 && (changedValue || controlledValue)) {
     // State should store pure value as is, because `value` can be an array for multiple selection
     // Then let the render logic compute what to display based on given value.
     // For single selection, when no custom option render exists, input shows text value.
@@ -443,6 +443,8 @@ Select.propTypes = {
   addOption: type.OneOf([type.Boolean, type.Object]),
   // Whether to use minimal width that fits content, pass number for additional character offset
   compact: type.OneOf([type.Boolean, type.Number]),
+  // Whether to lock selected value when `value` prop is given
+  controlledValue: type.Boolean,
   // Whether to open options initially
   defaultOpen: type.Boolean,
   // Whether to filter out selected value from options dropdown
@@ -479,6 +481,17 @@ Select.propTypes = {
 }
 
 export default React.memo(Select)
+
+/**
+ * Convert list of values to Select options, each as objects.
+ * @note: does not work for symbols with the same string, because `key` is no longer unique
+ * @param {any[]} arrayOfValues - to convert to options
+ * @returns {object[]} options - for Select dropdown with values converted to text representation
+ */
+export function toSelectOptions (arrayOfValues) {
+  let text
+  return arrayOfValues.map((v) => ({value: v, text: text = String(v), key: text}))
+}
 
 function toFuseList (options) {
   if (!options.length) return options
