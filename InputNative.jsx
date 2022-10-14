@@ -64,7 +64,7 @@ export function InputNative ({
       {prefix != null &&
         <Label className='input__prefix' htmlFor={id}>{renderProp(prefix, self)}</Label>}
       {(stickyPlaceholder || suffix != null) && hasValue &&
-        <Label className='input__suffix'>
+        <Label className={cn('input__suffix', {iconStart: icon, iconEnd})}>
           <Row>
             <Text className='invisible' aria-hidden='true'>{value}</Text>
             {stickyPlaceholder ? <Text>{stickyPlaceholder}</Text> : renderProp(suffix, self)}

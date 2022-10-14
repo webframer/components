@@ -362,13 +362,13 @@ export function Select (_props) {
   }, [hasValue, query, compact, multiple, open, options, placeholder])
 
   // Icon ------------------------------------------------------------------------------------------
-  if (icon != null) icon = (
+  if (icon) icon = (
     <Label className='input__icon' htmlFor={id}>{(isString(icon)
         ? <Icon name={icon} />
         : <Icon {...icon} />
     )}</Label>
   )
-  if (iconEnd != null) iconEnd = (
+  if (iconEnd) iconEnd = (
     <Label className='input__icon' htmlFor={id}>{(isString(iconEnd)
         ? <Icon name={iconEnd} />
         : <Icon {...iconEnd} />
@@ -425,7 +425,7 @@ export function Select (_props) {
       {prefix != null &&
         <Label className='input__prefix' htmlFor={id}>{renderProp(prefix, self)}</Label>}
       {(stickyPlaceholder || suffix != null) && hasValue &&
-        <Label className='input__suffix'>
+        <Label className={cn('input__suffix', {iconStart: icon, iconEnd})}>
           <Row>
             <Text className='invisible' aria-hidden='true'>{query}</Text>
             {stickyPlaceholder ? <Text>{stickyPlaceholder}</Text> : renderProp(suffix, self)}
@@ -501,9 +501,9 @@ Select.propTypes = {
   // Custom Icon name or props to render before input node.
   // Default is 'dropdown' icon at the end, or 'search' icon at the start if `search = true`
   // and icons are undefined or null.
-  icon: type.OneOf([type.String, type.Object]),
+  icon: type.OneOf([type.String, type.Object, type.Boolean]),
   // Custom Icon name or props to render after input node
-  iconEnd: type.OneOf([type.String, type.Object]),
+  iconEnd: type.OneOf([type.String, type.Object, type.Boolean]),
   // Whether to allow multiple selections and store values as array
   multiple: type.Boolean,
   // Whether to set options with position fixed on open to remain visible inside Scroll
