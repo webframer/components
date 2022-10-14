@@ -48,7 +48,7 @@ export function InputNative ({
     }
   }
 
-  // Render Props ----------------------------------------------------------------------------------
+  // Sticky Placeholder ----------------------------------------------------------------------------
   if (stickyPlaceholder) {
     const {placeholder} = props
     stickyPlaceholder = placeholder && placeholder.substring(String(value).length)

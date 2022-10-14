@@ -19,8 +19,9 @@ import {
 import { isPureKeyPress } from '@webframer/js/keyboard.js'
 import cn from 'classnames'
 import Fuse from 'fuse.js'
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useId, useMemo } from 'react'
 import Icon from './Icon.jsx'
+import Label from './Label.jsx'
 import { assignRef, toReactProps, useExpandCollapse, useInstance, useSyncedState } from './react.js'
 import { renderProp } from './react/render.js'
 import { Row } from './Row.jsx'
@@ -74,12 +75,13 @@ export function Select (_props) {
     options, defaultValue, name, defaultOpen, fuzzyOpt, focusIndex,
     multiple, query, search, compact, controlledValue, excludeSelected, forceRender, fixed, upward,
     onChange, onFocus, onBlur, onSearch, onSelect, onClickValue,
-    icon, iconEnd, iconProps,
+    icon, iconEnd,
     addOption, addOptionMsg, noOptionsMsg,
     format, parse, // these are serializer and deserializer
     type, // not used
+    float, error, label, loading, prefix, suffix, stickyPlaceholder,
     childBefore, childAfter, className, style, row,
-    _ref, inputRef, ...props
+    _ref, inputRef, id = useId(), ...props
   } = _props
   props = toReactProps(props)
   let {value = defaultValue} = props
@@ -329,6 +331,7 @@ export function Select (_props) {
   query = state.query
   options = state.options // filtered by search results and selected values
   focusIndex = state.focusIndex // focused selection without actual focus
+  const {disabled, readonly} = props
   const hasValue = multiple ? hasListValue(value) : value != null
   if (hasValue) delete props.placeholder // remove for multiple search
 
@@ -358,11 +361,34 @@ export function Select (_props) {
     return resizeWidth(maxContent, {}, compact)
   }, [hasValue, query, compact, multiple, open, options, placeholder])
 
-  // Render Icon -----------------------------------------------------------------------------------
-  const iconNode = icon ? // Let default Icon pass click through to parent Select
-    <Icon name={isString(icon) ? icon : (search ? 'search' : 'dropdown')}
-          {...{className: 'fade', ...iconProps}} /> : null
-  let isIconEnd = iconEnd || (!search && !isString(icon))
+  // Icon ------------------------------------------------------------------------------------------
+  if (icon != null) icon = (
+    <Label className='input__icon' htmlFor={id}>{(isString(icon)
+        ? <Icon name={icon} />
+        : <Icon {...icon} />
+    )}</Label>
+  )
+  if (iconEnd != null) iconEnd = (
+    <Label className='input__icon' htmlFor={id}>{(isString(iconEnd)
+        ? <Icon name={iconEnd} />
+        : <Icon {...iconEnd} />
+    )}</Label>
+  )
+  let iconDefault = icon == null && iconEnd == null && (
+    <Label className='input__icon' htmlFor={id}>
+      <Icon className='fade' name={search ? 'search' : 'dropdown'} />
+    </Label>
+  )
+  if (iconDefault) {
+    if (search) icon = iconDefault
+    else iconEnd = iconDefault
+  }
+
+  // Sticky Placeholder ----------------------------------------------------------------------------
+  if (stickyPlaceholder) {
+    const {placeholder} = _props
+    stickyPlaceholder = placeholder && placeholder.substring(query.length)
+  }
 
   // Input value should be:
   //    - query: for search selection
@@ -370,12 +396,17 @@ export function Select (_props) {
   // Multiple selection does not use input to display value, only single selection
   // => sync query with value onChange for single selection, then use `query` for input
 
-  return ( // When Select is open, assign 'active' CSS class to be consistent with other Input types
-    <Row className={cn(className, `select`,
-      {active: open, done: hasValue, compact, multiple, search, upward, query})} style={style}
+  // When Select is open, assign 'active' CSS class to be consistent with other Input types
+  return (<>
+    {label != null &&
+      <Label className='input__label'>{renderProp(label, self)}</Label>}
+    <Row className={cn(className, `select`, {
+      active: open, done: hasValue, multiple, search, upward, query,
+      compact, disabled, readonly, loading, error,
+    })} style={style}
          {...{row}} onClick={toggleOpen} tabIndex={-1} _ref={self.ref}>
       {childBefore != null && renderProp(childBefore, self)}
-      {!isIconEnd && iconNode}
+      {icon}
 
       {/* Multiple selected items */}
       {multiple && value && value.map(v => {
@@ -389,13 +420,27 @@ export function Select (_props) {
         })} tabIndex={-1} />
         </a>
       })}
+
+      {/* Prefix + Suffix */}
+      {prefix != null &&
+        <Label className='input__prefix' htmlFor={id}>{renderProp(prefix, self)}</Label>}
+      {(stickyPlaceholder || suffix != null) && hasValue &&
+        <Label className='input__suffix'>
+          <Row>
+            <Text className='invisible' aria-hidden='true'>{query}</Text>
+            {stickyPlaceholder ? <Text>{stickyPlaceholder}</Text> : renderProp(suffix, self)}
+          </Row>
+        </Label>
+      }
+
       <input
-        className={cn('select__input', {'fill-width': !compact && (multiple || !hasValue), iconEnd: icon && isIconEnd})}
+        className={cn('select__input', {'fill-width': !compact && (multiple || !hasValue), iconStart: icon, iconEnd})}
         style={styleI}
-        readOnly={!search} {...props} ref={self.ref1}
+        id={id} readOnly={!search} {...props} ref={self.ref1}
         value={query} onChange={self.searchQuery} onFocus={self.focus} onBlur={self.blur}
         onClick={search ? onEventStopPropagation(self.openOptions, props.onClick) : void 0} />
-      {isIconEnd && iconNode}
+
+      {iconEnd}
       {childAfter != null && renderProp(childAfter, self)}
       <Scroll className={cn('select__options', {open, upward, fixed: listBox.style})}
               noScrollOffset reverse={upward} _ref={self.ref2} {...listBox}>
@@ -406,7 +451,7 @@ export function Select (_props) {
                          {...optionsProps} />}
       </Scroll>
     </Row>
-  )
+  </>)
 }
 
 Select.defaultProps = {
@@ -420,8 +465,6 @@ Select.defaultProps = {
   fuzzyOpt: {keys: ['text']},
   // Default to empty string to prevent React controlled input error
   query: '',
-  // Default is 'dropdown' icon at the end, or 'search' icon at the start if `search = true`
-  icon: true,
 }
 
 Select.propTypes = {
@@ -455,12 +498,12 @@ Select.propTypes = {
   parse: type.Function,
   // Whether to always render options, even when closed
   forceRender: type.Boolean,
-  // Whether to use an icon, pass Icon name for custom Icon
-  icon: type.OneOf([type.String, type.Boolean]),
-  // Whether to place Icon after input, default is before input for custom Icon name
-  iconEnd: type.Boolean,
-  // Icon component props to pass over
-  iconProps: type.Object,
+  // Custom Icon name or props to render before input node.
+  // Default is 'dropdown' icon at the end, or 'search' icon at the start if `search = true`
+  // and icons are undefined or null.
+  icon: type.OneOf([type.String, type.Object]),
+  // Custom Icon name or props to render after input node
+  iconEnd: type.OneOf([type.String, type.Object]),
   // Whether to allow multiple selections and store values as array
   multiple: type.Boolean,
   // Whether to set options with position fixed on open to remain visible inside Scroll
