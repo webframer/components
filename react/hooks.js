@@ -180,44 +180,22 @@ export function useCompactStyle (compact, content, props = {}) {
 }
 
 /**
- * Create a globally unique ID string for the entire Component's lifetime.
- * For SSR rendering, use built-in `useId` method provided by React.
+ * Resolve input `value` based on given `props` to be Controlled or Uncontrolled state,
+ * this will mutate `props` to avoid duplicate value/defaultValue passed to `<input/>`,
+ * and format the value, if `format` function exists, before updating the state.
  *
- * @param {string} [id] - the unique ID to use, defaults to generating a new one on the first render
- * @returns {string} uid - globally unique ID
- */
-export function useUId (id) {
-  const {current: self} = useRef({id})
-  if (!self.id) self.id = Id()
-  return self.id
-}
-
-/**
- * React Hook to update Component state when props change, similar to class.componentWillReceiveProps
  * @example:
- *    const {current: self} = useRef({})
- *    self.state = useSyncedState(props, self.state)[0]
+ *    const [value, setValue, valueState] = useInputValue(props)
  *
- * @param {object} props - initial or new props to sync state with
- * @param {object} [state] - the current state
- * @returns {[state: object, justSynced: boolean]} state - mutated with partially updated `props`
- *    that changed, or existing state if nothing changed; and if it has just changed to sync with props.
- *    If `props` has `null` attributes, they will override `state`.
- *    Attributes that do not exist in `props` but in `state` are kept (usually the desired behavior).
+ * @param {object} props - input props containing `value` and/or `defaultValue`
+ * @returns [value, setValue, valueState] value - to use as input value
  */
-export function useSyncedState (props, state = {}) {
-  const prevProps = usePreviousProp(props, true) // shallow match to allow new object each time
-  // On initial render, prevProps is undefined
-  // Lodash isEqual() allows deep nesting of array/objects, and considers them to be equal
-  // @example:
-  //    const a = [new File([], 'test')]
-  //    isEqual({a: [a]}, {a: [a]}))
-  //    >>> true
-  //    isEqual({a: [a]}, {a: [new File([], 'test')]}))
-  //    >>> false
-  // Object.assign is required for updating array to new props, and to keep `state` object the same
-  if (prevProps === void 0 || !isEqual(prevProps, props)) return [Object.assign(state, props), true]
-  return [state, false]
+export function useInputValue (props) {
+  let {value = props.defaultValue} = props
+  const [valueState, setValue] = useState(value)
+  if (props.value === void 0) value = props.value = valueState // use state if uncontrolled value
+  delete props.defaultValue
+  return [value, setValue, valueState]
 }
 
 /**
@@ -251,116 +229,6 @@ export function useInstance (initialState = {}) {
     }
   }
   return [self, self.state]
-}
-
-/**
- * Get previous prop of the Component, similar to class.componentWillReceiveProps
- * @param {any} value - to get from previous Component props
- * @param {boolean} [shallow] - whether to use shallow isEqual() comparison
- * @param {object} [self] - Component instance
- * @returns {any|void} previous prop - undefined initially on the very first render
- */
-export function usePreviousProp (value, shallow, self = useRef({}).current) {
-  self.hasChanged = shallow ? !isEqual(value, self.lastValue) : value !== self.lastValue
-
-  // Set initial value once
-  useEffect(() => {self.lastValue = value}, [])
-
-  // Update cache value for the next render cycle if prop changed
-  useEffect(() => {
-    if (self.hasChanged) {
-      self.prevValue = self.lastValue // the cached value before the last value to restore
-      self.lastValue = value
-    }
-  })
-
-  return self.hasChanged ? self.lastValue : self.prevValue
-}
-
-/**
- * Get previous value of the Component during the last render.
- * (can be the same as current if forceUpdate - see usePreviousProp hook for changed props only).
- * @param {any} value - to get from previous render state
- * @returns {any|void} previous value - undefined initially
- */
-export function usePreviousValue (value) {
-  const instance = useRef()
-
-  useEffect(() => {
-    instance.current = value
-  })
-
-  return instance.current
-}
-
-/**
- * UIContext state provider
- * @example:
- *   // App.js
- *   const [state] = useUIState()
- *   //...
- *   <UIContext.Provider value={state}>
- *     <View>...</View>
- *   </>
- * @param {object} [initialState]
- * @returns [state: {
- *       isMobile: boolean,
- *       isTablet: boolean,
- *       isComputer: boolean,
- *       isDesktop: boolean,
- *       isWidescreen: boolean,
- *       isFHD: boolean,
- *       screenRatio: number,
- *       screenWidth: number,
- *       screenHeight: number,
- *     }] state - for UIContext.Provider
- */
-export function useUIState (initialState = getUIState()) {
-  const [self, state] = useInstance(initialState)
-  if (!self.resize) self.resize = debounce(() => self.setState(getUIState()))
-  useEffect(() => {
-    subscribeTo('resize', self.resize)
-    return () => {unsubscribeFrom('resize', self.resize)}
-  }, [])
-  return [state, self.setState]
-}
-
-// Get state for UIContext Provider
-export function getUIState () {
-  if (typeof window !== 'undefined') {
-    const {innerWidth, innerHeight} = window
-    return {
-      isMobile: innerWidth < 768,
-      isTablet: innerWidth >= 768 && innerWidth < 1024,
-      isComputer: innerWidth >= 1024 && innerWidth < 1200,
-      isDesktop: innerWidth >= 1200 && innerWidth < 1366,
-      isWidescreen: innerWidth >= 1366 && innerWidth <= 1680,
-      isFHD: innerWidth > 1680 && innerWidth <= 1920,
-      isQHD: innerWidth > 1920 && innerWidth <= 2560,
-      screenRatio: innerWidth / innerHeight,
-      screenWidth: innerWidth,
-      screenHeight: innerHeight,
-    }
-  } else {
-    return {}
-  }
-}
-
-/**
- * Resolve input `value` based on given `props` to be Controlled or Uncontrolled state,
- * this will mutate `props` to avoid duplicate value/defaultValue passed to `<input/>`
- * @example:
- *    const [value, setValue, valueState] = useInputValue(props)
- *
- * @param {object} props - input props containing `value` and/or `defaultValue`
- * @returns [value, setValue, valueState] value - to use as input value
- */
-export function useInputValue (props) {
-  let {value = props.defaultValue} = props
-  const [valueState, setValue] = useState(value)
-  if (props.value === void 0) value = props.value = valueState // use state if uncontrolled value
-  delete props.defaultValue
-  return [value, setValue, valueState]
 }
 
 /**
@@ -439,6 +307,47 @@ export function useModalRoute (
 }
 
 /**
+ * Get previous prop of the Component, similar to class.componentWillReceiveProps
+ * @param {any} value - to get from previous Component props
+ * @param {boolean} [shallow] - whether to use shallow isEqual() comparison
+ * @param {object} [self] - Component instance
+ * @returns {any|void} previous prop - undefined initially on the very first render
+ */
+export function usePreviousProp (value, shallow, self = useRef({}).current) {
+  self.hasChanged = shallow ? !isEqual(value, self.lastValue) : value !== self.lastValue
+
+  // Set initial value once
+  useEffect(() => {self.lastValue = value}, [])
+
+  // Update cache value for the next render cycle if prop changed
+  useEffect(() => {
+    if (self.hasChanged) {
+      self.prevValue = self.lastValue // the cached value before the last value to restore
+      self.lastValue = value
+    }
+  })
+
+  // On initial render, prevValue is undefined
+  return self.hasChanged ? self.lastValue : self.prevValue
+}
+
+/**
+ * Get previous value of the Component during the last render.
+ * (can be the same as current if forceUpdate - see usePreviousProp hook for changed props only).
+ * @param {any} value - to get from previous render state
+ * @returns {any|void} previous value - undefined initially
+ */
+export function usePreviousValue (value) {
+  const instance = useRef()
+
+  useEffect(() => {
+    instance.current = value
+  })
+
+  return instance.current
+}
+
+/**
  * Check whether the app has just changed routes
  * @param {object} props - of the Component
  * @param {object} [self] - Component instance
@@ -484,4 +393,111 @@ export function useScrollToElement (shouldScroll, options = {behavior: 'auto'}) 
   const ref = useRef(null)
   if (ref.current && shouldScroll) ref.current.scrollIntoView(options)
   return [ref]
+}
+
+/**
+ * React Hook to update Component state when props change, similar to class.componentWillReceiveProps
+ * @example:
+ *    const {current: self} = useRef({})
+ *    const [state, justChanged] = useSyncedState({value}, self.state)[0]
+ *    >>> state.value // syncs with the latest `value` prop
+ *
+ * @param {object} props - initial or new props to sync state with
+ * @param {object} [state] - the current state
+ * @param {object} [self] - Component instance
+ * @returns {[state: object, justSynced: boolean]} state - mutated with partially updated `props`
+ *    that changed, or existing state if nothing changed; and if it has just changed to sync with props.
+ *    If `props` has `null` attributes, they will override `state`.
+ *    Attributes that do not exist in `props` but in `state` are kept (usually the desired behavior).
+ */
+export function useSyncedState (props, state = {}, self = useRef({}).current) {
+  // Lodash isEqual() allows deep nesting of array/objects, and considers them to be equal
+  // @example:
+  //    const a = [new File([], 'test')]
+  //    isEqual({a: [a]}, {a: [a]}))
+  //    >>> true
+  //    isEqual({a: [a]}, {a: [new File([], 'test')]}))
+  //    >>> false
+  self.hasChanged = !isEqual(props, self.lastValue)
+
+  // Set initial value once
+  useEffect(() => {self.lastValue = props}, [])
+
+  // Update cache value for the next render cycle if props changed
+  useEffect(() => {
+    if (self.hasChanged) {
+      self.prevValue = self.lastValue // the cached value before the last value to restore
+      self.lastValue = props
+    }
+  })
+
+  // Object.assign is required for updating array to new props, and to keep `state` object the same
+  if (self.hasChanged) return [Object.assign(state, props), true]
+  return [state, false]
+}
+
+/**
+ * Create a globally unique ID string for the entire Component's lifetime.
+ * For SSR rendering, use built-in `useId` method provided by React.
+ *
+ * @param {string} [id] - the unique ID to use, defaults to generating a new one on the first render
+ * @returns {string} uid - globally unique ID
+ */
+export function useUId (id) {
+  const {current: self} = useRef({id})
+  if (!self.id) self.id = Id()
+  return self.id
+}
+
+/**
+ * UIContext state provider
+ * @example:
+ *   // App.js
+ *   const [state] = useUIState()
+ *   //...
+ *   <UIContext.Provider value={state}>
+ *     <View>...</View>
+ *   </>
+ * @param {object} [initialState]
+ * @returns [state: {
+ *       isMobile: boolean,
+ *       isTablet: boolean,
+ *       isComputer: boolean,
+ *       isDesktop: boolean,
+ *       isWidescreen: boolean,
+ *       isFHD: boolean,
+ *       screenRatio: number,
+ *       screenWidth: number,
+ *       screenHeight: number,
+ *     }] state - for UIContext.Provider
+ */
+export function useUIState (initialState = getUIState()) {
+  const [self, state] = useInstance(initialState)
+  if (!self.resize) self.resize = debounce(() => self.setState(getUIState()))
+  useEffect(() => {
+    subscribeTo('resize', self.resize)
+    return () => {unsubscribeFrom('resize', self.resize)}
+  }, [])
+  return [state, self.setState]
+}
+
+// Get state for UIContext Provider
+export function getUIState () {
+  if (typeof window !== 'undefined') {
+    const {innerWidth, innerHeight} = window
+    return {
+      isMobile: innerWidth < 768,
+      isTablet: innerWidth >= 768 && innerWidth < 1024,
+      isComputer: innerWidth >= 1024 && innerWidth < 1200,
+      isDesktop: innerWidth >= 1200 && innerWidth < 1366,
+      isWidescreen: innerWidth >= 1366 && innerWidth <= 1680,
+      isFHD: innerWidth > 1680 && innerWidth <= 1920,
+      isQHD: innerWidth > 1920 && innerWidth <= 2560,
+      screenRatio: innerWidth / innerHeight,
+      screenWidth: innerWidth,
+      screenHeight: innerHeight,
+    }
+  } else {
+    return {}
+  }
 }
