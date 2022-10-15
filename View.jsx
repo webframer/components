@@ -161,8 +161,8 @@ export function createView (defaultProp) {
      *    restrict this Scroll component to allow only vertical scroll,
      *    then create a nested Scroll component that can only scroll horizontally.
      * @example:
-     *  <Scroll reverseScroll scrollAlongDirectionOnly>
-     *    <Scroll row scrollAlongDirectionOnly>...</Scroll>
+     *  <Scroll rtl={rtl} reverseScroll scrollAlongDirectionOnly>
+     *     <Scroll row scrollAlongDirectionOnly>...</Scroll>
      *  </Scroll>
      */
     reverseScroll: type.Boolean,

@@ -25,7 +25,7 @@ import { extractViewProps } from './View.jsx'
  *  9. Sticky placeholder that persists as user enters text
  *  10. todo: improvement - Floating Label style
  */
-export function InputNative ({className, float, error, loading, ..._props}) {
+export function InputNative ({className, error, loading, ..._props}) {
   const viewProps = extractViewProps(_props)
   let {
     active, compact, disabled, readonly,
@@ -52,14 +52,14 @@ export function InputNative ({className, float, error, loading, ..._props}) {
     {label}
     <Row className={cn(className, 'input', {active, compact, disabled, readonly, loading, error})}
          {...viewProps}>
-      {childBefore != null && renderProp(childBefore, self)}
+      {childBefore}
       {icon}
       {prefix}
       {suffix}
       <input className={cn('input__field', {iconStart: icon, iconEnd})}
              {...props} ref={self.ref} />
       {iconEnd}
-      {childAfter != null && renderProp(childAfter, self)}
+      {childAfter}
     </Row>
   </>)
 }
@@ -79,7 +79,7 @@ export function InputNative ({className, float, error, loading, ..._props}) {
  */
 export function useInputSetup ({
   type, id = useId(),
-  compact, controlledValue, format = formatByType[type], parse = parseByType[type],
+  compact, controlledValue, float, format = formatByType[type], parse = parseByType[type],
   icon, iconEnd, label, prefix, suffix, onRemove, noSpellCheck = type === 'password', stickyPlaceholder,
   childBefore, childAfter, inputRef, ...props // `props` should only contain `input` props
 }, enabled = inputEnabledOptions) {
@@ -91,7 +91,7 @@ export function useInputSetup ({
   const [active, setFocus] = useState(props.autoFocus)
   const hasValue = value != null && value !== ''
   self.props = {
-    compact, controlledValue, format, parse,
+    compact, controlledValue, float, format, parse,
     icon, iconEnd, label, prefix, suffix, onRemove, noSpellCheck, stickyPlaceholder,
     childBefore, childAfter, inputRef, ...props,
   }
@@ -105,10 +105,6 @@ export function useInputSetup ({
     const {onChange, name} = self.props
     if (onChange) onChange.call(this, self.getParsedValue.call(this, e, value), name, e, self)
     if (e.defaultPrevented) return
-    // Same internal value does not re-render, but for input number,
-    // we need to update UI when user types in numbers with trailing zeros: 1.020,
-    // or anytime parse() function returns the same value, but format() does not.
-    // if (value === self.state.value) self.forceUpdate()
     setValue(value)
   }
   if (!self.blur) self.blur = function (e) {
@@ -264,6 +260,8 @@ InputNative.defaultProps = {
 InputNative.propTypes = {
   // Whether to use minimal width that fits content, pass number for additional character offset
   compact: type.OneOf([type.Boolean, type.Number]),
+  // Whether to lock input value when `value` prop is given
+  controlledValue: type.Boolean,
   // Initial value for uncontrolled state
   defaultValue: type.Any,
   // Internal value for controlled state

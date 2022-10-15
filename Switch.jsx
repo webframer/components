@@ -1,57 +1,53 @@
 import cn from 'classnames'
-import React, { useId, useRef, useState } from 'react'
+import React from 'react'
+import checkbox from './Checkbox.jsx'
 import Icon from './Icon.jsx'
+import { useInputSetup } from './InputNative.jsx'
 import Label from './Label.jsx'
-import { toReactProps, useExpandCollapse } from './react.js'
+import { useExpandCollapse } from './react.js'
 import { renderProp } from './react/render.js'
 import { Row } from './Row.jsx'
 import Spacer from './Spacer.jsx'
 import { type } from './types.js'
+import { extractViewProps } from './View.jsx'
 
 /**
  * Switch (Toggle) Input Component
  */
 export function Switch ({
-  value, defaultValue, checkedValue, uncheckedValue, label, checkedLabel, uncheckedLabel,
-  id = useId(), onChange, title, danger,
-  childBefore, childAfter, className, style, reverse,
-  float, compact, // not used
-  ...props
+  className, error, loading, label, checkedLabel, uncheckedLabel, title,
+  ..._props
 }) {
-  const {current: self} = useRef({onChange})
-  props = toReactProps(props)
-  if (value === checkedValue) value = true
-  if (value === uncheckedValue) value = false
-  if (value == null) { // Uncontrolled component
-    if (defaultValue != null) props.defaultChecked = !!defaultValue
-  } else {  // Controlled component
-    props.checked = !!value
-  }
-  let {checked = props.defaultChecked} = props
-  const [checkedState, setChecked] = useState(!!checked)
-  if (value == null) checked = checkedState // use state if uncontrolled value
+  const viewProps = extractViewProps(_props)
+  const {
+    active, disabled, readonly, value,
+    childBefore, childAfter, id, props, self,
+  } = useInputSetup(_props, switchEnabledOptions)
 
   // Event Handler ---------------------------------------------------------------------------------
-  if (!self.change) self.change = function (e) {
-    const {checked} = e.target
-    setChecked(checked)
-    if (self.onChange)
-      self.onChange.call(this, checked ? checkedValue : uncheckedValue, props.name, ...arguments)
+  if (!self.changeChecked) self.changeChecked = function (e) {
+    return self.change.call(this, e, e.target.checked) // extend the base pattern
   }
-  props.onChange = self.change
+  props.onChange = self.changeChecked
+
+  // Render Prop -----------------------------------------------------------------------------------
+  const checked = props.checked = value
+  props.type = 'checkbox'
+  delete props.value
 
   return (
-    <Row className={cn(className, 'switch', {checked, reverse, danger})} style={style}>
-      {label && <>
+    <Row className={cn(className, 'switch', {active, disabled, readonly, loading, error, checked})}
+         {...viewProps}>
+      {label != null && <>
         <Label className='switch__label'>{renderProp(label, self)}</Label>
         <Spacer />
       </>}
-      {childBefore != null && renderProp(childBefore, self)}
-      <input id={id} className='sr-only' {...props} />
-      <Label className='switch__toggle' title={title} {...!props.readOnly && {htmlFor: id}}>
+      {childBefore}
+      <input className='sr-only' {...props} />
+      <Label className='switch__toggle' title={title} {...!disabled && !readonly && {htmlFor: id}}>
         <SwitchLabels {...{checked, checkedLabel, uncheckedLabel, self}} />
       </Label>
-      {childAfter != null && renderProp(childAfter, self)}
+      {childAfter}
     </Row>
   )
 }
@@ -74,34 +70,34 @@ function ToggleLabels ({checked, checkedLabel, uncheckedLabel, self}) {
 
 const SwitchLabels = React.memo(ToggleLabels)
 
-Switch.defaultProps = {
-  type: 'checkbox',
-  checkedValue: true,
-  uncheckedValue: false,
-}
-
 Switch.propTypes = {
   // Unique identifier, default is string created from React.useId()
   id: type.String,
+  // Whether to lock input value when `value` prop is given
+  controlledValue: type.Boolean,
   // Initial value for uncontrolled checked or unchecked state
   defaultValue: type.Any,
   // Label to show before the switch (or after Switch with `reverse` true)
   label: type.NodeOrFunction,
+  // Function(value, name?, event?, self) => boolean - Input value formatter for input.checked
+  format: type.Function,
+  // Function(value: boolean, name?, event, self) => any - value parser for onChange/onBlur/onFocus handlers
+  parse: type.Function,
   // UI to show for checked state inside the Switch, defaults to a checkmark icon
   checkedLabel: type.NodeOrFunction,
-  // Internal value to assign to checked case
-  checkedValue: type.Any,
   // UI to show for unchecked state inside the Switch, defaults to empty Spacer
   uncheckedLabel: type.NodeOrFunction,
-  // Internal value to assign to unchecked case
-  uncheckedValue: type.Any,
-  // Input onChange callback(checked: boolean, name: string, event: Event)
+  // Handler(value: any, name?: string, event: Event, self) on input value changes
   onChange: type.Function,
+  // Handler(value: any, name?: string, event: Event, self) on input focus
+  onFocus: type.Function,
+  // Handler(value: any, name?: string, event: Event, self) on input blur
+  onBlur: type.Function,
   // Internal value for controlled checked or unchecked state
   value: type.Any,
-  // Whether Label for unchecked state should have 'danger' CSS class
-  danger: type.Boolean,
-  // Other input props
+  // ...other native HTML `<input/>` props
 }
 
 export default React.memo(Switch)
+
+const switchEnabledOptions = {childBefore: true, childAfter: true}
