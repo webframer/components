@@ -331,7 +331,7 @@ export function Select (_props) {
   query = state.query
   options = state.options // filtered by search results and selected values
   focusIndex = state.focusIndex // focused selection without actual focus
-  const {disabled, readonly} = props
+  const {disabled, readOnly: readonly} = props
   const hasValue = multiple ? hasListValue(value) : value != null
   if (hasValue) delete props.placeholder // remove for multiple search
 
@@ -492,9 +492,10 @@ Select.propTypes = {
   defaultOpen: type.Boolean,
   // Whether to filter out selected value from options dropdown
   excludeSelected: type.Boolean,
-  // Function(value, name?, event?, self) => any - Serializer for internal Select value
+  // Function(value, name?, event?, self) => any - Serializer for internal Select state value
   format: type.Function,
-  // Function(value, name?, event, self) => any - Deserializer for onChange value
+  // Function(value, name?, event, self) => any - Deserializer for onChange/onBlur/onFocus value
+  // Select always stores the `value` or `value[]` internally for its logic, like fuzzy search
   parse: type.Function,
   // Whether to always render options, even when closed
   forceRender: type.Boolean,
