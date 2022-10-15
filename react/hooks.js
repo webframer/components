@@ -103,7 +103,7 @@ function hookAnimatedSize (side = 'height') {
  * @returns [{open: boolean, animating: boolean}, toggleOpen: function, ref: (node: HTMLElement) => void]
  */
 export function useExpandCollapse (isOpen, {side = 'height', size = 'auto', duration} = {}) {
-  const opened = usePreviousProp(isOpen)
+  const [opened] = usePreviousProp(isOpen)
   const [self, state] = useInstance({open: isOpen})
   if (opened != null && isOpen != null && opened !== isOpen) state.open = isOpen // update prop changes
 
@@ -182,20 +182,61 @@ export function useCompactStyle (compact, content, props = {}) {
 /**
  * Resolve input `value` based on given `props` to be Controlled or Uncontrolled state,
  * this will mutate `props` to avoid duplicate value/defaultValue passed to `<input/>`,
- * and format the value, if `format` function exists, before updating the state.
+ * and format the value, if `format` function exists, before updating the state by mutation.
+ *
+ * Notes:
+ *  - if the `value` prop is undefined, the input becomes uncontrolled.
+ *  - if `controlledValue` flag is true, input always use provided `value` prop.
  *
  * @example:
- *    const [value, setValue, valueState] = useInputValue(props)
+ * function MyComponent (_props) {
+ *    const {noneInputProp1, noneInputProp2, controlledValue, format, ...props} = _props
+ *    const [self] = useInstance()
+ *    const [value, setValue, justSynced] = useInputValue(props, {controlledValue, format}, self)
+ *
+ *    >>> `value` will be the `defaultValue` initially, if `_props.value` is undefined
+ *    >>> `value` is the formatted `_props.value` if `format` function exists
+ *    >>> `value` === `self.state.value`
+ *    >>> `value` === `props.value`
+ *    >>> `setValue` === `self.setValue`
+ *
+ *    // ...later in the render
+ *    <input {...props} />
+ * }
  *
  * @param {object} props - input props containing `value` and/or `defaultValue`
- * @returns [value, setValue, valueState] value - to use as input value
+ * @param {object} [modifiers] - such as `format` function or `controlledValue` flag
+ * @param {object} [self] - Component instance from useInstance()
+ * @returns [value: string, setValue: function, justSynced: boolean]
+ *    value - to use as input value;
+ *    setValue - function to change value state;
+ *    justSynced - true if the new value prop just changed;
+ *    with `props` mutated for passing to input, like this:
+ *    <input {...props} />
  */
-export function useInputValue (props) {
-  let {value = props.defaultValue} = props
-  const [valueState, setValue] = useState(value)
-  if (props.value === void 0) value = props.value = valueState // use state if uncontrolled value
+export function useInputValue (props, {controlledValue, format} = {}, self = useInstance()[0]) {
+  const justSynced = usePreviousProp(props.value)[1]
+  let {value = props.defaultValue, name} = props
+
+  // Initialize value once
+  if (!self.setValue && value !== void 0) {
+    self.state.value = format ? format(value, name, void 0, self) : value
+  }
+
+  // Sync controlled state
+  else if (props.value !== void 0 && (controlledValue || justSynced)) {
+    self.state.value = format ? format(props.value, name, void 0, self) : props.value
+  }
+
+  // fix for React controlled value error
+  if (self.state.value == null) self.state.value = ''
+
+  // Mutate and cleanup unused props
+  props.value = value = self.state.value
   delete props.defaultValue
-  return [value, setValue, valueState]
+
+  if (!self.setValue) self.setValue = (value) => self.setState({value})
+  return [value, self.setValue, justSynced]
 }
 
 /**
@@ -310,25 +351,34 @@ export function useModalRoute (
  * Get previous prop of the Component, similar to class.componentWillReceiveProps
  * @param {any} value - to get from previous Component props
  * @param {boolean} [shallow] - whether to use shallow isEqual() comparison
- * @param {object} [self] - Component instance
- * @returns {any|void} previous prop - undefined initially on the very first render
+ * @returns [prevProp: any, justChanged: boolean]
+ *    previous prop - undefined initially on the very first render;
+ *    justChanged - whether the prop just changed value in this render cycle
  */
-export function usePreviousProp (value, shallow, self = useRef({}).current) {
-  self.hasChanged = shallow ? !isEqual(value, self.lastValue) : value !== self.lastValue
+export function usePreviousProp (value, shallow) {
+  const self = useRef({}).current
+  // Lodash isEqual() allows deep nesting of array/objects, and considers them to be equal
+  // @example:
+  //    const a = [new File([], 'test')]
+  //    isEqual({a: [a]}, {a: [a]}))
+  //    >>> true
+  //    isEqual({a: [a]}, {a: [new File([], 'test')]}))
+  //    >>> false
+  self.justChanged = shallow ? !isEqual(value, self.lastValue) : value !== self.lastValue
 
   // Set initial value once
   useEffect(() => {self.lastValue = value}, [])
 
   // Update cache value for the next render cycle if prop changed
   useEffect(() => {
-    if (self.hasChanged) {
+    if (self.justChanged) {
       self.prevValue = self.lastValue // the cached value before the last value to restore
       self.lastValue = value
     }
   })
 
   // On initial render, prevValue is undefined
-  return self.hasChanged ? self.lastValue : self.prevValue
+  return [self.justChanged ? self.lastValue : self.prevValue, self.justChanged]
 }
 
 /**
@@ -404,36 +454,16 @@ export function useScrollToElement (shouldScroll, options = {behavior: 'auto'}) 
  *
  * @param {object} props - initial or new props to sync state with
  * @param {object} [state] - the current state
- * @param {object} [self] - Component instance
  * @returns {[state: object, justSynced: boolean]} state - mutated with partially updated `props`
  *    that changed, or existing state if nothing changed; and if it has just changed to sync with props.
  *    If `props` has `null` attributes, they will override `state`.
  *    Attributes that do not exist in `props` but in `state` are kept (usually the desired behavior).
  */
-export function useSyncedState (props, state = {}, self = useRef({}).current) {
-  // Lodash isEqual() allows deep nesting of array/objects, and considers them to be equal
-  // @example:
-  //    const a = [new File([], 'test')]
-  //    isEqual({a: [a]}, {a: [a]}))
-  //    >>> true
-  //    isEqual({a: [a]}, {a: [new File([], 'test')]}))
-  //    >>> false
-  self.hasChanged = !isEqual(props, self.lastValue)
-
-  // Set initial value once
-  useEffect(() => {self.lastValue = props}, [])
-
-  // Update cache value for the next render cycle if props changed
-  useEffect(() => {
-    if (self.hasChanged) {
-      self.prevValue = self.lastValue // the cached value before the last value to restore
-      self.lastValue = props
-    }
-  })
-
+export function useSyncedState (props, state = {}) {
+  const justSynced = usePreviousProp(props, true)[1]
   // Object.assign is required for updating array to new props, and to keep `state` object the same
-  if (self.hasChanged) return [Object.assign(state, props), true]
-  return [state, false]
+  if (justSynced) Object.assign(state, props)
+  return [state, justSynced]
 }
 
 /**

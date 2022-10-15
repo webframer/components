@@ -32,8 +32,8 @@ export function Input ({
 
   // Error Message ---------------------------------------------------------------------------------
   const [{animating}, _on, ref] = useExpandCollapse(error != null || info != null)
-  const _error = usePreviousProp(error) // for animation to collapse
-  const _info = usePreviousProp(info) // for animation to collapse
+  const [_error] = usePreviousProp(error) // for animation to collapse
+  const [_info] = usePreviousProp(info) // for animation to collapse
   if (animating && error == null) error = _error
   if (animating && info == null) info = _info
 

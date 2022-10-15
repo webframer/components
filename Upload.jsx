@@ -3,7 +3,6 @@ import {
   __CLIENT__,
   hasListValue,
   ips,
-  isEqual,
   l,
   localiseTranslation,
   shortNumber,
@@ -46,7 +45,7 @@ export function Upload ({
 }) {
   props = toReactProps(props)
   let [self, {active}] = useInstance()
-  const [value, setValue, valueState] = useInputValue(props)
+  const [value, setValue, justSyncedValue] = useInputValue(props)
 
   Object.assign(self, {
     maxFiles, maxSize, minSize, onChange, onError, onRemove, value,
@@ -159,7 +158,7 @@ export function Upload ({
   if (props.readOnly || props.disabled) active = false
 
   // Sync input.files with controlled `value`
-  if (self.inputNode && props.value && !isEqual(props.value, valueState))
+  if (self.inputNode && props.value && justSyncedValue)
     setInputFiles(self.inputNode, props.value)
 
   // React cannot set value for Input of type 'file' programmatically,

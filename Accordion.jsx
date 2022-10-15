@@ -32,7 +32,7 @@ import { View } from './View.jsx'
 export function Accordion ({
   duration, forceRender, multiple, onChange, open, className, ...props
 }) {
-  const opened = usePreviousProp(open)
+  const [opened] = usePreviousProp(open)
   const [self, state] = useInstance({openAll: open, openById: {}})
   if (opened != null && open != null && opened !== open) state.openAll = open // update prop changes
 
