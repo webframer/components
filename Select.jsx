@@ -423,12 +423,12 @@ export function Select (_props) {
 
       {/* Prefix + Suffix */}
       {prefix != null &&
-        <Label className='input__prefix' htmlFor={id}>{renderProp(prefix, self)}</Label>}
+        <Label className='input__prefix' htmlFor={id}>{renderProp(prefix, self, opts)}</Label>}
       {(stickyPlaceholder || suffix != null) && hasValue &&
         <Label className={cn('input__suffix', {iconStart: icon, iconEnd})}>
           <Row>
             <Text className='invisible' aria-hidden='true'>{query}</Text>
-            {stickyPlaceholder ? <Text>{stickyPlaceholder}</Text> : renderProp(suffix, self)}
+            {stickyPlaceholder ? <Text>{stickyPlaceholder}</Text> : renderProp(suffix, self, opts)}
           </Row>
         </Label>
       }
@@ -616,6 +616,10 @@ function getOptionsFiltered (self) {
     options = options.filter(o => isObject(o) ? o.value !== v : o !== v)
   }
   return options
+}
+
+const opts = {
+  preserveSpace: true,
 }
 
 localiseTranslation({

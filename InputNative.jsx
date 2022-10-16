@@ -182,13 +182,13 @@ export function useInputSetup ({
 
   // Prefix + Suffix -------------------------------------------------------------------------------
   if (enabled.prefix && prefix != null)
-    prefix = <Label className='input__prefix' htmlFor={id}>{renderProp(prefix, self)}</Label>
+    prefix = <Label className='input__prefix' htmlFor={id}>{renderProp(prefix, self, opts)}</Label>
   if (enabled.suffix && (suffix != null || stickyPlaceholder))
     suffix = hasValue && (
       <Label className={cn('input__suffix', {iconStart: icon, iconEnd})}>
         <Row>
           <Text className='invisible' aria-hidden='true'>{value}</Text>
-          {stickyPlaceholder ? <Text>{stickyPlaceholder}</Text> : renderProp(suffix, self)}
+          {stickyPlaceholder ? <Text>{stickyPlaceholder}</Text> : renderProp(suffix, self, opts)}
         </Row>
       </Label>
     )
@@ -251,6 +251,10 @@ export const noSpellCheckProps = {
   autoCorrect: 'off',
   autoCapitalize: 'off',
   spellCheck: false,
+}
+
+const opts = {
+  preserveSpace: true,
 }
 
 InputNative.defaultProps = {
