@@ -1,3 +1,4 @@
+import { isObject } from '@webframer/js'
 import cn from 'classnames'
 import React, { useId } from 'react'
 import { InputNative } from './InputNative.jsx'
@@ -10,7 +11,7 @@ import { TextArea } from './TextArea.jsx'
 import { type } from './types.js'
 import { Upload } from './Upload.jsx'
 import { UploadGrid } from './UploadGrid.jsx'
-import { View } from './View.jsx'
+import { extractViewProps, View } from './View.jsx'
 
 /**
  * Universal Input Component that delegates to the corresponding UI component based on given `type`.
@@ -23,33 +24,35 @@ import { View } from './View.jsx'
  *    User can always use `tooltip` prop to display additional input information on hover.
  */
 export function Input ({
-  compact, error, info, id = useId(), idHelp = `${id}-help`,
-  className, style, tooltip, _ref,
-  col, row, rtl, fill, left, right, top, bottom, center, middle,
+  compact, error, info, id = useId(), idHelp = `${id}-help`, helpTransition,
+  className, style, reverse, _ref,
   ...props
 }) {
+  const viewProps = extractViewProps(props)
   if (props.type === 'hidden') return <input {...{id, className, style, ref: _ref, ...props}} />
 
   // Error Message ---------------------------------------------------------------------------------
-  const [{animating}, _on, ref] = useExpandCollapse(error != null || info != null)
-  const [_error] = usePreviousProp(error) // for animation to collapse
-  const [_info] = usePreviousProp(info) // for animation to collapse
-  if (animating && error == null) error = _error
-  if (animating && info == null) info = _info
+  if (helpTransition) {
+    if (!isObject(helpTransition)) helpTransition = void 0
+    const [{animating}, _on, ref] = useExpandCollapse(error != null || info != null, helpTransition)
+    const [_error] = usePreviousProp(error) // for animation to collapse
+    const [_info] = usePreviousProp(info) // for animation to collapse
+    if (animating && error == null) error = _error
+    if (animating && info == null) info = _info
+    helpTransition = {_ref: ref}
+  }
 
-  // Accessibility ---------------------------------------------------------------------------------
+  // Render Prop -----------------------------------------------------------------------------------
   props.id = id
   props.compact = compact
   props.error = error
+  props.reverse = reverse
   props['aria-describedby'] = idHelp
   compact = compact != null && compact !== false
-
-  // Render Prop -----------------------------------------------------------------------------------
   const {required} = props
 
   return (
-    <View className={cn(className, 'input-group', {compact, error, required})}
-          {...{style, tooltip, _ref, col, row, rtl, fill, left, right, top, bottom, center, middle}}>
+    <View className={cn(className, 'input-group', {compact, error, required})} style={style} {...viewProps}>
       {(() => {
         switch (props.type) {
           case 'select':
@@ -66,7 +69,7 @@ export function Input ({
             return <InputNative {...props} />
         }
       })()}
-      <View id={idHelp} className='input__help' _ref={ref}>
+      <View id={idHelp} className='input__help' {...helpTransition}>
         {error != null && <Label className='input__error'>{renderProp(error)}</Label>}
         {info != null && <Label className='input__info'>{renderProp(info)}</Label>}
       </View>
@@ -76,6 +79,7 @@ export function Input ({
 
 Input.defaultProps = {
   type: 'text',
+  helpTransition: true,
 }
 
 Input.propTypes = {
@@ -85,6 +89,8 @@ Input.propTypes = {
   info: type.NodeOrFunction,
   // Error message to show after the Input (ex. on validation fail)
   error: type.NodeOrFunction,
+  // Whether to enable input info/error animation transition (or expandCollapse transition options)
+  helpTransition: type.OneOf([type.Boolean, type.Object]),
   // Tooltip props or value to display as tooltip
   tooltip: type.Tooltip,
   // ...other native HTML `<input/>` props
