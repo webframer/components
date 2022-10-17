@@ -86,21 +86,22 @@ function hookAnimatedSize (side = 'height') {
  * Expand/Collapse Element with Animated Height.
  * @example:
  *    function Component ({list, ...props}) {
- *      const [{open, animating}, toggleOpen, ref] = useExpandCollapse(props.open)
+ *      const [{open, animating}, toggleOpen, setRef] = useExpandCollapse(props.open)
  *      const hasItems = list && list.length > 0
  *      return <>
  *        <button onClick={toggleOpen}>{open ? 'Collapse' : 'Expand'}</button>
- *        <div ref={ref}>
+ *        <div ref={setRef}>
  *          {(open || animating) && hasItems && list.map((item, i) => (...))}
  *        </div>
  *      </>
  *    }
  *
  * @param {boolean|null} [isOpen] - whether expanded initially, will update state if changes
- * @param {number} [duration] - animation duration in milliseconds
- * @param {string} [side] - expand/collapse direction enum ('height' or 'width')
- * @param {number | string} [size] - CSS style for open state, default is 'auto'
- * @returns [{open: boolean, animating: boolean}, toggleOpen: function, ref: (node: HTMLElement) => void]
+ * @param {object} [options]:
+ *  - {number} [duration] animation duration in milliseconds
+ *  - {string} [side] expand/collapse direction enum ('height' or 'width')
+ *  - {number | string} [size] CSS style for open state, default is 'auto'
+ * @returns [{open: boolean, animating: boolean}, toggleOpen: function, setRef: (node: HTMLElement) => void]
  */
 export function useExpandCollapse (isOpen, {side = 'height', size = 'auto', duration} = {}) {
   const [opened] = usePreviousProp(isOpen)
@@ -115,7 +116,7 @@ export function useExpandCollapse (isOpen, {side = 'height', size = 'auto', dura
   // Use cached open state while animating, to achieve the effect similar to throttle,
   // when `isOpen` prop changes too fast, so that it will always animate to the last prop
   const open = self.animating ? self.open : state.open
-  const [ref, animating, resetStyles] = useAnimatedSize[side](open ? size : 0, {self, duration, forwards: true})
+  const [setRef, animating, resetStyles] = useAnimatedSize[side](open ? size : 0, {self, duration, forwards: true})
   useEffect(() => {
     // Started/in animation
     if (animating) {
@@ -129,7 +130,7 @@ export function useExpandCollapse (isOpen, {side = 'height', size = 'auto', dura
     self.open = null // then reset cached state
   }, [animating, resetStyles])
   self.animating = animating
-  return [{open, animating}, self.toggleOpen, ref]
+  return [{open, animating}, self.toggleOpen, setRef] // requires setRef function, not useRef()
 }
 
 /**
@@ -436,11 +437,11 @@ export function useRouteChange (props, self = useRef({}).current) {
  * Scroll to the given ref element on render (example: scroll to top when route changes).
  *
  * @param {boolean} shouldScroll - whether to scroll to the ref element
- * @param {object} options
+ * @param {object} [options]
+ * @param {MutableRefObject<null>|{current}|*} [ref] - from React.useRef(null)
  * @returns [ref: MutableRefObject<null>] ref - to assign to the element to scroll to
  */
-export function useScrollToElement (shouldScroll, options = {behavior: 'auto'}) {
-  const ref = useRef(null)
+export function useScrollToElement (shouldScroll, options = {behavior: 'auto'}, ref = useRef(null)) {
   if (ref.current && shouldScroll) ref.current.scrollIntoView(options)
   return [ref]
 }
