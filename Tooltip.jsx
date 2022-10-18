@@ -10,10 +10,10 @@ import {
 import cn from 'classnames'
 import React, { useEffect, useRef } from 'react'
 import { useInstance } from './react/hooks.js'
+import { renderProp } from './react/render.js'
 import { type } from './types.js'
 
 /**
- * todo: fix Tooltip position: 'right' toggles between top and right positions when content overflows
  * todo: fix Tooltip incorrect position after scroll
  * todo: component improvement 3 - align tooltip
  * Tooltip Component
@@ -29,57 +29,50 @@ export function Tooltip ({
 }) {
   const ref = useRef(null)
   const [self, state] = useInstance({open, position})
+  const prerender = state.prerender
   open = state.open
   position = state.position
 
-  if (!self.openDelayed) self.openDelayed = debounce(() => {
-    if (self.canceled) return
-    self.setState({open: true, position: positionFrom(ref.current, position)})
-  }, delay)
-
-  if (!self.openOnHover) self.openOnHover = () => {
-    self.canceled = false
-    self.openDelayed()
-  }
-
-  if (!self.closeOnHover) self.closeOnHover = () => {
-    self.canceled = true
-    if (self.state.open) self.setState({open: false})
-  }
-
-  if (!self.toggleOpenOnClick) self.toggleOpenOnClick = (event) => {
-    const isTarget = event.target === self.parent
-    if (isTarget) { // toggle state when clicking on the parent node directly
-      const open = !self.state.open
-      self.setState({open, position: open ? positionFrom(ref.current, position) : self.state.position})
-    } else if (self.state.open) { // close tooltip if clicking anywhere outside the parent node
-      // except for clicking inside the tooltip itself
-      let target = event.target
-      while (target.parentElement) {
-        if (target === ref.current) return
-        target = target.parentElement
+  // Event Handlers --------------------------------------------------------------------------------
+  if (!self.open) {
+    self.open = () => {
+      if (self.canceled) return
+      self.setState({prerender: true}) // first render to compute dimensions for positioning
+      // the actual opening is called within useEffect to ensure the prerender has finished
+    }
+    self.close = () => {
+      if (self.state.open) self.setState({open: false, prerender: false})
+    }
+    self.openDelayed = debounce(self.open, delay)
+    self.openOnHover = () => {
+      self.canceled = false
+      self.openDelayed()
+    }
+    self.closeOnHover = () => {
+      self.canceled = true
+      self.close()
+    }
+    self.toggleOpenOnClick = (event) => {
+      const isTarget = event.target === self.parent
+      if (isTarget) { // toggle state when clicking on the parent node directly
+        if (self.state.open) self.close()
+        else self.open()
+      } else if (self.state.open) { // close tooltip if clicking anywhere outside the parent node
+        // except for clicking inside the tooltip itself
+        let target = event.target
+        while (target.parentElement) {
+          if (target === ref.current) return
+          target = target.parentElement
+        }
+        target = null
+        self.close()
       }
-      target = null
-      self.setState({open: false})
     }
   }
 
-  // For now, only register events on component mount,
-  // because the use cases for changing tooltip behavior after mounting is rare.
+  // Register Event Handlers -----------------------------------------------------------------------
   useEffect(() => {
-    self.mounted = true
     if (!ref.current) return
-
-    // Show Tooltip on mount after calculating the correct position
-    if (open) {
-      const pos = positionFrom(ref.current, position)
-      if (pos !== position) {
-        self.setState({position: pos})
-      } else {
-        self.forceUpdate()
-      }
-    } // If Tooltip is not open initially, no need to re-render, the next interaction will update it
-
     self.parent = ref.current.parentElement
     let eventArgs = [void 0, self.parent]
     let events = toUniqueListFast(trimSpaces(on).toLowerCase().split(',').map(e => e.trim()))
@@ -87,8 +80,8 @@ export function Tooltip ({
         switch (event) {
           // clicking anywhere outside should close the popup (i.e. toggle state on click)
           case 'click':
-            subscribeTo(event, self.toggleOpenOnClick)
-            return () => unsubscribeFrom(event, self.toggleOpenOnClick)
+            subscribeTo('click', self.toggleOpenOnClick)
+            return () => unsubscribeFrom('click', self.toggleOpenOnClick)
 
           // https://www.w3schools.com/jsref/event_onmouseenter.asp
           case 'hover':
@@ -105,13 +98,21 @@ export function Tooltip ({
         }
       })
     return () => events.forEach(unsubscribe => unsubscribe())
+  }, [on])
+  useEffect(() => {
+    self.mounted = true
+    if (open && ref.current) self.open() // Show Tooltip on mount
   }, [])
+  useEffect(() => {
+    if (!prerender || !ref.current) return
+    self.setState({prerender: false, open: true, position: positionFrom(ref.current, position)})
+  }, [prerender, position])
 
   return ( // Outer div is required to take full size of the parent element for positioning
     <span className={cn(
       'tooltip row', `theme-${theme}`,
-      self.mounted && `from-${position} ${alignClass(align, position)} position-fill`,
-    )} ref={ref} style={self.mounted ? noPointerEvents : styleFixed}>
+      !prerender && `from-${position} ${alignClass(align, position)} position-fill`,
+    )} ref={ref} style={prerender ? styleFixed : noPointerEvents}>
       {/**
        This extra middle div fixes {width/height: fit-content} problem for Safari and serves
        as the container to retain hover state when user wants to hover over the tooltip.
@@ -120,20 +121,24 @@ export function Tooltip ({
        otherwise, text collapses in width due to overflow.
        => setting 'position-fixed' without top/left/right/bottom behaves like position absolute
        (i.e. relative to the parent element), but allows z-index to override ancestors' siblings
-       */}
-      <span className={cn('col', {'position-fixed': self.mounted})}
-            style={open ? styleTooltip : noPointerEvents}>
+       => However, position fixed does not work for scrolled elements, it stays in the original
+       position even if the parent element has moved.
+       */
+        self.mounted && (prerender || open) && // Skip rendering when closed for performance
+        <span className={cn('col', {'position-fixed': !prerender})}
+              style={open ? styleTooltip : noPointerEvents}>
         {/* Inner div behaves like View.jsx - tooltip pointer can be added to this */}
-        <span className={cn(className, 'tooltip__content', {
-          col, row, fill, reverse, rtl,
-          left, right, top, bottom, center, middle,
-          'pointer': props.onClick,
-          'invisible': !self.mounted || !open, // tailwind only recognizes text literal
-          [animation]: self.mounted && open,
-        })} {...props}>
-          {isFunction(children) ? children(self) : children}
+          <span className={cn(className, 'tooltip__content', {
+            col, row, fill, reverse, rtl,
+            left, right, top, bottom, center, middle,
+            'pointer': props.onClick,
+            'invisible': prerender, // tailwind only recognizes text literal
+            [animation]: open && !prerender,
+          })} {...props}>
+          {renderProp(children, self)}
         </span>
       </span>
+      }
     </span>
   )
 }
@@ -147,6 +152,7 @@ Tooltip.propTypes = {
   align: type.Enum(['start', 'end']),
   // Location of the Tooltip relative to the parent element
   position: type.Enum(['top', 'right', 'bottom', 'left']),
+  children: type.NodeOrFunction.isRequired,
 }
 
 Tooltip.defaultProps = {
