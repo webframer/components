@@ -1,5 +1,6 @@
 export * from './Accordion.jsx'
 export * from './Badge.jsx'
+export * from './Breadcrumb.jsx'
 export * from './Button.jsx'
 export * from './Buttons.jsx'
 export * from './Checkbox.jsx'
