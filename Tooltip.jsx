@@ -17,17 +17,20 @@ import { type } from './types.js'
 /**
  * todo: component improvement 3 - align tooltip + RTL position support
  * Tooltip Component
- * @notes:
- *  - Offset position should use margin to allow hovering over Tooltip, without loosing mouse hover.
- *  - This component renders as Portal to avoid edge case bugs, like inside
- *    absolute positioned parent with transform, causing Tooltip to be in the incorrect place.
+ * Notes:
+ *  - Offset position should use margin to allow hovering over Tooltip, without loosing mouse hover
+ *  - Rendering as Portal to cover use cases, such as absolute positioned parent with transform.
+ *
+ * Side notes;
+ *    - Portal elements do not keep hover state on the parent element
+ *    when transitioning the cursor from parent to the tooltip.
+ *    A test was done to check for the hitNodeFrom event coordinates, but it had flaky results.
+ *    The Tooltip from the bottom would not capture the cursor sometimes.
+ *    This was not due to CSS margin or gaps, because it did not work even with overlapping padding.
+ *    => Need to capture mouse enter event on the tooltip itself with debounce to check open state.
  */
 export function Tooltip ({
-  position, on, open, delay, animation, theme,
-  align = (position === 'left' || position === 'right') ? 'middle' : 'center',
-  className, style, row, col = !(row), fill, reverse, rtl,
-  left, right, top, bottom, center, middle,
-  children, ...props
+  position, on, open, delay, style, ...props
 }) {
   const ref = useRef(null)
   const [self, state] = useInstance({position}) // initially always closed to prerender
@@ -38,24 +41,28 @@ export function Tooltip ({
   if (!self.ref) {
     self.ref = (node) => self.node = node
     self.open = () => {
-      if (self.canceled || self.state.open) return
+      if (self.canceled || self.state.open || self.willUnmount) return
       self.setState({prerender: true, style: {bottom: 0, right: 0}})
       // ^ first prerender to compute dimensions for positioning
       // (must have bottom + right positions set to work within scroll).
       // The actual opening is called within useLayoutEffect to ensure the prerender has finished.
     }
     self.close = () => {
+      if (self.willUnmount) return
       if (self.state.open) self.setState({open: false, prerender: false, style: null})
     }
     self.openDelayed = debounce(self.open, delay)
-    self.openOnHover = () => {
+    self.onHoverEnter = () => {
+      self.hasHover = true
       self.canceled = false
       self.openDelayed()
     }
-    self.closeOnHover = () => {
+    self.onHoverLeave = debounce(() => {
+      self.hasHover = false
+      if (self.hasTooltipHover) return
       self.canceled = true
       self.close()
-    }
+    }, 16) // debounce to capture cursor transition to tooltip
     self.toggleOpenOnClick = (event) => {
       const isTarget = event.target === self.parent
       if (isTarget) { // toggle state when clicking on the parent node directly
@@ -72,6 +79,11 @@ export function Tooltip ({
         self.close()
       }
     }
+    self.enterTooltip = () => self.hasTooltipHover = true
+    self.leaveTooltip = debounce(() => {
+      self.hasTooltipHover = false
+      if (!self.hasHover) self.close()
+    }, 16)
   }
 
   // Register Event Handlers -----------------------------------------------------------------------
@@ -79,33 +91,33 @@ export function Tooltip ({
     if (!ref.current) return
     self.parent = ref.current.parentElement
     let eventArgs = [void 0, self.parent]
-    let events = toUniqueListFast(trimSpaces(on).toLowerCase().split(',').map(e => e.trim()))
-      .map((event) => {
-        switch (event) {
-          // clicking anywhere outside should close the popup (i.e. toggle state on click)
-          case 'click':
-            subscribeTo('click', self.toggleOpenOnClick)
-            return () => unsubscribeFrom('click', self.toggleOpenOnClick)
+    let events = eventsFromProp(on).map((event) => {
+      switch (event) {
+        // clicking anywhere outside should close the popup (i.e. toggle state on click)
+        case 'click':
+          subscribeTo('click', self.toggleOpenOnClick)
+          return () => unsubscribeFrom('click', self.toggleOpenOnClick)
 
-          // https://www.w3schools.com/jsref/event_onmouseenter.asp
-          case 'hover':
+        // https://www.w3schools.com/jsref/event_onmouseenter.asp
+        case 'hover':
+          // noinspection JSCheckFunctionSignatures
+          subscribeTo('mouseenter', self.onHoverEnter, ...eventArgs)
+          // noinspection JSCheckFunctionSignatures
+          subscribeTo('mouseleave', self.onHoverLeave, ...eventArgs)
+          return () => {
             // noinspection JSCheckFunctionSignatures
-            subscribeTo('mouseenter', self.openOnHover, ...eventArgs)
+            unsubscribeFrom('mouseenter', self.onHoverEnter, ...eventArgs)
             // noinspection JSCheckFunctionSignatures
-            subscribeTo('mouseleave', self.closeOnHover, ...eventArgs)
-            return () => {
-              // noinspection JSCheckFunctionSignatures
-              unsubscribeFrom('mouseenter', self.openOnHover, ...eventArgs)
-              // noinspection JSCheckFunctionSignatures
-              unsubscribeFrom('mouseleave', self.closeOnHover, ...eventArgs)
-            }
-        }
-      })
+            unsubscribeFrom('mouseleave', self.onHoverLeave, ...eventArgs)
+          }
+      }
+    })
     return () => events.forEach(unsubscribe => unsubscribe())
   }, [on])
   useEffect(() => {
     self.mounted = true
     if (self.props.open) self.open() // Show Tooltip on mount
+    return () => self.willUnmount = true
   }, [])
   useLayoutEffect(() => {
     if (!prerender || !self.parent || !self.node) return
@@ -115,25 +127,11 @@ export function Tooltip ({
   // Render Props ----------------------------------------------------------------------------------
   const shouldRender = self.mounted && (prerender || state.open)
   if (state.style) style = style ? {...style, ...state.style} : state.style
-  position = state.position
-  open = state.open
 
   return (
     <span style={hidden} ref={ref}>
       {shouldRender && createPortal(
-        <span className={cn('tooltip col position-fixed', `theme-${theme}`,
-          !prerender && `tooltip-${position} tooltip-${align}`,
-          open ? 'pointer-events-auto z-10' : 'pointer-events-none', {
-            'hidden': !shouldRender,
-            'invisible': prerender, // tailwind only recognizes text literal
-            [animation]: open && !prerender,
-          })} style={style} ref={self.ref}>
-          <span className={cn(className, 'tooltip__content', {
-            col, row, fill, reverse, rtl, left, right, top, bottom, center, middle,
-            'pointer': props.onClick,
-          })} {...props}>{renderProp(children, self)}
-          </span>
-        </span>,
+        <TooltipRender {...props} {...state} on={on} style={style} self={self} />,
         document.body,
       )}
     </span>
@@ -199,6 +197,48 @@ Tooltip.defaultProps = {
 let ToolTip
 export default ToolTip = React.memo(Tooltip)
 
+function TooltipRender ({
+  open, position, prerender, self, // props from state
+  animation, on, theme, align = (position === 'left' || position === 'right') ? 'middle' : 'center',
+  className, style, row, col = !(row), fill, reverse, rtl,
+  left, right, top, bottom, center, middle,
+  children, ...props
+}) {
+
+  useEffect(() => {
+    if (!self.node) return
+    let eventArgs = [void 0, self.node]
+    let events = eventsFromProp(on).filter(e => e === 'hover').map(() => {
+      // noinspection JSCheckFunctionSignatures
+      subscribeTo('mouseenter', self.enterTooltip, ...eventArgs)
+      // noinspection JSCheckFunctionSignatures
+      subscribeTo('mouseleave', self.leaveTooltip, ...eventArgs)
+      return () => {
+        // noinspection JSCheckFunctionSignatures
+        unsubscribeFrom('mouseenter', self.enterTooltip, ...eventArgs)
+        // noinspection JSCheckFunctionSignatures
+        unsubscribeFrom('mouseleave', self.leaveTooltip, ...eventArgs)
+      }
+    })
+    return () => events.forEach(unsubscribe => unsubscribe())
+  }, [on])
+
+  return (
+    <div className={cn('tooltip col position-fixed', `theme-${theme}`,
+      !prerender && `tooltip-${position} tooltip-${align}`,
+      open ? 'pointer-events-auto z-10' : 'pointer-events-none', {
+        'invisible': prerender, // tailwind only recognizes text literal
+        [animation]: open && !prerender,
+      })} style={style} ref={self.ref}>
+      <div className={cn(className, 'tooltip__content', {
+        col, row, fill, reverse, rtl, left, right, top, bottom, center, middle,
+        'pointer': props.onClick,
+      })} {...props}>{renderProp(children, self)}
+      </div>
+    </div>
+  )
+}
+
 /**
  * Convert `tooltip` prop of any type into props for Tooltip rendering.
  *
@@ -259,6 +299,10 @@ function alignClass (align, position) {
           return 'center'
       }
   }
+}
+
+function eventsFromProp (on) {
+  return toUniqueListFast(trimSpaces(on).toLowerCase().split(',').map(e => e.trim()))
 }
 
 /**
