@@ -9,6 +9,7 @@ import {
 } from '@webframer/js'
 import cn from 'classnames'
 import React, { useEffect, useLayoutEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useInstance } from './react/hooks.js'
 import { renderProp } from './react/render.js'
 import { type } from './types.js'
@@ -17,7 +18,9 @@ import { type } from './types.js'
  * todo: component improvement 3 - align tooltip + RTL position support
  * Tooltip Component
  * @notes:
- *  - Offset position should use margin to allow hovering over Tooltip, without loosing mouse hover
+ *  - Offset position should use margin to allow hovering over Tooltip, without loosing mouse hover.
+ *  - This component renders as Portal to avoid edge case bugs, like inside
+ *    absolute positioned parent with transform, causing Tooltip to be in the incorrect place.
  */
 export function Tooltip ({
   position, on, open, delay, animation, theme,
@@ -32,7 +35,8 @@ export function Tooltip ({
   self.props = {open, position}
 
   // Event Handlers --------------------------------------------------------------------------------
-  if (!self.open) {
+  if (!self.ref) {
+    self.ref = (node) => self.node = node
     self.open = () => {
       if (self.canceled || self.state.open) return
       self.setState({prerender: true, style: {bottom: 0, right: 0}})
@@ -61,7 +65,7 @@ export function Tooltip ({
         // except for clicking inside the tooltip itself
         let target = event.target
         while (target.parentElement) {
-          if (target === ref.current) return
+          if (target === self.node) return
           target = target.parentElement
         }
         target = null
@@ -104,8 +108,8 @@ export function Tooltip ({
     if (self.props.open) self.open() // Show Tooltip on mount
   }, [])
   useLayoutEffect(() => {
-    if (!prerender || !ref.current) return
-    self.setState({prerender: false, open: true, ...positionFrom(ref.current, self.props.position)})
+    if (!prerender || !self.parent || !self.node) return
+    self.setState({prerender: false, open: true, ...positionFrom(self.node, self.parent, self.props.position)})
   }, [prerender])
 
   // Render Props ----------------------------------------------------------------------------------
@@ -115,26 +119,23 @@ export function Tooltip ({
   open = state.open
 
   return (
-    <span className={cn('tooltip col position-fixed', `theme-${theme}`,
-      !prerender && `tooltip-${position} tooltip-${align}`,
-      open ? 'pointer-events-auto z-10' : 'pointer-events-none', {
-        'hidden': !shouldRender,
-        'invisible': prerender, // tailwind only recognizes text literal
-        [animation]: open && !prerender,
-      })} style={style} ref={ref}>
-      {/**
-       * Inner div behaves like View.jsx - tooltip pointer can be added to this
-       * Skip rendering content when closed for performance,
-       * but the outer ref is required to register events.
-       */
-        shouldRender &&
-        <span className={cn(className, 'tooltip__content', {
-          col, row, fill, reverse, rtl, left, right, top, bottom, center, middle,
-          'pointer': props.onClick,
-        })} {...props}>
-          {renderProp(children, self)}
-        </span>
-      }
+    <span style={hidden} ref={ref}>
+      {shouldRender && createPortal(
+        <span className={cn('tooltip col position-fixed', `theme-${theme}`,
+          !prerender && `tooltip-${position} tooltip-${align}`,
+          open ? 'pointer-events-auto z-10' : 'pointer-events-none', {
+            'hidden': !shouldRender,
+            'invisible': prerender, // tailwind only recognizes text literal
+            [animation]: open && !prerender,
+          })} style={style} ref={self.ref}>
+          <span className={cn(className, 'tooltip__content', {
+            col, row, fill, reverse, rtl, left, right, top, bottom, center, middle,
+            'pointer': props.onClick,
+          })} {...props}>{renderProp(children, self)}
+          </span>
+        </span>,
+        document.body,
+      )}
     </span>
   )
 
@@ -263,17 +264,18 @@ function alignClass (align, position) {
 /**
  * Compute correct Tooltip position to try to fit it within viewport
  * @param {Element} node - the Tooltip outer div element
+ * @param {Element} parentElement - the Tooltip container
  * @param {string} position - desired initially
  * @param {number} [offset] - to account for Tooltip offset position and pointer
  * @returns {{position: string, style: object}} state - props for optimum placement
  */
-function positionFrom (node, position, offset = 15) {
+function positionFrom (node, parentElement, position, offset = 15) {
   // The outer div can have 0 height if Tooltip children is an inline element.
   // Use .tooltip__content div to guarantee correct Tooltip dimensions.
   // offsetHeight/offsetWidth dimensions may be incorrect within scroll, make sure the outer div has
   // fixed bottom and right positions set to 0 during the prerender phase.
   const {offsetHeight, offsetWidth} = node.children[0]
-  const {top, left, bottom, right, width, height} = node.parentElement.getBoundingClientRect()
+  const {top, left, bottom, right, width, height} = parentElement.getBoundingClientRect()
   const {innerWidth, innerHeight} = window
   const _bottom = innerHeight - Math.max(0, top + height) // available space from the edge of viewport
   const _right = innerWidth - Math.max(0, left + width) // available space from the edge of viewport
@@ -322,3 +324,5 @@ function positionComputed (position, top, bottom, left, right, offsetWidth, offs
       return position
   }
 }
+
+const hidden = {display: 'none'}
