@@ -4,7 +4,6 @@ import React, { useContext, useEffect, useId } from 'react'
 import Icon from './Icon.jsx'
 import { useInstance } from './react/hooks.js'
 import { renderProp } from './react/render.js'
-import Spacer from './Spacer.jsx'
 import { type } from './types.js'
 import View from './View.jsx'
 
@@ -125,7 +124,7 @@ Tabs.propTypes = {
       type.Number,
       type.Node,
       type.Obj({
-        text: type.String.isRequired,
+        text: type.String,
         icon: type.OneOf([
           type.String,
           type.Obj({
@@ -135,6 +134,7 @@ Tabs.propTypes = {
             style: type.Object,
           }),
         ]),
+        // ...other props to pass to Tab
       }),
     ]).isRequired,
     // Tab Content
@@ -271,16 +271,17 @@ TabPanel.defaultProps = {
 
 // Render Tab component from `items` prop
 function renderTab ({id, tab}, i) {
-  let children = tab
+  let child = tab, props
   // React rendered node can also be an object
-  if (typeof tab === 'object' && tab.text != null) {
-    children = tab.text
-    const {icon} = tab
-    if (icon) children = <>
-      <Icon {...isObject(icon) ? icon : {name: icon}} /><Spacer smaller />{children}
+  if (isObject(tab)) {
+    const {icon, text, children = text, ...rest} = tab
+    child = children
+    props = rest
+    if (icon) child = <>
+      <Icon {...isObject(icon) ? icon : {name: icon}} />{renderProp(child, {id, tab, index: i})}
     </>
   }
-  return <Tab key={id != null ? id : i} id={id}>{children}</Tab>
+  return <Tab key={id != null ? id : i} id={id} {...props}>{child}</Tab>
 }
 
 // Render TabPanel component from `items` prop
