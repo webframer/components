@@ -57,7 +57,9 @@ const TabState = React.createContext({})
  *       ]} />
  */
 export function Tabs ({
-  activeId, defaultId, children, className, onChange, vertical, forceRender, items, ...props
+  activeId, defaultId, children, className, onChange, vertical, forceRender, items,
+  tabListProps,
+  ...props
 }) {
   const tabsId = useId()
   const [self, state] = useInstance({tabsId})
@@ -88,7 +90,7 @@ export function Tabs ({
       <TabState.Provider value={self.tabState}>
         <View className={cn(className, 'tabs')} row={vertical} {...props}>
           {items && (<>
-            <TabList>{items.map(renderTab)}</TabList>
+            <TabList {...tabListProps}>{items.map(renderTab)}</TabList>
             {renderPanel(items, self)}
           </>)}
           {isFunction(children) ? children(this) : children}
@@ -146,6 +148,8 @@ Tabs.propTypes = {
       }),
     ]).isRequired,
   })),
+  // TabList props to pass
+  tabListProps: type.Object,
 }
 
 export default React.memo(Tabs)
