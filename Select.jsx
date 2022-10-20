@@ -348,7 +348,7 @@ export function Select (_props) {
   const {placeholder} = props
   const styleI = useMemo(() => {
     // Prevent flickering when selecting the first value in multiple (no width should be set)
-    if (!compact && !(multiple && hasValue)) return
+    if ((compact == null || compact === false) && !(multiple && hasValue)) return
     let maxContent = query || placeholder || ''
     if (!multiple && open && options.length) {
       for (const o of options) {
@@ -389,6 +389,9 @@ export function Select (_props) {
     const {placeholder} = _props
     stickyPlaceholder = placeholder && placeholder.substring(query.length)
   }
+
+  // Render Props ----------------------------------------------------------------------------------
+  compact = compact != null && compact !== false // convert to boolean for rendering
 
   // Input value should be:
   //    - query: for search selection
