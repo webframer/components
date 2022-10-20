@@ -442,7 +442,7 @@ export function Select (_props) {
 
       {iconEnd}
       {childAfter != null && renderProp(childAfter, self)}
-      <Scroll className={cn('select__options', {open, upward, fixed: listBox.style})}
+      <Scroll className={cn('select__options', {open, upward, reverse: upward, fixed: listBox.style})}
               noScrollOffset reverse={upward} _ref={self.ref2} {...listBox}>
         {(forceRender || open) &&
           <SelectOptions items={options} {...{multiple, search, query, value, focusIndex}}

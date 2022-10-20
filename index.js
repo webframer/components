@@ -9,6 +9,7 @@ export * from './Icon.jsx'
 export * from './Image.jsx'
 export * from './ImageSwatch.jsx'
 export * from './Input.jsx'
+export * from './InputNative.jsx'
 export * from './JsonView.jsx' // 'react-json-tree' is tree shaked if not used
 export * from './Label.jsx'
 export * from './Loader.jsx'

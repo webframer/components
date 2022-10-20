@@ -42,7 +42,7 @@ export function InputNative ({className, error, loading, ..._props}) {
       }
       iconEnd = (
         <Label className='input__icon' htmlFor={id}>
-          <Icon name={visible ? 'eye-blocked' : 'eye'} onClick={self.toggleVisibility} />
+          <Icon name={visible ? 'eye' : 'eye-blocked'} onClick={self.toggleVisibility} />
         </Label>
       )
     }
