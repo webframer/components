@@ -524,11 +524,12 @@ export function useUIState (initialState = getUIState()) {
 export function getUIState () {
   if (typeof window !== 'undefined') {
     const {innerWidth} = window
+    // https://gs.statcounter.com/screen-resolution-stats
     return { // only set booleans to reduce re-renders
       isMobile: innerWidth < 768,
-      isTablet: innerWidth >= 768 && innerWidth < 1200,
-      isDesktop: innerWidth >= 1200,
-      isLaptop: innerWidth >= 1200 && innerWidth <= 1680,
+      isTablet: innerWidth >= 768 && innerWidth < 1280,
+      isDesktop: innerWidth >= 1280,
+      isLaptop: innerWidth >= 1280 && innerWidth <= 1680,
       isFHD: innerWidth > 1680 && innerWidth <= 1920,
       is2K: innerWidth > 1920 && innerWidth <= 2560,
       is3K: innerWidth > 2560 && innerWidth <= 3840,
