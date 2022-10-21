@@ -181,6 +181,16 @@ export function useCompactStyle (compact, content, props = {}) {
 }
 
 /**
+ * Attach component mount lifecycle props to an object
+ * @param {object} [self] - function Component instance to attach mount props
+ * @returns {{didMount?: boolean, willUnmount?: boolean}} self with mount properties attached
+ */
+export function useMountCycle (self = useRef({}).current) {
+  useEffect(() => (self.didMount = true) && (() => {self.willUnmount = true}), [])
+  return self
+}
+
+/**
  * Resolve input `value` based on given `props` to be Controlled or Uncontrolled state,
  * this will mutate `props` to avoid duplicate value/defaultValue passed to `<input/>`,
  * and format the value, if `format` function exists, before updating the state by mutation.
@@ -493,13 +503,11 @@ export function useUId (id) {
  * @returns [state: {
  *       isMobile: boolean,
  *       isTablet: boolean,
- *       isComputer: boolean,
  *       isDesktop: boolean,
- *       isWidescreen: boolean,
+ *       isLaptop: boolean,
  *       isFHD: boolean,
- *       screenRatio: number,
- *       screenWidth: number,
- *       screenHeight: number,
+ *       is2K: boolean,
+ *       is3K: boolean,
  *     }] state - for UIContext.Provider
  */
 export function useUIState (initialState = getUIState()) {
@@ -515,18 +523,15 @@ export function useUIState (initialState = getUIState()) {
 // Get state for UIContext Provider
 export function getUIState () {
   if (typeof window !== 'undefined') {
-    const {innerWidth, innerHeight} = window
-    return {
+    const {innerWidth} = window
+    return { // only set booleans to reduce re-renders
       isMobile: innerWidth < 768,
-      isTablet: innerWidth >= 768 && innerWidth < 1024,
-      isComputer: innerWidth >= 1024 && innerWidth < 1200,
-      isDesktop: innerWidth >= 1200 && innerWidth < 1366,
-      isWidescreen: innerWidth >= 1366 && innerWidth <= 1680,
+      isTablet: innerWidth >= 768 && innerWidth < 1200,
+      isDesktop: innerWidth >= 1200,
+      isLaptop: innerWidth >= 1200 && innerWidth <= 1680,
       isFHD: innerWidth > 1680 && innerWidth <= 1920,
-      isQHD: innerWidth > 1920 && innerWidth <= 2560,
-      screenRatio: innerWidth / innerHeight,
-      screenWidth: innerWidth,
-      screenHeight: innerHeight,
+      is2K: innerWidth > 1920 && innerWidth <= 2560,
+      is3K: innerWidth > 2560 && innerWidth <= 3840,
     }
   } else {
     return {}
