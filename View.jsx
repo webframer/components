@@ -1,4 +1,4 @@
-import { hasProp } from '@webframer/js'
+import { hasProp, isString } from '@webframer/js'
 import cn from 'classnames'
 import React, { useEffect, useRef } from 'react'
 import { accessibilitySupport, assignRef, isRef } from './react.js'
@@ -22,7 +22,7 @@ export function createView (defaultProp) {
     left, right, top, bottom, center, middle, sound,
     className, children, _ref,
     scroll, scrollClass, scrollStyle, scrollAlongDirectionOnly, scrollProps,
-    noScrollOffset, reverseScroll,
+    scrollOffset, reverseScroll,
     ...props
   }, ref) {
     const [tooltip] = useTooltip(props)
@@ -112,9 +112,9 @@ export function createView (defaultProp) {
     _props.ref = self.ref
 
     useEffect(() => {
-      if (noScrollOffset) return
+      if (!scrollOffset) return
       if (!self.node.parentElement) return
-      let attr = maxSizeScrollOffset(self.node.parentElement)
+      let attr = maxSizeScrollOffset(self.node.parentElement, scrollOffset)
       if (attr) {
         return () => {
           let {node} = self
@@ -201,11 +201,11 @@ export function createView (defaultProp) {
     scrollStyle: type.Object,
     // Props for inner wrapper Scroll component
     scrollProps: type.Object,
-    // Whether to prevent the Scroll element from setting offset style to its parent element.
-    // By default, the Scroll component may set max-width or max-height style to the parent
+    // Whether to allow Scroll element to set offset style to its parent element.
+    // The Scroll component may set max-width or max-height style to the parent
     // element in order for it to calculate the maximum available space correctly.
-    // Sometimes, this behavior leads to false positives, and needs to be disabled manually.
-    noScrollOffset: type.Boolean,
+    // Sometimes, this behavior leads to false positives, and needs to be disabled.
+    scrollOffset: type.OneOf([type.Boolean, type.Enum(['height', 'width'])]),
     // Tooltip props or value to display as tooltip on hover
     tooltip: type.Tooltip,
   }
@@ -266,26 +266,20 @@ export function hasScrollElement (parentElement, scrollElement = null, className
  * Set CSS max-height/width offset style for direct Parent element of a flex Scroll component
  * to prevent clipping of content when Scroll overflows the Parent.
  * @param {Element} parentElement - direct parent node to offset scroll
+ * @param {string|boolean} [side] - one of 'height' or 'width' (or `true` for both) to offset
  * @param {string} [className] - to identify the Scroll component
  * @param {string} [attr] - attribute key to store the original parentElement.style for reset later
  * @returns {string|void} attribute - modified style attribute that was attached to parentElement
  */
-export function maxSizeScrollOffset (parentElement, className = 'scroll', attr = '@scrollReset') {
+export function maxSizeScrollOffset (parentElement, side, className = 'scroll', attr = '@scrollReset') {
   if (parentElement === document.body) return
 
   // Scroll offset style only works when set to the parent or higher up nested grandparents.
   // The offset must be in the direction of the scroll, not the parent.
   // Offset amount must be accumulated from parent siblings, grandparent siblings, and so on...
   // Offset should not take in account `absolute` and `fixed` sibling elements.
-  let directions = ['column', 'row']
-  let offsetBy = {
-    [directions[0]]: 0,
-    [directions[1]]: 0,
-  }
-  let attrBy = {
-    [directions[0]]: 'offsetHeight',
-    [directions[1]]: 'offsetWidth',
-  }
+  let directions = isString(side) ? (side === 'width' ? ['row'] : ['column']) : ['column', 'row']
+  let offsetBy = directions.reduce((obj, val) => ((obj[val] = 0) || obj), {})
   let offset = 0
   let direction
   let grandParent, grandParentStyle
@@ -338,4 +332,8 @@ export function maxSizeScrollOffset (parentElement, className = 'scroll', attr =
 const scrollOffsetExclude = {
   'absolute': true,
   'fixed': true,
+}
+const attrBy = {
+  'column': 'offsetHeight',
+  'row': 'offsetWidth',
 }
