@@ -1,4 +1,14 @@
-import { debounce, Id, isEqual, isFunction, subscribeTo, unsubscribeFrom } from '@webframer/js'
+import {
+  cloneDeep,
+  debounce,
+  Id,
+  isEqual,
+  isFunction,
+  objChanges,
+  subscribeTo,
+  unsubscribeFrom,
+  update,
+} from '@webframer/js'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useEventListener, useIsomorphicLayoutEffect } from 'usehooks-ts/dist/esm/index.js'
 import { resizeWidth } from '../utils/element.js'
@@ -457,6 +467,17 @@ export function useScrollToElement (shouldScroll, options = {behavior: 'auto'}, 
 }
 
 /**
+ * Get the latest prop value when it changes, else the current state
+ * @example:
+ *    const [self] = useInstance()
+ *    self.state.value = useSyncedProp(prop, self.state.value)
+ */
+export function useSyncedProp (prop, stateValue = prop) {
+  const justSynced = usePreviousProp(prop)[1]
+  return [justSynced ? prop : stateValue, justSynced]
+}
+
+/**
  * React Hook to update Component state when props change, similar to class.componentWillReceiveProps
  * @example:
  *    const {current: self} = useRef({})
@@ -465,16 +486,23 @@ export function useScrollToElement (shouldScroll, options = {behavior: 'auto'}, 
  *
  * @param {object} props - initial or new props to sync state with
  * @param {object} [state] - the current state
- * @returns {[state: object, justSynced: boolean]} state - mutated with partially updated `props`
- *    that changed, or existing state if nothing changed; and if it has just changed to sync with props.
- *    If `props` has `null` attributes, they will override `state`.
+ * @returns {[state: object, justSynced: boolean, prevState: object, changedProps?: object]}
+ *    - state: mutated with partially updated `props` that changed, or existing state if nothing changed
+ *    - justSynced: if it has just changed to sync with props.
+ *    - changedProps: properties that changed.
+ *    - prevState: deep clone of the previous state just before syncing, same as state otherwise
+ *    - If `props` has `null` attributes, they will override `state`.
  *    Attributes that do not exist in `props` but in `state` are kept (usually the desired behavior).
  */
 export function useSyncedState (props, state = {}) {
-  const justSynced = usePreviousProp(props, true)[1]
-  // Object.assign is required for updating array to new props, and to keep `state` object the same
-  if (justSynced) Object.assign(state, props)
-  return [state, justSynced]
+  const [prevProps, justSynced] = usePreviousProp(props, true)
+  let changedProps, prevState = state
+  if (justSynced) {
+    prevState = cloneDeep(state)
+    // Keep `state` object the same
+    update(state, changedProps = objChanges(prevProps, props, {ignoreDeleted: true}))
+  }
+  return [state, justSynced, prevState, changedProps]
 }
 
 /**
