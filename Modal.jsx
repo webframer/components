@@ -13,12 +13,12 @@ export function Modal ({
   children,
 }) {
   return (
-    <View className={'app__modal fade-in' + (open ? ' active' : '')}>
-      <View className='app__modal__backdrop no-outline'
+    <View className={'modal fade-in' + (open ? ' active' : '')}>
+      <View className='modal__backdrop no-outline'
             onClick={(canClose && onClose) ? onClose : void 0} />
       {open &&
-        <View className={cn(className, 'app__modal__box')}>
-          <View className='app__modal__box__content'>
+        <View className={cn(className, 'modal__box')}>
+          <View className='modal__content'>
             {children}
           </View>
         </View>}
