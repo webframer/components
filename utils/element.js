@@ -106,7 +106,7 @@ export function replaceElement (oldNode, newNode) {
  * @param {boolean|number} offset - count of characters to add to final width
  * @returns {object} style - with required attributes set
  */
-export function resizeWidth (value, style, offset = 1) {
+export function resizeWidth (value, style, offset = 0) {
   // Add additional character to prevent truncation from uneven fonts
   // boolean `offset` evaluates to 1 by default.
   style.width = value.length + Number(offset) + 'ch'

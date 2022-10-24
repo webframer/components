@@ -1,9 +1,11 @@
+import { isString } from '@webframer/js'
 import cn from 'classnames'
 import React from 'react'
+import { renderProp } from './react/render.js'
 import Spinner from './Spinner.jsx'
 import Text from './Text.jsx'
 import { type } from './types.js'
-import View from './View.jsx'
+import { extractViewProps, View } from './View.jsx'
 
 /**
  * Loading Overlay - Pure Component
@@ -21,15 +23,18 @@ export function Loader ({
   loading = true,
   size = 'base',  // Enum
   className,
-  classIcon,
+  iconClass,
   transparent = false,
   children,
   ...props
 }) {
   return (loading &&
-    <View className={cn(className, 'loader', {transparent})}>
-      <Spinner className={classIcon} size={size} {...props} />
-      {children && <Text className='h4 animate-blink'>{children}</Text>}
+    <View className={cn(className, 'loader', {transparent})} {...extractViewProps(props)}>
+      <Spinner className={iconClass} size={size} {...props} />
+      {children != null && (isString(children)
+          ? <Text className='h4 padding padding-top-smaller animate-blink'>{children}</Text>
+          : renderProp(children)
+      )}
     </View>
   )
 }
@@ -37,8 +42,9 @@ export function Loader ({
 Loader.propTypes = {
   loading: type.Boolean,
   size: type.String,
-  className: type.String,
-  classIcon: type.String,
+  className: type.ClassName,
+  iconClass: type.ClassName,
+  // ...other props to pass to Spinner
 }
 
 export default React.memo(Loader)
