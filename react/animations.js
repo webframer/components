@@ -79,33 +79,35 @@ export function animateSize (node, startSize, endSize, side = 'height', duration
     if (typeof startSize !== 'number') startSize = startPx // convert startSize to fixed pixel value
 
     // Set start-transition with fixed width and height because 'flex: unset' can cause layout shift
-    setupStyles({width: w + 'px', height: h + 'px', [side]: startSize + 'px', flex: 'unset'})
+    setupStyles({width: w + 'px', height: h + 'px', [side]: startSize + 'px', flex: 'unset', overflow: 'hidden'})
 
     // Let initial style apply before setting end transition
-    requestAnimationFrame(() => {
+    setTimeout(() => { // fix for Firefox (this causes one frame with overflow visible on expansion)
+      requestAnimationFrame(() => {
 
-      // Collapsing to 0
-      if (String(endSize) === '0') {
-        style[mStart] = '0'
-        style[mEnd] = '0'
-        style[pStart] = '0'
-        style[pEnd] = '0'
-      }
-      style[side] = endSize ? (endSize + 'px') : '0'
-      style.overflow = 'hidden'
-      style.transitionProperty = 'all'
-      style.transitionDuration = `${duration}ms`
+        // Collapsing to 0
+        if (String(endSize) === '0') {
+          style[mStart] = '0'
+          style[mEnd] = '0'
+          style[pStart] = '0'
+          style[pEnd] = '0'
+        }
+        style[side] = endSize ? (endSize + 'px') : '0'
+        style.overflow = 'hidden'
+        style.transitionProperty = 'all'
+        style.transitionDuration = `${duration}ms`
 
-      setTimeout(() => {
-        resolve()
-        hasEnded = true
+        setTimeout(() => {
+          resolve()
+          hasEnded = true
 
-        // Reset style after resolving animation first, to avoid flickering at the end,
-        // because Component might not remove node from rendering fast enough,
-        // causing collapsed content to expand back to initial size.
-        if (!forwards) setTimeout(resetStyles, 0)
-      }, duration)
-    })
+          // Reset style after resolving animation first, to avoid flickering at the end,
+          // because Component might not remove node from rendering fast enough,
+          // causing collapsed content to expand back to initial size.
+          if (!forwards) setTimeout(resetStyles, 0)
+        }, duration)
+      })
+    }, 16) // 0 sometimes does not work, set to one frame to make sure collapsed state is applied
   })
   return [promise, resetStyles]
 }

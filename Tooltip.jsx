@@ -8,9 +8,9 @@ import {
   unsubscribeFrom,
 } from '@webframer/js'
 import cn from 'classnames'
-import React, { useEffect, useLayoutEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { useInstance } from './react/hooks.js'
+import { useInstance, useIsomorphicLayoutEffect } from './react/hooks.js'
 import { renderProp } from './react/render.js'
 import { type } from './types.js'
 
@@ -119,7 +119,7 @@ export function Tooltip ({
     if (self.props.open) self.open() // Show Tooltip on mount
     return () => self.willUnmount = true
   }, [])
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!prerender || !self.parent || !self.node) return
     self.setState({prerender: false, open: true, ...positionFrom(self.node, self.parent, self.props.position)})
   }, [prerender])

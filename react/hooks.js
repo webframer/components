@@ -62,7 +62,7 @@ function hookAnimatedSize (side = 'height') {
 
     // Height change
     const [animating, setAnimating] = useState(false)
-    useEffect(() => {
+    useIsomorphicLayoutEffect(() => {
       if (self[side] === size) return
 
       // Set animating state explicitly in case of force update, and to force rerender at the end
@@ -127,7 +127,7 @@ export function useExpandCollapse (isOpen, {side = 'height', size = 'auto', dura
   // when `isOpen` prop changes too fast, so that it will always animate to the last prop
   const open = self.animating ? self.open : state.open
   const [setRef, animating, resetStyles] = useAnimatedSize[side](open ? size : 0, {self, duration, forwards: true})
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     // Started/in animation
     if (animating) {
       if (self.open == null) self.open = self.state.open // cache state initially
