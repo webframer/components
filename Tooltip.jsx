@@ -327,16 +327,23 @@ function positionFrom (node, parentElement, position, offset = 15) {
 
   // Besides the position direction, the tooltip also needs coordinates along the other axis.
   // By default, try to place it in the center/middle, then restrict to be within viewport.
+  let style
   switch (position) {
-    case 'bottom':
-      return {position, style: {top: bottom, left: Math.max(0, left + width / 2 - offsetWidth / 2)}}
     case 'left':
-      return {position, style: {right: innerWidth - left, top: Math.max(0, top + height / 2 - offsetHeight / 2)}}
     case 'right':
-      return {position, style: {left: right, top: Math.max(0, top + height / 2 - offsetHeight / 2)}}
+      style = {top: Math.max(0, top + height / 2 - offsetHeight / 2)}
+      style.top = Math.min(innerHeight - offsetHeight, style.top) // prevent bottom clipping
+      if (position === 'left') style.right = innerWidth - left
+      if (position === 'right') style.left = right
+      return {position, style}
+    case 'bottom':
     case 'top':
     default:
-      return {position, style: {bottom: innerHeight - top, left: Math.max(0, left + width / 2 - offsetWidth / 2)}}
+      style = {left: Math.max(0, left + width / 2 - offsetWidth / 2)}
+      style.left = Math.min(innerWidth - offsetWidth, style.left) // prevent right clipping
+      if (position === 'bottom') style.top = bottom
+      if (position === 'top') style.bottom = innerHeight - top
+      return {position, style}
   }
 }
 

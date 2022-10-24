@@ -196,9 +196,9 @@ export function createView (defaultProp) {
     // Scrollable in all directions by default.
     scrollAlongDirectionOnly: type.Boolean,
     // CSS class for inner wrapper Scroll component
-    scrollClass: type.String,
+    scrollClass: type.ClassName,
     // CSS style for inner wrapper Scroll component
-    scrollStyle: type.Object,
+    scrollStyle: type.Style,
     // Props for inner wrapper Scroll component
     scrollProps: type.Object,
     // Whether to allow Scroll element to set offset style to its parent element.
