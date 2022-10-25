@@ -7,7 +7,7 @@ import Text from './Text.jsx'
 export function SelectOptions ({
   items, multiple, search, query, value, focusIndex, onFocus, onBlur, onClick,
   addOption, noOptionsMsg,
-  ...props
+  className, ...props
 }) {
   const isActive = value != null ? (multiple ? (v => value.includes(v)) : (v => value === v)) : (v => false)
 
@@ -31,7 +31,7 @@ export function SelectOptions ({
       else if ((i = text.indexOf(q)) > -1)
         t = <>{t.substring(0, i)}<b>{t.substring(i, i + q.length)}</b>{t.substring(i + q.length)}</>
     }
-    return <Row key={k} className={cn('select__option', {focus: focusIndex === i, selected})}
+    return <Row key={k} className={cn('select__option', className, {focus: focusIndex === i, selected})}
                 onClick={function (e) {
                   e.stopPropagation()
                   onClick.call(this, item, ...arguments)

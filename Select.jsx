@@ -76,7 +76,7 @@ export function Select (_props) {
     multiple, query, search, compact, controlledValue, excludeSelected, forceRender, fixed, upward,
     onChange, onFocus, onBlur, onSearch, onSelect, onClickValue,
     icon, iconEnd,
-    addOption, addOptionMsg, noOptionsMsg,
+    addOption, addOptionMsg, noOptionsMsg, optionProps, optionsProps,
     format, parse, // these are serializer and deserializer
     type, // not used
     float, error, label, loading, prefix, suffix, stickyPlaceholder,
@@ -320,9 +320,16 @@ export function Select (_props) {
   useEffect(() => self.unsubscribeEvents, [])
   const optPos = self.getOptionsPosition()
   const listBox = {
+    ...optionsProps,
     role: 'listbox', 'aria-expanded': open,
-    style: (fixed && !defaultOpen) ? self.getOptStyle(optPos, upward ? 'top' : 'bottom') : null,
     scrollProps: self.scrollProps,
+  }
+  const optionsClass = listBox.className
+  delete listBox.className
+  fixed = fixed && !defaultOpen && optPos
+  if (fixed) {
+    listBox.style = self.getOptStyle(optPos, upward ? 'top' : 'bottom')
+    if (optionsProps && optionsProps.style) listBox.style = {...listBox.style, ...optionsProps.style}
   }
   self.upward = upward = upward && (!optPos || optPos.canBeUpward || optPos.optimalPosition.bottom > 0)
 
@@ -336,10 +343,10 @@ export function Select (_props) {
   if (hasValue) delete props.placeholder // remove for multiple search
 
   // Options Props ---------------------------------------------------------------------------------
-  const optionsProps = {}
+  optionProps = {...optionProps}
   if (addOption && search && query)
-    optionsProps.addOption = addOptionItem(query, options, addOptionMsg, value)
-  if (!options.length) optionsProps.noOptionsMsg = noOptionsMsg
+    optionProps.addOption = addOptionItem(query, options, addOptionMsg, value)
+  if (!options.length) optionProps.noOptionsMsg = noOptionsMsg
 
   // Compact Input ---------------------------------------------------------------------------------
   // Logic to get compact input width:
@@ -445,13 +452,13 @@ export function Select (_props) {
 
       {iconEnd}
       {childAfter != null && renderProp(childAfter, self)}
-      <Scroll className={cn('select__options', {open, upward, reverse: upward, fixed: listBox.style})}
+      <Scroll className={cn('select__options', optionsClass, {open, upward, reverse: upward, fixed: listBox.style})}
               reverse={upward} _ref={self.ref2} {...listBox}>
         {(forceRender || open) &&
           <SelectOptions items={options} {...{multiple, search, query, value, focusIndex}}
                          onFocus={self.focusOption} onBlur={self.blurOption} onClick={self.selectOption}
                          tabIndex={-1} // tab moves to the next input + avoid focusIndex mismatch
-                         {...optionsProps} />}
+                         {...optionProps} />}
       </Scroll>
     </Row>
   </>)
@@ -473,6 +480,10 @@ Select.defaultProps = {
 Select.propTypes = {
   // Selectable values
   options: type.Options.isRequired,
+  // Individual option props to pass
+  optionProps: type.Object,
+  // Options container props to pass
+  optionsProps: type.Object,
   // Handler(value: any, name?, event, self) when selected value changes
   onChange: type.Function,
   // Handler(value: any, name?: string, event: Event, self) on select focus
@@ -550,7 +561,7 @@ function getOptionsPosition (self = this) {
   let {top: topAvail, left, bottom: top, width, height} = self.node.getBoundingClientRect()
   const {height: actualHeight} = self.scrollNode.getBoundingClientRect()
   let maxHeight = +getComputedStyle(self.optNode).getPropertyValue('max-height').replace('px', '')
-  if (!maxHeight) throw Error('Select options must have explicit max-height!')
+  if (!maxHeight) throw Error(`Select options must have explicit max-height, got ${maxHeight}`)
   maxHeight = Math.min(actualHeight, maxHeight)
   const bottomAvail = window.innerHeight - topAvail - height
   let style = getComputedStyle(self.node)
