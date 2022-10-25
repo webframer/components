@@ -1,4 +1,4 @@
-import { isFunction, isObject } from '@webframer/js'
+import { isObject } from '@webframer/js'
 import cn from 'classnames'
 import React, { useContext, useEffect, useId } from 'react'
 import Icon from './Icon.jsx'
@@ -26,12 +26,10 @@ const TabState = React.createContext({})
  *      <TabPanel>Panel 2</TabPanel>
  *    </Tabs>
  *
- *    // Controlled state
+ *    // Controlled state (TabList is optional, this example omits it)
  *    <Tabs activeId='b' onChange={(activeId: string) => any}>
- *      <TabList className='custom'>
- *        <Tab id='a'>Tab A</Tab>
- *        <Tab id='b'>Tab B</Tab>
- *      </TabList>
+ *      <Tab id='a'>Tab A</Tab>
+ *      <Tab id='b'>Tab B</Tab>
  *
  *      <TabPanel id='b'>{() => 'Panel B'}</TabPanel>
  *      <TabPanel id='a'>{() => 'Panel A'}</TabPanel>
@@ -93,7 +91,7 @@ export function Tabs ({
             <TabList {...tabListProps}>{items.map(renderTab)}</TabList>
             {renderPanel(items, self)}
           </>)}
-          {isFunction(children) ? children(this) : children}
+          {children != null && renderProp(children, self)}
         </View>
       </TabState.Provider>
     </TabInstance.Provider>
@@ -156,15 +154,17 @@ export default React.memo(Tabs)
 
 /**
  * Tab List ----------------------------------------------------------------------------------------
+ * Optional grouping of tabs.
  */
 export function TabList ({className, ...props}) {
   const {vertical} = useContext(TabState)
 
   // Do not use Scroll here to avoid potential bugs with parent offset, let user set `scroll`
-  return <View className={cn(className, 'tabs__list no-scrollbar')} row={!vertical} {...props} />
+  return <View className={cn(className, 'tabs__list')} row={!vertical} {...props} />
 }
 
 TabList.defaultProps = {
+  className: 'no-scrollbar',
   role: 'tablist',
 }
 

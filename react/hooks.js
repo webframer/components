@@ -15,6 +15,7 @@ import { resizeWidth } from '../utils/element.js'
 import { animateSize } from './animations.js'
 
 export * from 'usehooks-ts/dist/esm/index.js'
+export { useIsomorphicLayoutEffect }
 
 export const useAnimatedHeight = hookAnimatedSize('height')
 export const useAnimatedWidth = hookAnimatedSize('width')

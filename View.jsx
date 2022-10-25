@@ -21,7 +21,7 @@ export function createView (defaultProp) {
     row, col = !(row), fill, reverse, rtl,
     left, right, top, bottom, center, middle, sound,
     className, children, _ref,
-    scroll, scrollClass, scrollStyle, scrollAlongDirectionOnly, scrollProps,
+    scroll, scrollClass, scrollStyle, scrollAlongDirectionOnly, scrollRef, scrollProps,
     scrollOffset, reverseScroll,
     ...props
   }, ref) {
@@ -135,7 +135,9 @@ export function createView (defaultProp) {
     // Scroll View
     return (
       <div className={className} style={style} {..._props} >
-        <div className={scrollClass} style={scrollStyle} {...scrollProps}>{children}</div>
+        <div className={scrollClass} style={scrollStyle} ref={scrollRef} {...scrollProps}>
+          {children}
+        </div>
         {tooltip}
       </div>
     )
@@ -199,7 +201,9 @@ export function createView (defaultProp) {
     scrollClass: type.ClassName,
     // CSS style for inner wrapper Scroll component
     scrollStyle: type.Style,
-    // Props for inner wrapper Scroll component
+    // Ref for the inner Scroll component
+    scrollRef: type.Ref,
+    // Props for the inner Scroll component
     scrollProps: type.Object,
     // Whether to allow Scroll element to set offset style to its parent element.
     // The Scroll component may set max-width or max-height style to the parent

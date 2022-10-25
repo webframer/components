@@ -305,8 +305,11 @@ type.Option = type.OneOf([
 // Select options array of option values
 type.Options = type.ListOf(type.Option.isRequired)
 
-// Function or the Object created by React.useRef() or React.createRef()
-type.Ref = type.OneOf([type.Function, type.Obj({current: type.Any})])
+// Object `{current?: Element}` created by React.useRef() or React.createRef()
+type.RefObject = type.Obj({current: type.Element})
+
+// `Function(node) => void` or the Object created by React.useRef() or React.createRef()
+type.Ref = type.OneOf([type.Function, type.RefObject])
 
 // CSS style object with camelCase attribute keys
 type.Style = type.ObjectOf(type.OneOf([
