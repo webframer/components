@@ -1,4 +1,4 @@
-import { __CLIENT__, isString, numericPattern, parseNumber } from '@webframer/js'
+import { __CLIENT__, isString, numericPattern, parseNumberLocale } from '@webframer/js'
 import cn from 'classnames'
 import React, { useId, useState } from 'react'
 import Icon from './Icon.jsx'
@@ -226,7 +226,7 @@ export const formatByType = {
 
 // Default parser for Input value
 export const parseByType = {
-  number: v => parseNumber(v),
+  number: v => parseNumberLocale(v),
   // Unused - logic made redundant
   // number: (value, name, event, self) => {
   //   // Note: in Safari, if user types in a comma, onChange event only fires once with value = '',

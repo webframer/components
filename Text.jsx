@@ -2,6 +2,7 @@ import cn from 'classnames'
 import React from 'react'
 import { accessibilitySupport } from './react.js'
 import { useTooltip } from './Tooltip.jsx'
+import { type } from './types.js'
 
 // Wrap with HOC so that IDE automatically imports default, instead of pure function
 function createText () {
@@ -35,6 +36,11 @@ function createText () {
     )
   }
 
+  Text.propTypes = {
+    children: type.NodeOrFunction,
+    className: type.ClassName,
+    style: type.Style,
+  }
   return [Text]
 }
 

@@ -118,6 +118,12 @@ type.Float = PropTypes.number
 // Function or class method
 type.Function = PropTypes.func
 
+// React JSX element (eg. `<View/>`)
+type.JSXElement = PropTypes.element
+
+// React JSX element type (eg. `View`)
+type.JSXElementType = PropTypes.elementType
+
 // A whole number value
 type.Integer = PropTypes.number
 
@@ -127,8 +133,7 @@ type.List = PropTypes.array
 // Map value
 type.Map = PropTypes.object
 
-// Anything that can be rendered: numbers, strings, elements or an array
-// (or fragment) containing these types.
+// An element or an array (or fragment) of elements that can be rendered (ie. `[type.JSXElement]`)
 type.Node = PropTypes.node
 
 // Number value (Integer or Float)
@@ -139,12 +144,6 @@ type.Object = PropTypes.object
 
 // A single type from React Component.propTypes object (eg. `type.Number`)
 type.PropType = PropTypes.func
-
-// React JSX element (eg. `<View/>`)
-type.ReactElement = PropTypes.element
-
-// React JSX element type (eg. `View`)
-type.ReactElementType = PropTypes.elementType
 
 // String value
 type.String = PropTypes.string
@@ -220,7 +219,12 @@ type.Multiplier = type.Number
 
 // Anything that can be rendered: numbers, strings, elements, an array, or function
 // (or fragment) containing these types.
-type.NodeOrFunction = type.OneOf([type.Node, type.Function])
+type.NodeOrFunction = type.OneOf([
+  type.String,
+  type.Number,
+  type.Node,
+  type.Function,
+])
 
 // A float number between 0 and 1 inclusive (to be used with slider).
 // For values outside the 0 and 1 range, use **type.Percentage**
