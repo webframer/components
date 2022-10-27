@@ -463,22 +463,33 @@ type.TagIds = type.ListOf(type.Id.isRequired)
 type.TagById = type.ObjectOf(type.Tag.isRequired)
 type.TagOptions = type.Options
 
+// Tooltip on events
+const tooltipOnEnum = type.Enum(['hover', 'click'])
 // Tooltip props object
-type.Tooltip = type.OneOf([
-  type.String,
-  type.Number,
-  type.Node,
-  type.Function,
-  type.Obj({
-    children: type.Any.isRequired,
-    position: type.String,
-    on: type.String,
-    open: type.Boolean,
-    delay: type.Millisecond,
-    animation: type.String,
-    theme: type.String,
-  }),
-])
+export const tooltipProptypes = {
+  // Tooltip content
+  children: type.NodeOrFunction.isRequired,
+  // One of, or any combination of: 'hover', 'click'
+  on: type.OneOf([tooltipOnEnum, type.ListOf(tooltipOnEnum)]),
+  // Location of the Tooltip relative to the parent element
+  position: type.Enum(['top', 'right', 'bottom', 'left']),
+  /**
+   * Tooltip alignment relative to the `position`, default is center/middle alignment.
+   *   - `start === 'left'` and `end === 'right'` if position is 'top' or 'bottom'
+   *   - `start === 'top'` and `end === 'bottom'` if position is 'left' or 'right'
+   */
+  align: type.Enum(['start', 'end']),
+  // Animation CSS class to apply
+  animation: type.String,
+  // Popup delay duration in milliseconds
+  delay: type.Millisecond,
+  // Whether to show Tooltip by default
+  open: type.Boolean,
+  // Name of the theme style to apply - must be one of the available themes
+  theme: type.String,
+}
+// Tooltip prop(s)
+type.Tooltip = type.OneOf([type.NodeOrFunction, type.Obj(tooltipProptypes)])
 
 // This can be used to attach input controls or custom validators to types defined above
 if (typeof defineComponent === 'function') defineComponent(type)

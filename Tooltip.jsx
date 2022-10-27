@@ -3,16 +3,17 @@ import {
   isFunction,
   isObject,
   subscribeTo,
+  toList,
   toUniqueListFast,
   trimSpaces,
   unsubscribeFrom,
 } from '@webframer/js'
 import cn from 'classnames'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useInstance, useIsomorphicLayoutEffect } from './react/hooks.js'
 import { renderProp } from './react/render.js'
-import { type } from './types.js'
+import { tooltipProptypes } from './types.js'
 
 /**
  * todo: component improvement 3 - align tooltip + RTL position support
@@ -30,12 +31,13 @@ import { type } from './types.js'
  *    => Need to capture mouse enter event on the tooltip itself with debounce to check open state.
  */
 export function Tooltip ({
-  position, on, open, delay, style, ...props
+  position, on: onEvent, open, delay, style, ...props
 }) {
   const ref = useRef(null)
   const [self, state] = useInstance({position}) // initially always closed to prerender
   const prerender = state.prerender
   self.props = {open, position}
+  const on = useMemo(() => toUniqueListFast(toList(onEvent)), [onEvent])
 
   // Event Handlers --------------------------------------------------------------------------------
   if (!self.ref) {
@@ -91,7 +93,7 @@ export function Tooltip ({
     if (!ref.current) return
     self.parent = ref.current.parentElement
     let eventArgs = [void 0, self.parent]
-    let events = eventsFromProp(on).map((event) => {
+    let events = on.map((event) => {
       switch (event) {
         // clicking anywhere outside should close the popup (i.e. toggle state on click)
         case 'click':
@@ -173,22 +175,12 @@ export function Tooltip ({
   // )
 }
 
-Tooltip.propTypes = {
-  // One of, or any combination of: 'hover', 'click' - separated by comma
-  on: type.String,
-  // Tooltip alignment relative to the `position`, default is center/middle alignment.
-  //  - `start === 'left'` and `end === 'right'` if position is 'top' or 'bottom'
-  //  - `start === 'top'` and `end === 'bottom'` if position is 'left' or 'right'
-  align: type.Enum(['start', 'end']),
-  // Location of the Tooltip relative to the parent element
-  position: type.Enum(['top', 'right', 'bottom', 'left']),
-  children: type.NodeOrFunction.isRequired,
-}
+Tooltip.propTypes = tooltipProptypes
 
 Tooltip.defaultProps = {
   animation: 'fade-in',
   delay: 1000,
-  on: 'hover,click',
+  on: ['hover', 'click'],
   position: 'top',
   theme: 'dark',
   role: 'tooltip',
@@ -208,7 +200,7 @@ function TooltipRender ({
   useEffect(() => {
     if (!self.node) return
     let eventArgs = [void 0, self.node]
-    let events = eventsFromProp(on).filter(e => e === 'hover').map(() => {
+    let events = on.filter(e => e === 'hover').map(() => {
       // noinspection JSCheckFunctionSignatures
       subscribeTo('mouseenter', self.enterTooltip, ...eventArgs)
       // noinspection JSCheckFunctionSignatures
