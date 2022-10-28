@@ -148,6 +148,10 @@ export function createView (defaultProp) {
   if (defaultProp) View.defaultProps = ViewRef.defaultProps = {[defaultProp]: true}
 
   View.propTypes = ViewRef.propTypes = {
+    // CSS class names separated by space
+    className: type.ClassName,
+    // CSS style object with camelCase attribute keys
+    style: type.Style,
     // Whether to use column layout, true if `row` is falsy by default
     col: type.Boolean,
     // Whether to use row layout, column by default
@@ -186,10 +190,6 @@ export function createView (defaultProp) {
     sound: type.Object,
     // Inner content to render
     children: type.Node,
-    // CSS class names separated by space
-    className: type.ClassName,
-    // CSS style object with camelCase attribute keys
-    style: type.Style,
     // Ref for the View or outer Scroll container
     _ref: type.Ref,
     // Whether to make the View scrollable

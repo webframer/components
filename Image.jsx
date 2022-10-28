@@ -33,12 +33,17 @@ function createImage () {
   }
 
   Image.propTypes = ImageRef.propTypes = {
+    // Optional CSS classes
+    className: type.ClassName,
+    style: type.Style,
+    // Alternative text description of the image
+    alt: type.String,
     // File name (required if `src` or `alt` not defined)
     name: type.String,
     // Directory path to the file (without file name) if `src` not given
     path: type.String,
-    // Optional CSS classes
-    className: type.String,
+    // Image file source path or URL
+    src: type.String,
     decoding: type.Enum(['auto', 'async', 'sync']),
     loading: type.Enum(['eager', 'lazy']),
   }

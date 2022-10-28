@@ -1,7 +1,8 @@
 import cn from 'classnames'
 import React from 'react'
 import Loader from './Loader.jsx'
-import { isRef, onPressHoc } from './react.js'
+import { onPressHoc } from './react.js'
+import { renderProp } from './react/render.js'
 import { useTooltip } from './Tooltip.jsx'
 import { type } from './types.js'
 
@@ -10,22 +11,6 @@ import { type } from './types.js'
 function createButton () {
   /**
    * Button - Pure Component.
-   *
-   * @param {Function} [onClick] - button click callback
-   * @param {String} [size] - button size, one of ['small', 'base', 'large']
-   * @param {String} [type=button] - button type eg. button, submit
-   * @param {String} [className] - optional, will be prepended with `button `
-   * @param {Boolean} [disabled] - optional, whether the button is disabled
-   * @param {Boolean} [loading] - optional, show spinner instead of children
-   * @param {Boolean} [active] - whether to add `active` css class=
-   * @param {Boolean} [circle] - whether to add `circle` css class with even padding
-   * @param {Boolean} [square] - whether to add `square` css class with even padding
-   * @param {Object} [sound] - new Audio(URL) sound file
-   * @param {*} [children] - optional, content to be wrapped inside button `<button>{children}</button>`
-   * @param {function|React.MutableRefObject} [_ref] - from React.useRef() or React.createRef()
-   * @param {*} [props] - other attributes to pass
-   * @param {function|React.MutableRefObject} [ref] - forwarding React.useRef() or React.createRef()
-   * @returns {object|JSX.Element} - React component
    */
   function Button ({
     onClick,
@@ -40,36 +25,40 @@ function createButton () {
     className,
     _ref,
     ...props
-  }, ref) {
+  }) {
     const [tooltip] = useTooltip(props)
-    if (isRef(ref)) props.ref = ref
-    else if (_ref) props.ref = _ref
+    if (_ref) props.ref = _ref
     return (
       <button
-        className={cn(className, 'btn', size, {circle, square, active, loading})}
+        className={cn(className, 'btn', {active, loading, circle, square})}
         disabled={disabled || loading}
         onClick={sound ? onPressHoc(onClick, sound) : onClick}
         {...props}
       >
-        {children}
+        {children != null && renderProp(children)}
         {loading && <Loader loading size={size || 'smallest'} />}
         {tooltip}
       </button>
     )
   }
 
-  const ButtonRef = React.forwardRef(Button)
-
-  Button.propTypes = ButtonRef.propTypes = {
-    size: type.Enum(['largest', 'larger', 'large', 'base', 'small', 'smaller', 'smallest']),
-    type: type.String,
-    className: type.String,
-    children: type.Any,
+  Button.propTypes = {
+    children: type.NodeOrFunction,
+    className: type.ClassName,
+    style: type.Style,
+    // Whether to add `active` css class
+    active: type.Boolean,
+    // Whether the button is disabled
+    disabled: type.Boolean,
+    // Whether to show loading spinner
+    loading: type.Boolean,
+    // Button type eg. button, submit
+    type: type.Enum(['button', 'submit']),
     _ref: type.Ref,
   }
 
-  return [Button, ButtonRef]
+  return [Button]
 }
 
-export const [Button, ButtonRef] = createButton()
+export const [Button] = createButton()
 export default React.memo(Button)
