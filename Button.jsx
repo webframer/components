@@ -35,7 +35,7 @@ function createButton () {
         onClick={sound ? onPressHoc(onClick, sound) : onClick}
         {...props}
       >
-        {children != null && renderProp(children)}
+        {renderProp(children)}
         {loading && <Loader loading size={size || 'smallest'} />}
         {tooltip}
       </button>
@@ -43,7 +43,7 @@ function createButton () {
   }
 
   Button.propTypes = {
-    children: type.NodeOrFunction,
+    children: type.NodeOrFunction.isRequired,
     className: type.ClassName,
     style: type.Style,
     // Whether to add `active` css class
@@ -54,6 +54,7 @@ function createButton () {
     loading: type.Boolean,
     // Button type eg. button, submit
     type: type.Enum(['button', 'submit']),
+    tooltip: type.Tooltip,
     _ref: type.Ref,
   }
 
