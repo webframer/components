@@ -12,9 +12,10 @@ export function SelectOptions ({
   const isActive = value != null ? (multiple ? (v => value.includes(v)) : (v => value === v)) : (v => false)
 
   function renderItem (item, i) {
-    let t, k, selected
+    let t, k, selected, _props
     if (isObject(item)) {
-      const {value, text = String(value), key = String(value)} = item
+      const {value, text = String(value), key = String(value), ...rest} = item
+      _props = rest
       t = text
       k = key
       selected = isActive(value)
@@ -31,7 +32,8 @@ export function SelectOptions ({
       else if ((i = text.indexOf(q)) > -1)
         t = <>{t.substring(0, i)}<b>{t.substring(i, i + q.length)}</b>{t.substring(i + q.length)}</>
     }
-    return <Row key={k} className={cn('select__option', className, {focus: focusIndex === i, selected})}
+    return <Row key={k} className={cn('select__option', className,
+      _props ? _props.className : void 0, {focus: focusIndex === i, selected})}
                 onClick={function (e) {
                   e.stopPropagation()
                   onClick.call(this, item, ...arguments)
@@ -39,7 +41,7 @@ export function SelectOptions ({
                 onFocus={function () {onFocus.call(this, item, ...arguments)}}
                 onBlur={function () {onBlur.call(this, item, ...arguments)}}
                 children={<Text>{t}</Text>}
-                {...props} />
+                {...props} {..._props} />
   }
 
   return (<>

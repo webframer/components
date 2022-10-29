@@ -303,6 +303,7 @@ type.Option = type.OneOf([
     key: type.Any,
     // Option's displayed UI
     children: type.NodeOrFunction,
+    // ...other props to pass to `<SelectOption/>`
   }),
 ])
 
@@ -393,8 +394,11 @@ type.Control = type.Obj({
   '#text': type.String,
   // Brief explanation of the input type (supports Markdown)
   '#desc': type.NodeOrFunction,
-  // CSS color value (eg. 'rgba(0,0,0,1)', 'linear-gradient(to bottom, white, black)', etc.)
-  '#color': type.String,
+  /**
+   * CSS color value (eg. 'rgba(0,0,0,1)', 'linear-gradient(to bottom, white, black)', etc.),
+   * of Function(value, name, control) => string | undefined - that returns color value
+   */
+  '#color': type.OneOf([type.String, type.Function]),
   // Function(value) => boolean | number - function to check if value belongs to this control type.
   // Return `true` to indicate a match, or number of matches for type.Obj/ObjEqual for sorting
   '#ofType': type.Function.isRequired,
