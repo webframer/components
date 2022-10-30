@@ -1,7 +1,7 @@
-import { hasProp, isString } from '@webframer/js'
+import { hasProp, isString, merge, throttle, toUniqueListFast } from '@webframer/js'
 import cn from 'classnames'
-import React, { useEffect, useRef } from 'react'
-import { accessibilitySupport, assignRef, isRef } from './react.js'
+import React from 'react'
+import { accessibilitySupport, assignRef, isRef, useInstance, useIsomorphicLayoutEffect } from './react.js'
 import { useTooltip } from './Tooltip.jsx'
 import { type } from './types.js'
 import { applyStyles } from './utils/css.js'
@@ -22,7 +22,7 @@ export function createView (defaultProp) {
     left, right, top, bottom, center, middle, sound,
     className, children, _ref,
     scroll, scrollClass, scrollStyle, scrollAlongDirectionOnly, scrollRef, scrollProps,
-    scrollOffset, reverseScroll,
+    scrollOffset, scrollOverflowProps = overflowScrollProps, reverseScroll,
     ...props
   }, ref) {
     const [tooltip] = useTooltip(props)
@@ -42,14 +42,106 @@ export function createView (defaultProp) {
       return <div className={className} {...props}>{children}{tooltip}</div>
     }
 
-    // Scrollable View -----------------------------------------------------------------------------
+    // Scrollable View =============================================================================
     // The wrapper should get rest props by default, because that's the expected behavior
-    let {style, ..._props} = props
-    scrollProps = {...scrollProps}
-    if (hasProp(_props, '_id')) {
-      Object.assign(_props, {_nodrop: ''})
-      Object.assign(scrollProps, {_id: _props._id, _nodrag: ''})
+    const [self, overflowProps] = useInstance()
+    if (!self.ref) self.ref = function (node) {
+      if (self.props.ref) assignRef.call(this, self.props.ref, ...arguments)
+      self.node = node
     }
+    if (hasProp(props, '_id')) {
+      Object.assign(props, {_nodrop: ''})
+      scrollProps = Object.assign({}, scrollProps, {_id: props._id, _nodrag: ''})
+    }
+    self.props = props
+
+    // Overflow Props ------------------------------------------------------------------------------
+    if (!self.onScroll) {
+      self.onScroll = function (e) {
+        const {onScroll} = self.props
+        if (onScroll) onScroll.apply(this, arguments)
+        if (e.defaultPrevented) return
+        self.setScrollPropsDebounced()
+      }
+      self.setScrollProps = function () {
+        if (!self.node || !self.scrollOverflowProps) return
+        let {scrollWidth, scrollHeight, clientWidth, clientHeight, scrollTop, scrollLeft} = self.node
+        const {scrollAlongDirectionOnly, scrollOverflowProps: {top, left, right, bottom}} = self
+        // Compute rtl directly from the node, because it could inherit style from parent nodes
+        const rtl = getComputedStyle(self.node).getPropertyValue('direction') === 'rtl'
+        scrollTop = Math.abs(scrollTop)
+        scrollLeft = Math.abs(scrollLeft) // rtl direction has negative scroll
+        let overflowProps = []
+        // Scroll area does not include border, it is within padding-box
+        if (scrollAlongDirectionOnly) {
+          switch (self.row) { // use prop `row` because Scroll may have display 'block', not flex
+            case true: // row
+              if (scrollWidth > clientWidth) {
+                if (scrollLeft >= 1) overflowProps.push(rtl ? right : left)
+                if (Math.ceil(scrollLeft + clientWidth) < scrollWidth)
+                  overflowProps.push(rtl ? left : right)
+              }
+              break
+            case false: // column
+            default:
+              if (scrollHeight > clientHeight) {
+                if (scrollTop >= 1) overflowProps.push(top)
+                if (Math.ceil(scrollTop + clientHeight) < scrollHeight)
+                  overflowProps.push(bottom)
+              }
+          }
+        } else {
+          if (scrollHeight > clientHeight) {
+            if (scrollTop >= 1) overflowProps.push(top)
+            if (Math.ceil(scrollTop + clientHeight) < scrollHeight)
+              overflowProps.push(bottom)
+          }
+          if (scrollWidth > clientWidth) {
+            if (scrollLeft >= 1) overflowProps.push(rtl ? right : left)
+            if (Math.ceil(scrollLeft + clientWidth) < scrollWidth)
+              overflowProps.push(rtl ? left : right)
+          }
+        }
+        // Merge props
+        overflowProps = overflowProps.filter(v => v)
+        let classNames = overflowProps.map(props => props.className).filter(v => v)
+        classNames = toUniqueListFast(classNames).join(' ')
+        overflowProps = merge(...overflowProps)
+        overflowProps.className = classNames
+        self.setState(overflowProps)
+      }
+      self.setScrollPropsDebounced = throttle(self.setScrollProps, 100, {trailing: true})
+    }
+    useIsomorphicLayoutEffect(() => {
+      if (scrollOverflowProps) self.setScrollProps()
+    }, [scrollOverflowProps])
+    if (scrollOverflowProps) Object.assign(props, overflowProps)
+    self.scrollAlongDirectionOnly = scrollAlongDirectionOnly
+    self.scrollOverflowProps = scrollOverflowProps
+    self.row = row
+
+    // Scroll Offset ------------------------------------------------------------------------------
+    // max-height/width calculation for direct parent element
+    useIsomorphicLayoutEffect(() => {
+      if (!scrollOffset) return
+      if (!self.node.parentElement) return
+      let attr = maxSizeScrollOffset(self.node.parentElement, scrollOffset)
+      if (attr) {
+        return () => {
+          let {node} = self
+          if (!node) return
+
+          // Only reset parent style if no other scrollables exist
+          if (node.parentElement && node.parentElement[attr]) {
+            if (!hasScrollElement(node.parentElement, node)) {
+              applyStyles(node.parentElement.style, node.parentElement[attr])
+              delete node.parentElement[attr]
+            }
+          }
+          node = null
+        }
+      }
+    })
 
     // // @archive: position absolute version
     // // CSS styles required:
@@ -61,9 +153,9 @@ export function createView (defaultProp) {
     // className = cn(className, 'scrollable', {col, row, fill, rtl})
     // scrollClass = cn({'position-fill': scroll})
 
-    // @Flexbox version
+    // @Flexbox version ----------------------------------------------------------------------------
     className = cn( // outer div container
-      className, 'scroll', {
+      className, 'scroll', props.className, {
         col, row, fill, rtl,
         center: center && !(row), // avoid Tailwind bug by negation with brackets
         middle: middle && !(col),
@@ -101,40 +193,11 @@ export function createView (defaultProp) {
         'margin-auto-v': middle, // when layout is col and inner div is smaller than outer
       },
     )
-
-    // @experimental: max-height/width calculation for direct parent element
-    const {current: self} = useRef({})
-    if (!self.ref) self.ref = function (node) {
-      if (self._ref) assignRef.apply(this, [self._ref, ...arguments])
-      self.node = node
-    }
-    self._ref = props.ref
-    _props.ref = self.ref
-
-    useEffect(() => {
-      if (!scrollOffset) return
-      if (!self.node.parentElement) return
-      let attr = maxSizeScrollOffset(self.node.parentElement, scrollOffset)
-      if (attr) {
-        return () => {
-          let {node} = self
-          if (!node) return
-
-          // Only reset parent style if no other scrollables exist
-          if (node.parentElement && node.parentElement[attr]) {
-            if (!hasScrollElement(node.parentElement, node)) {
-              applyStyles(node.parentElement.style, node.parentElement[attr])
-              delete node.parentElement[attr]
-            }
-          }
-          node = null
-        }
-      }
-    })
+    delete props.className
 
     // Scroll View
     return (
-      <div className={className} style={style} {..._props} >
+      <div className={className} {...props} ref={self.ref} onScroll={self.onScroll}>
         <div className={scrollClass} style={scrollStyle} ref={scrollRef} {...scrollProps}>
           {children}
         </div>
@@ -210,6 +273,16 @@ export function createView (defaultProp) {
     // element in order for it to calculate the maximum available space correctly.
     // Sometimes, this behavior leads to false positives, and needs to be disabled.
     scrollOffset: type.OneOf([type.Boolean, type.Enum(['height', 'width'])]),
+    // Props for outer Scroll div when content overflows in given direction, set `false` to disable
+    scrollOverflowProps: type.OneOf([
+      type.Obj({
+        top: type.Props,
+        bottom: type.Props,
+        left: type.Props,
+        right: type.Props,
+      }),
+      type.Boolean,
+    ]),
     // Tooltip props or value to display as tooltip on hover
     tooltip: type.Tooltip,
   }
@@ -333,6 +406,12 @@ export function maxSizeScrollOffset (parentElement, side, className = 'scroll', 
   return attr
 }
 
+export const overflowScrollProps = {
+  top: {className: 'bg-fade-top'},
+  bottom: {className: 'bg-fade-bottom'},
+  left: {className: 'bg-fade-left'},
+  right: {className: 'bg-fade-right'},
+}
 const scrollOffsetExclude = {
   'absolute': true,
   'fixed': true,

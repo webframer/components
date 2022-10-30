@@ -495,5 +495,11 @@ export const tooltipProptypes = {
 // Tooltip prop(s)
 type.Tooltip = type.OneOf([type.NodeOrFunction, type.Obj(tooltipProptypes)])
 
+// Generic Component props
+type.Props = type.Obj({
+  className: type.ClassName,
+  style: type.Style,
+})
+
 // This can be used to attach input controls or custom validators to types defined above
 if (typeof defineComponent === 'function') defineComponent(type)
