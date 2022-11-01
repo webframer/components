@@ -22,7 +22,7 @@ export function createView (defaultProp) {
     left, right, top, bottom, center, middle, sound,
     className, children, _ref,
     scroll, scrollClass, scrollStyle, scrollAlongDirectionOnly, scrollRef, scrollProps,
-    scrollOffset, scrollOverflowProps = overflowScrollProps, reverseScroll,
+    scrollOffset, scrollOverflowProps, reverseScroll,
     ...props
   }, ref) {
     const [tooltip] = useTooltip(props)
@@ -117,7 +117,7 @@ export function createView (defaultProp) {
     }, [scrollOverflowProps])
     if (scrollOverflowProps) Object.assign(props, overflowProps)
     self.scrollAlongDirectionOnly = scrollAlongDirectionOnly
-    self.scrollOverflowProps = scrollOverflowProps
+    self.scrollOverflowProps = scrollOverflowProps === true ? overflowScrollProps : scrollOverflowProps
     self.row = row
 
     // Scroll Offset ------------------------------------------------------------------------------

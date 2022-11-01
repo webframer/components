@@ -37,7 +37,7 @@ function createText () {
   }
 
   Text.propTypes = {
-    children: type.NodeOrFunction.isRequired,
+    children: type.NodeOrFunction,
     className: type.ClassName,
     style: type.Style,
     tooltip: type.Tooltip,
