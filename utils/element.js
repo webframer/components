@@ -21,11 +21,14 @@ export function collapseElement (node) {
 
 /**
  * Get the top most Node Element under cursor position for given Event
- * @param {PointerEvent} event
- * @returns {Element} node - under the event's cursor position
+ * @param {PointerEvent|{clientX: number, clientY: number}} event
+ * @returns {Element|null} node - under the event's cursor position
  */
-export function hitNodeFrom (event) {
-  return document.elementFromPoint(event.clientX, event.clientY)
+export function hitNodeFrom ({clientX, clientY}) {
+  let element = document.elementFromPoint(clientX, clientY)
+  if (element && element.shadowRoot)
+    element = element.shadowRoot.elementFromPoint(clientX, clientY)
+  return element
 }
 
 /**
