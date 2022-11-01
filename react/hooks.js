@@ -10,12 +10,12 @@ import {
   update,
 } from '@webframer/js'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useEventListener, useIsomorphicLayoutEffect } from 'usehooks-ts/dist/esm/index.js'
+import { useEvent, useIsomorphicLayoutEffect } from 'react-use'
 import { resizeWidth } from '../utils/element.js'
 import { animateSize } from './animations.js'
 
-export * from 'usehooks-ts/dist/esm/index.js'
-export { useIsomorphicLayoutEffect }
+export * from 'react-use'
+export { useEvent, useIsomorphicLayoutEffect }
 
 export const useAnimatedHeight = hookAnimatedSize('height')
 export const useAnimatedWidth = hookAnimatedSize('width')
@@ -172,6 +172,39 @@ export function useElementHeight (delay = 16) {
 }
 
 /**
+ * AddEventListener on mount and RemoveEventListener on unmount to ref element.
+ * Automatically updates when eventName, ref element or event options change.
+ * @example:
+ *    const ref = useRef(null)
+ *    useEventListener('click', (event) => alert(event), ref)
+ *    return <div ref={ref}/>
+ *
+ * @param {string} eventName - to subscribe
+ * @param {function} handler - event handler
+ * @param {MutableRefObject<null>|{current}|*} [ref] - from React.useRef(null)
+ * @param {object} [options] - event options
+ */
+export function useEventListener (eventName, handler, ref, options) {
+  const self = useRef({}).current
+  self.handler = handler
+  if (!self.onEvent) self.onEvent = function () {self.handler.apply(this, arguments)}
+  useEffect(() => {
+    // Define the listening target
+    let targetElement = (ref && ref.current) || window
+
+    if (!(targetElement && targetElement.addEventListener)) return
+
+    targetElement.addEventListener(eventName, self.onEvent, options)
+
+    // Remove event listener on cleanup
+    return () => {
+      targetElement.removeEventListener(eventName, self.onEvent, options)
+      targetElement = null
+    }
+  }, [eventName, ref, options])
+}
+
+/**
  * React Hook to calculate `compact` styles to apply to props
  * @param {boolean|number|null|void} compact - whether to use minimal width that fits content
  * @param {string|number} [content] - value to use for calculating compact width
@@ -199,6 +232,18 @@ export function useCompactStyle (compact, content, props = {}) {
 export function useMountCycle (self = useRef({}).current) {
   useEffect(() => (self.didMount = true) && (() => {self.willUnmount = true}), [])
   return self
+}
+
+/**
+ * Check if the element with ref is being hovered directly (not including its children elements)
+ * @param {MutableRefObject<null>|{current}|*} [ref] - from React.useRef(null)
+ * @returns {[isHovered: boolean, ref]}
+ */
+export function useHovered (ref = useRef(null)) {
+  const [isHovered, setValue] = useState(false)
+  useEventListener('mouseenter', () => setValue(true), ref)
+  useEventListener('mouseleave', () => setValue(false), ref)
+  return [isHovered, ref]
 }
 
 /**

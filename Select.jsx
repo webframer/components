@@ -326,7 +326,7 @@ export function Select (_props) {
   }
   const optionsClass = listBox.className
   delete listBox.className
-  fixed = fixed && !defaultOpen && optPos
+  fixed = fixed && optPos
   if (fixed) {
     listBox.style = self.getOptStyle(optPos, upward ? 'top' : 'bottom')
     if (optionsProps && optionsProps.style) listBox.style = {...listBox.style, ...optionsProps.style}
