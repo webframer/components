@@ -516,7 +516,7 @@ export function useScrollToElement (shouldScroll, options = {behavior: 'auto'}, 
  * Get the latest prop value when it changes, else the current state
  * @example:
  *    const [self] = useInstance()
- *    self.state.value = useSyncedProp(prop, self.state.value)
+ *    self.state.value = useSyncedProp(prop, self.state.value)[0]
  */
 export function useSyncedProp (prop, stateValue = prop) {
   const justSynced = usePreviousProp(prop)[1]
