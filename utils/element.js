@@ -1,4 +1,13 @@
-import { debounce } from '@webframer/js'
+import { debounce, toFlatList, toUniqueListFast } from '@webframer/js'
+
+/**
+ * Get all `class` names from innerHTML of given Node element (including the Node itself)
+ * @param {Element|HTMLElement} node - to get classes for
+ * @returns {string[]} classNames - array of unique class names sorted in alphabetical order
+ */
+export function classNamesFrom (node) {
+  return toUniqueListFast(toFlatList([node, ...node.querySelectorAll('*')].map(e => [...e.classList]))).sort()
+}
 
 /**
  * Make DOM element take no space
