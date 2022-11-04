@@ -72,7 +72,7 @@ import { onEventStopPropagation } from './utils/interactions.js'
  */
 export function Select (_props) {
   let {
-    options, defaultValue, name, defaultOpen, fuzzyOpt, focusIndex,
+    options, defaultValue, name, defaultOpen, searchOptions, focusIndex,
     multiple, query, search, compact, controlledValue, excludeSelected, forceRender, fixed, upward,
     onChange, onFocus, onBlur, onSearch, onSelect, onClickValue,
     icon, iconEnd,
@@ -212,7 +212,7 @@ export function Select (_props) {
 
   // Fuzzy Search ----------------------------------------------------------------------------------
   if (search) {
-    if (!self.fuse) self.fuse = new Fuse([], fuzzyOpt)
+    if (!self.fuse) self.fuse = new Fuse([], {...searchOptions, ...fuzzyOpt})
     if (!self.getOptions) self.getOptions = function (query) {
       return self.fuse.search(query).map(v => v.item)
     }
@@ -470,9 +470,6 @@ Select.defaultProps = {
   get addOptionMsg () {return _.__ADD___term__},
   get noOptionsMsg () {return _.NO_OPTIONS_AVAILABLE},
   focusIndex: 0,
-  // Fuzzy search options // https://fusejs.io/demo.html
-  // The default works even if the options is a list of Strings (does not work with number)
-  fuzzyOpt: {keys: ['text']},
   // Default to empty string to prevent React controlled input error
   query: '',
 }
@@ -527,6 +524,11 @@ Select.propTypes = {
   query: type.String,
   // Whether to enable search by options, pass Handler(query, options) => value for custom search
   search: type.OneOf([type.Boolean, type.Function]),
+  // Fuzzy [search options](https://fusejs.io/api/options.html)
+  searchOptions: type.Obj({
+    distance: type.Integer,
+    threshold: type.Percent,
+  }),
   // Whether options menu should try to open from the top, default is from the bottom
   upward: type.Boolean,
   // Selected value(s) - if passed, becomes a controlled component
@@ -632,6 +634,9 @@ function getOptionsFiltered (self) {
   return options
 }
 
+// Fuzzy search options // https://fusejs.io/demo.html
+// The default works even if the options is a list of Strings (does not work with number)
+const fuzzyOpt = {keys: ['text']}
 const opts = {
   preserveSpace: true,
 }

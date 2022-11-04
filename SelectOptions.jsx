@@ -1,6 +1,7 @@
 import { ips, isObject, toList, trimSpaces } from '@webframer/js'
 import cn from 'classnames'
 import React from 'react'
+import { renderProp } from './react/render.js'
 import { Row } from './Row.jsx'
 import Text from './Text.jsx'
 
@@ -14,8 +15,9 @@ export function SelectOptions ({
   function renderItem (item, i) {
     let t, k, selected, _props
     if (isObject(item)) {
-      const {value, text = String(value), key = String(value), ...rest} = item
+      const {value, text = String(value), key = String(value), children, ...rest} = item
       _props = rest
+      if (children != null) _props.children(renderProp(children, item))
       t = text
       k = key
       selected = isActive(value)
