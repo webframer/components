@@ -420,7 +420,7 @@ export function useModalRoute (
  * @param {boolean} [shallow] - whether to use shallow isEqual() comparison
  * @returns [prevProp: any, justChanged: boolean]
  *    previous prop - undefined initially on the very first render;
- *    justChanged - whether the prop just changed value in this render cycle
+ *    justChanged - whether the prop just changed value in this render cycle, true initially
  */
 export function usePreviousProp (value, shallow) {
   const self = useRef({}).current
