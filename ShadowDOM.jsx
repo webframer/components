@@ -17,8 +17,8 @@ export function ShadowDOM (_props) {
   const key = `node_${mode}${delegatesFocus}`
   self.props = {..._props, shadowRoot}
   if (!self.ref) self.ref = function (node) {
-    if (self.props.ref) assignRef.call(this, self.props.ref, ...arguments)
     self.node = node
+    assignRef.call(this, self.props._ref, ...arguments)
   }
 
   // Apply style sheet(s)
