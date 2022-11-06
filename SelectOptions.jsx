@@ -1,81 +1,83 @@
-import { ips, isObject, toList, trimSpaces } from '@webframer/js'
 import cn from 'classnames'
-import React from 'react'
-import { renderProp } from './react/render.js'
-import { Row } from './Row.jsx'
-import Text from './Text.jsx'
+import React, { useMemo } from 'react'
+import { Scroll } from './Scroll.jsx'
+import { useSelectionOptionProps } from './SelectOption.jsx'
+import { VirtualList } from './VirtualList.jsx'
 
+/**
+ * Higher Order Component to render Select Options.
+ * This component constructs methods and props for Options renderer to consume,
+ * where Options renderer is a plugin that can be swapped with VirtualList renderer.
+ * It encapsulates away internal logic of Select component by exposing ready-made props.
+ */
 export function SelectOptions ({
-  items, multiple, search, query, value, focusIndex, onFocus, onBlur, onClick,
-  addOption, noOptionsMsg,
-  className, ...props
+  // Extract Options Props here
+  fixed, open, upward, optionsProps,
+  forceRender, virtualOptionsMinimum,
+  self, ...restProps // pass the rest for conditional rendering to optimize for performance
 }) {
-  const isActive = value != null ? (multiple ? (v => value.includes(v)) : (v => value === v)) : (v => false)
-
-  function renderItem (item, i) {
-    let t, k, selected, _props
-    if (isObject(item)) {
-      const {value, text = String(value), key = String(value), children, ...rest} = item
-      _props = rest
-      if (children != null) _props.children(renderProp(children, item))
-      t = text
-      k = key
-      selected = isActive(value)
-    } else {
-      t = k = String(item)
-      selected = isActive(item)
+  // Options Props ---------------------------------------------------------------------------------
+  fixed = fixed && !!self.optPos
+  optionsProps = useMemo(() => {
+    let {className, style} = optionsProps || {}
+    if (fixed && open) style = {
+      ...self.getOptStyle(self.optPos, upward ? 'top' : 'bottom'),
+      ...style,
     }
-
-    // Bolden the matched query
-    if (search && query) {
-      let i, q = query.toLowerCase(), text = t.toLowerCase()
-      // to keep the logic simple, for now only use exact match once, case-insensitive
-      if (q === text) t = <b>{t}</b>
-      else if ((i = text.indexOf(q)) > -1)
-        t = <>{t.substring(0, i)}<b>{t.substring(i, i + q.length)}</b>{t.substring(i + q.length)}</>
+    return {
+      ...optionsProps,
+      className: cn('select__options', className, {fixed, open, upward, reverse: upward}),
+      style,
+      reverse: upward,
+      _ref: self.optionsRef,
+      scrollRef: self.optionsScrollRef,
+      role: 'listbox',
+      'aria-expanded': open,
     }
-    return <Row key={k} className={cn('select__option', className,
-      _props ? _props.className : void 0, {focus: focusIndex === i, selected})}
-                onClick={function (e) {
-                  e.stopPropagation()
-                  onClick.call(this, item, ...arguments)
-                }}
-                onFocus={function () {onFocus.call(this, item, ...arguments)}}
-                onBlur={function () {onBlur.call(this, item, ...arguments)}}
-                children={<Text>{t}</Text>}
-                {...props} {..._props} />
-  }
+  }, [fixed, open, upward, optionsProps])
 
-  return (<>
-    {items.map(renderItem)}
-    {addOption && renderItem(addOption, items.length)}
-    {noOptionsMsg && <Row className='select__option' children={<Text>{noOptionsMsg}</Text>} />}
-  </>)
+  const ListBox = restProps.options.length >= virtualOptionsMinimum ? VirtualOptions : Options
+  return <ListBox {...{optionsProps, forceRender, open, self, ...restProps}} />
 }
 
 export default React.memo(SelectOptions)
 
-/**
- * Create addOption item for SelectOptions component to render.
- * Logic to detect if addOption message should be shown:
- *  - query exists and does not match selected values or available options
- *
- * @param {string} query - current search query
- * @param {array<any>} options - all available options from the original Select props
- * @param {string} addOptionMsg - localised string with `term` placeholder to be replaced by `query`
- * @param {any} value - Select component's selected value state
- * @returns {{text: string, value: string}|void} option - if query can be added
- */
-export function addOptionItem (query, options, addOptionMsg, value) {
-  query = trimSpaces(query)
-  if (!query) return
-  let q = query.toLowerCase()
-  if (value != null && toList(value).find(v => String(v).toLowerCase() === q)) return
-  if (options.find(o => isObject(o)
-    ? (o.text || String(o.value)).toLowerCase() === q
-    : String(o).toLowerCase() === q,
-  )) return
-  return {text: ips(addOptionMsg, {term: query}), value: query}
+// Virtual List Options Renderer
+function VirtualOptions ({optionsProps, forceRender, open, ...restProps}) {
+  const {options} = restProps
+  const items = useMemo(() => (forceRender || open) ? options : [], [options, forceRender, open])
+  const {addOption, noOptions, renderOption} = useSelectionOptionProps(restProps)
+  return (
+    <VirtualList
+      items={items}
+      renderItem={renderOption}
+      childAfter={<>
+        {addOption}
+        {noOptions}
+      </>}
+      {...optionsProps}
+    />
+  )
+}
+
+// Default Options Renderer
+function Options ({optionsProps, forceRender, open, ...restProps}) {
+  return (
+    <Scroll {...optionsProps}>
+      {(forceRender || open) && <Option {...restProps} />}
+    </Scroll>
+  )
+}
+
+// Default Option Renderer
+function Option (props) {
+  const {options} = props
+  const {addOption, noOptions, renderOption} = useSelectionOptionProps(props)
+  return (<>
+    {options.map(renderOption)}
+    {addOption}
+    {noOptions}
+  </>)
 }
 
 // Keep focus within options length

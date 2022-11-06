@@ -2,6 +2,7 @@ import { hasProp, isString, merge, throttle, toUniqueListFast } from '@webframer
 import cn from 'classnames'
 import React from 'react'
 import { accessibilitySupport, assignRef, isRef, useInstance, useIsomorphicLayoutEffect } from './react.js'
+import { renderProp } from './react/render.js'
 import { useTooltip } from './Tooltip.jsx'
 import { type } from './types.js'
 import { applyStyles } from './utils/css.js'
@@ -20,7 +21,7 @@ export function createView (defaultProp) {
   function View ({
     row, col = !(row), fill, reverse, rtl,
     left, right, top, bottom, center, middle, sound,
-    className, children, _ref,
+    className, children, childBefore, childAfter, _ref,
     scroll, scrollClass, scrollStyle, scrollAlongDirectionOnly, scrollRef, scrollProps,
     scrollOffset, scrollOverflowProps, reverseScroll,
     ...props
@@ -198,9 +199,11 @@ export function createView (defaultProp) {
     // Scroll View
     return (
       <div className={className} {...props} ref={self.ref} onScroll={self.onScroll}>
+        {renderProp(childBefore, self)}
         <div className={scrollClass} style={scrollStyle} ref={scrollRef} {...scrollProps}>
           {children}
         </div>
+        {renderProp(childAfter, self)}
         {tooltip}
       </div>
     )
@@ -253,6 +256,10 @@ export function createView (defaultProp) {
     sound: type.Object,
     // Inner content to render
     children: type.Node,
+    // Custom UI to render before `children` in Scroll mode (outside inner Scroll component)
+    childBefore: type.NodeOrFunction,
+    // Custom UI to render after `children` in Scroll mode (outside inner Scroll component)
+    childAfter: type.NodeOrFunction,
     // Ref for the View or outer Scroll container
     _ref: type.Ref,
     // Whether to make the View scrollable

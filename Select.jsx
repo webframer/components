@@ -25,8 +25,7 @@ import Label from './Label.jsx'
 import { assignRef, toReactProps, useExpandCollapse, useInstance, useSyncedState } from './react.js'
 import { renderProp } from './react/render.js'
 import { Row } from './Row.jsx'
-import { Scroll } from './Scroll.jsx'
-import SelectOptions, { addOptionItem } from './SelectOptions.jsx'
+import SelectOptions from './SelectOptions.jsx'
 import Text from './Text.jsx'
 import { type } from './types.js'
 import { resizeWidth, setFocus } from './utils/element.js'
@@ -76,7 +75,7 @@ export function Select (_props) {
     multiple, query, search, compact, controlledValue, excludeSelected, forceRender, fixed, upward,
     onChange, onFocus, onBlur, onSearch, onSelect, onClickValue,
     icon, iconEnd,
-    addOption, addOptionMsg, noOptionsMsg, optionProps, optionsProps,
+    addOption, addOptionMsg, noOptionsMsg, optionProps, optionsProps, virtualOptionsMinimum,
     format, parse, // these are serializer and deserializer
     type, // not used
     float, error, label, loading, prefix, suffix, stickyPlaceholder,
@@ -115,15 +114,15 @@ export function Select (_props) {
     self.node = node
     return assignRef.call(this, _ref, ...arguments)
   }
-  if (!self.ref1) self.ref1 = function (node) {
+  if (!self.inputRef) self.inputRef = function (node) {
     self.inputNode = node
     return assignRef.call(this, inputRef, ...arguments)
   }
-  if (!self.ref2) self.ref2 = function (node) {
+  if (!self.optionsRef) self.optionsRef = function (node) {
     self.optNode = node
     return assignRef.call(this, ref, ...arguments)
   }
-  if (!self.scrollProps) self.scrollProps = {ref: (node) => self.scrollNode = node}
+  if (!self.optionsScrollRef) self.optionsScrollRef = (node) => self.scrollNode = node
   if (!self.getOptionsPosition) self.getOptionsPosition = getOptionsPosition
   if (!self.getOptStyle) self.getOptStyle = getFixedOptionsStyle
 
@@ -318,35 +317,17 @@ export function Select (_props) {
   }
   if (self.open) self.subscribeToEvents()
   useEffect(() => self.unsubscribeEvents, [])
-  const optPos = self.getOptionsPosition()
-  const listBox = {
-    ...optionsProps,
-    role: 'listbox', 'aria-expanded': open,
-    scrollProps: self.scrollProps,
-  }
-  const optionsClass = listBox.className
-  delete listBox.className
-  fixed = fixed && optPos
-  if (fixed) {
-    listBox.style = self.getOptStyle(optPos, upward ? 'top' : 'bottom')
-    if (optionsProps && optionsProps.style) listBox.style = {...listBox.style, ...optionsProps.style}
-  }
-  self.upward = upward = upward && (!optPos || optPos.canBeUpward || optPos.optimalPosition.bottom > 0)
 
   // UI Props --------------------------------------------------------------------------------------
   value = state.value
   query = state.query
   options = state.options // filtered by search results and selected values
   focusIndex = state.focusIndex // focused selection without actual focus
+  const optPos = self.optPos = self.getOptionsPosition()
+  upward = self.upward = upward && (!optPos || optPos.canBeUpward || optPos.optimalPosition.bottom > 0)
   const {disabled, readOnly: readonly} = props
   const hasValue = multiple ? hasListValue(value) : value != null
   if (hasValue) delete props.placeholder // remove for multiple search
-
-  // Options Props ---------------------------------------------------------------------------------
-  optionProps = {...optionProps}
-  if (addOption && search && query)
-    optionProps.addOption = addOptionItem(query, options, addOptionMsg, value)
-  if (!options.length) optionProps.noOptionsMsg = noOptionsMsg
 
   // Compact Input ---------------------------------------------------------------------------------
   // Logic to get compact input width:
@@ -446,20 +427,18 @@ export function Select (_props) {
       <input
         className={cn('select__input', {'fill-width': !compact && (multiple || !hasValue), iconStart: icon, iconEnd})}
         style={styleI}
-        id={id} readOnly={!search} {...props} ref={self.ref1}
+        id={id} readOnly={!search} {...props} ref={self.inputRef}
         value={query} onChange={self.searchQuery} onFocus={self.focus} onBlur={self.blur}
         onClick={search ? onEventStopPropagation(self.openOptions, props.onClick) : void 0} />
 
       {iconEnd}
       {childAfter != null && renderProp(childAfter, self)}
-      <Scroll className={cn('select__options', optionsClass, {open, upward, reverse: upward, fixed: listBox.style})}
-              reverse={upward} _ref={self.ref2} {...listBox}>
-        {(forceRender || open) &&
-          <SelectOptions items={options} {...{multiple, search, query, value, focusIndex}}
-                         onFocus={self.focusOption} onBlur={self.blurOption} onClick={self.selectOption}
-                         tabIndex={-1} // tab moves to the next input + avoid focusIndex mismatch
-                         {...optionProps} />}
-      </Scroll>
+      <SelectOptions {...{
+        fixed, open, upward, optionsProps,
+        forceRender, virtualOptionsMinimum, self,
+        addOption, addOptionMsg, options, noOptionsMsg,
+        focusIndex, multiple, search, query, value, optionProps,
+      }} />
     </Row>
   </>)
 }
@@ -472,6 +451,7 @@ Select.defaultProps = {
   focusIndex: 0,
   // Default to empty string to prevent React controlled input error
   query: '',
+  virtualOptionsMinimum: 100,
 }
 
 Select.propTypes = {
@@ -535,6 +515,8 @@ Select.propTypes = {
   value: type.Any,
   // Message to display when there are no options left for multiple select
   noOptionsMsg: type.String,
+  // Minimum number of Select options to use Virtual List renderer to optimize for performance
+  virtualOptionsMinimum: type.UnsignedInteger,
   // Message to display when there are no matching results for search select
   // noResultsMsg: type.String, // not needed, use the same `noOptionsMsg`
   // ...other native `<input>` props

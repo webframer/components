@@ -267,7 +267,10 @@ function VirtualListItem ({children}) {
   return renderProp(children)
 }
 
-const VirtualItem = React.memo(VirtualListItem)
+VirtualListItem.propTypes = {
+  children: type.NodeOrFunction.isRequired,
+}
+export const VirtualItem = React.memo(VirtualListItem)
 
 const innerSize = {
   top: 'innerHeight',
