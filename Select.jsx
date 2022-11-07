@@ -308,9 +308,16 @@ export function Select (_props) {
   }
   if (!self.setOptionFocus) self.setOptionFocus = function (focusIndex) {
     if (!self.open || !self.scrollNode || !self.inputNode) return
-    // First actually focus on the option to scroll if necessary, excluding noOptionsMsg
-    const length = self.scrollNode.children.length + (!self.state.options.length ? -1 : 0)
-    focusIndex = setFocus(self.scrollNode.children, focusIndex, length)
+    const {addOption, search} = self.props
+    const {query} = self.state
+    if (focusIndex === -1 && addOption && search && query) {
+      // Focus on addOption
+      setFocus(self.optNode.children, 0)
+    } else {
+      // Focus on the option to scroll if necessary
+      // this returns -1 if no options available, thus automatically focusing on addOption
+      focusIndex = setFocus(self.scrollNode.children, focusIndex, self.state.options.length)
+    }
     // Then focus back to input for possible query change, keeping focused state
     self.inputNode.focus()
     self.setState({focusIndex})

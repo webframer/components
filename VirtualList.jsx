@@ -27,7 +27,7 @@ export function VirtualList (_props) {
     renderItem = ((item, i, items, self) => <VirtualItem key={i} children={item} />),
     ...props
   } = _props
-  let [self, {visibleIndices}] = useInstance({visibleIndices: new Array(initialItems).fill(1).map((v, i) => i)})
+  let [self, {visibleIndices}] = useInstance()
   self.justChangedItems = usePreviousProp(items)[1]
   self.props = _props
   self.offsetSide = props.row ? 'offsetWidth' : 'offsetHeight'
@@ -36,16 +36,26 @@ export function VirtualList (_props) {
   self.isBusy = true // halt scroll event handler until component has updated
   // Reset rendered child node index within its parent by virtual list index
   self.renderedItemByIndex = {}
-  // Child node sizes by their virtual list index
-  if (self.justChangedItems) self.renderedItemSizeByIndex = {}
-  // Normalize visible indices to be within current items array
-  if (visibleIndices.length > items.length) {
-    visibleIndices = self.state.visibleIndices = items.map((v, i) => i)
-  } else {
-    let extraIndices = last(visibleIndices) - items.length + 1
-    if (extraIndices > 0) {
-      visibleIndices = self.state.visibleIndices =
-        new Array(visibleIndices.length).fill(items.length - visibleIndices.length).map((v, i) => v + i)
+  
+  // Sync indices when items change
+  if (self.justChangedItems) {
+    // Child node sizes by their virtual list index
+    self.renderedItemSizeByIndex = {}
+
+    // On initial render or after collapse, visibleIndices is empty
+    if (!visibleIndices || visibleIndices.length === 0) {
+      visibleIndices = self.state.visibleIndices = new Array(initialItems).fill(1).map((v, i) => i)
+    }
+
+    // Normalize visible indices to be within current items array
+    if (visibleIndices.length > items.length) {
+      visibleIndices = self.state.visibleIndices = items.map((v, i) => i)
+    } else {
+      let extraIndices = last(visibleIndices) - items.length + 1
+      if (extraIndices > 0) {
+        visibleIndices = self.state.visibleIndices =
+          new Array(visibleIndices.length).fill(items.length - visibleIndices.length).map((v, i) => v + i)
+      }
     }
   }
 

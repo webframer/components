@@ -75,6 +75,7 @@ export function setFocus (nodes, focusIndex, length = nodes.length) {
   if (!length || length < 0) return -1
   focusIndex %= length
   if (focusIndex < 0) focusIndex += length
+  if (!nodes[focusIndex]) return -1
   nodes[focusIndex].focus()
   return focusIndex
 }

@@ -70,7 +70,10 @@ export default React.memo(SelectOption)
 export function useSelectionOptionProps ({
   focusIndex, multiple, value, search, query, self, optionProps: optProps, // from Select props
   addOption, addOptionMsg, options, noOptionsMsg,
+  forceRender, open,
 }) {
+  const shouldRender = forceRender || open
+
   // Generic Option Props that is common to all options
   const optionProps = useMemo(() => ({
     onClick: self.selectOption,
@@ -112,16 +115,18 @@ export function useSelectionOptionProps ({
 
   // Convert `addOption` prop to an Option object for rendering
   addOption = useMemo(() => {
-    if (addOption && search && query) return addOptionItem(addOption, addOptionMsg, options, query, value)
-  }, [addOption, addOptionMsg, options, search, query])
-  if (addOption) addOption = renderOption(addOption, options.length)
+    if (addOption && search && query && shouldRender)
+      return addOptionItem(addOption, addOptionMsg, options, query, value)
+  }, [addOption, addOptionMsg, options, search, query, shouldRender])
+  if (addOption) addOption = renderOption(addOption, -1)
 
   // Convert noOptionsMsg to a component ready for rendering
   const hasNoOptions = !options.length
-  const noOptions = useMemo(() => hasNoOptions && !!noOptionsMsg &&
-    <Row className='select__option' children={<Text>{noOptionsMsg}</Text>} />, [hasNoOptions, noOptionsMsg])
+  const noOptions = useMemo(() => hasNoOptions && !!noOptionsMsg && shouldRender &&
+      <Row className='select__option' children={<Text>{noOptionsMsg}</Text>} />,
+    [hasNoOptions, noOptionsMsg, shouldRender])
 
-  return {addOption, noOptions, optionPropsGetter, renderOption}
+  return {addOption, noOptions, optionPropsGetter, renderOption, shouldRender}
 }
 
 /**

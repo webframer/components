@@ -43,41 +43,36 @@ export function SelectOptions ({
 export default React.memo(SelectOptions)
 
 // Virtual List Options Renderer
-function VirtualOptions ({optionsProps, forceRender, open, ...restProps}) {
+// todo: improvement - fix keyboard up/down focus jumps in scroll after about 30 steps
+function VirtualOptions ({optionsProps, ...restProps}) {
   const {options} = restProps
-  const items = useMemo(() => (forceRender || open) ? options : [], [options, forceRender, open])
-  const {addOption, noOptions, renderOption} = useSelectionOptionProps(restProps)
+  const {addOption, noOptions, renderOption, shouldRender} = useSelectionOptionProps(restProps)
+  const items = useMemo(() => shouldRender ? options : [], [options, shouldRender])
   return (
     <VirtualList
       items={items}
       renderItem={renderOption}
-      childAfter={<>
-        {addOption}
-        {noOptions}
-      </>}
+      childBefore={addOption}
+      childAfter={noOptions}
       {...optionsProps}
     />
   )
 }
 
 // Default Options Renderer
-function Options ({optionsProps, forceRender, open, ...restProps}) {
+function Options ({optionsProps, ...restProps}) {
+  const {options} = restProps
+  const {addOption, noOptions, renderOption, shouldRender} = useSelectionOptionProps(restProps)
+  const children = useMemo(() => shouldRender ? options.map(renderOption) : null,
+    [renderOption, options, shouldRender])
   return (
-    <Scroll {...optionsProps}>
-      {(forceRender || open) && <Option {...restProps} />}
-    </Scroll>
+    <Scroll
+      children={children}
+      childBefore={addOption}
+      childAfter={noOptions}
+      {...optionsProps}
+    />
   )
-}
-
-// Default Option Renderer
-function Option (props) {
-  const {options} = props
-  const {addOption, noOptions, renderOption} = useSelectionOptionProps(props)
-  return (<>
-    {options.map(renderOption)}
-    {addOption}
-    {noOptions}
-  </>)
 }
 
 // Keep focus within options length
