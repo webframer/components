@@ -73,7 +73,7 @@ export function Select (_props) {
   let {
     options, defaultValue, name, defaultOpen, searchOptions, focusIndex,
     multiple, query, search, compact, controlledValue, excludeSelected, forceRender, fixed, upward,
-    onChange, onFocus, onBlur, onSearch, onSelect, onClickValue,
+    onChange, onFocus, onBlur, onSearch, onSelect, onClickValue, queryParser,
     icon, iconEnd,
     addOption, addOptionMsg, noOptionsMsg, optionProps, optionsProps, virtualOptionsMinimum,
     format, parse, // these are serializer and deserializer
@@ -213,6 +213,8 @@ export function Select (_props) {
   if (search) {
     if (!self.fuse) self.fuse = new Fuse([], {...searchOptions, ...fuzzyOpt})
     if (!self.getOptions) self.getOptions = function (query) {
+      const {queryParser} = self.props
+      if (queryParser) query = queryParser(query)
       return self.fuse.search(query).map(v => v.item)
     }
     if (!self.searchQuery) self.searchQuery = function (e) {
@@ -509,12 +511,22 @@ Select.propTypes = {
   fixed: type.Boolean,
   // Default search query to use
   query: type.String,
+  // Function(query) => string - parse function for internal query string used for search
+  queryParser: type.Function,
   // Whether to enable search by options, pass Handler(query, options) => value for custom search
   search: type.OneOf([type.Boolean, type.Function]),
   // Fuzzy [search options](https://fusejs.io/api/options.html)
   searchOptions: type.Obj({
     distance: type.Integer,
     threshold: type.Percent,
+    /**
+     * Goes along with `queryParser`
+     * @example:
+     *    // Filter options to include search `query`
+     *    queryParser: (query) => `'${query}`
+     *    searchOptions: {useExtendedSearch: true, ignoreLocation: true}
+     */
+    useExtendedSearch: type.Boolean,
   }),
   // Whether options menu should try to open from the top, default is from the bottom
   upward: type.Boolean,
