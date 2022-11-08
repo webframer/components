@@ -20,11 +20,10 @@ export function SelectOption ({
   props.onFocus = useCallback(function () {onFocus.call(this, option, ...arguments)}, [option, onFocus])
 
   // Option Text or Children Display ---------------------------------------------------------------
-  let t, _props
+  let t, _props = {}
   if (isObject(option)) {
-    const {value, text = String(value), children, ...rest} = option
+    const {value, text = String(value), key, ...rest} = option
     _props = rest
-    if (children != null) _props.children(renderProp(children, option))
     t = text
   } else {
     t = String(option)
@@ -39,10 +38,15 @@ export function SelectOption ({
       t = <>{t.substring(0, i)}<b>{t.substring(i, i + q.length)}</b>{t.substring(i + q.length)}</>
   }
 
+  // Custom Option children
+  if (_props.children != null) _props.children = renderProp(_props.children, {
+    text: t, props: {...props, className, option, focus, selected, search, query},
+  })
+  const {children = <Text>{t}</Text>, className: _className, ...rest} = _props
+
   return (
-    <Row className={cn('select__option', className, _props && _props.className, {focus, selected})}
-         children={<Text>{t}</Text>}
-         {...props} {..._props} />
+    <Row className={cn('select__option', className, _className, {focus, selected})}
+         {...props} {...rest}>{children}</Row>
   )
 }
 

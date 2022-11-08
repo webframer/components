@@ -458,7 +458,7 @@ Select.defaultProps = {
   focusIndex: 0,
   // Default to empty string to prevent React controlled input error
   query: '',
-  virtualOptionsMinimum: 100,
+  virtualOptionsMinimum: 50,
 }
 
 Select.propTypes = {
