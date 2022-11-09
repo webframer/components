@@ -1,4 +1,4 @@
-import { ips, isObject, toList, trimSpaces } from '@webframer/js'
+import { ips, isFunction, isObject, toList, trimSpaces } from '@webframer/js'
 import cn from 'classnames'
 import React, { useCallback, useMemo } from 'react'
 import { renderProp } from './react/render.js'
@@ -119,8 +119,10 @@ export function useSelectionOptionProps ({
 
   // Convert `addOption` prop to an Option object for rendering
   addOption = useMemo(() => {
-    if (addOption && search && query && shouldRender)
-      return addOptionItem(addOption, addOptionMsg, options, query, value)
+    if (search && query && shouldRender) {
+      addOption = isFunction(addOption) ? addOption(query) : addOption
+      if (addOption) return addOptionItem(addOption, addOptionMsg, options, query, value)
+    }
   }, [addOption, addOptionMsg, options, search, query, shouldRender])
   if (addOption) addOption = renderOption(addOption, -1)
 

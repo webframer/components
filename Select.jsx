@@ -4,6 +4,7 @@ import {
   _,
   debounce,
   hasListValue,
+  isFunction,
   isObject,
   isString,
   KEY,
@@ -211,7 +212,7 @@ export function Select (_props) {
 
   // Fuzzy Search ----------------------------------------------------------------------------------
   if (search) {
-    if (!self.fuse) self.fuse = new Fuse([], {...searchOptions, ...fuzzyOpt})
+    if (!self.fuse) self.fuse = new Fuse([], {...fuzzyOpt, ...searchOptions})
     if (!self.getOptions) self.getOptions = function (query) {
       const {queryParser} = self.props
       if (queryParser) query = queryParser(query)
@@ -287,7 +288,8 @@ export function Select (_props) {
         // prevent event propagation to onClick that toggles open state, or selects accidentally
         if (!options.length && !addOption) return e.preventDefault()
         let selected = options.length ? options[focusIndex] : null
-        if (selected == null && addOption && query) selected = trimSpaces(query)
+        if (selected == null && addOption && query && (!isFunction(addOption) || addOption(query)))
+          selected = trimSpaces(query)
         if (selected == null) return e.preventDefault()
         self.selectOption.call(this, selected, ...arguments)
         return e.stopPropagation() // allow closing after selection for single select
@@ -312,7 +314,7 @@ export function Select (_props) {
     if (!self.open || !self.scrollNode || !self.inputNode) return
     const {addOption, search} = self.props
     const {query} = self.state
-    if (focusIndex === -1 && addOption && search && query) {
+    if (focusIndex === -1 && addOption && search && query && (!isFunction(addOption) || addOption(query))) {
       // Focus on addOption
       setFocus(self.optNode.children, 0)
     } else {
@@ -482,8 +484,13 @@ Select.propTypes = {
   onSelect: type.Function,
   // Handler(value: any, name?, event, self) when a multiple selected value is clicked
   onClickValue: type.Function,
-  // Whether to allow users to add new options (in combination with search)
-  addOption: type.OneOf([type.Boolean, type.Object]),
+  /**
+   * Whether to allow users to add new options (in combination with search)
+   * Set to `true` to allow adding new term.
+   * Set to `object` of props to pass to new `option` object when selected.
+   * Set to `function(query: string) => boolean | object` for conditional logic.
+   */
+  addOption: type.OneOf([type.Boolean, type.Object, type.Function]),
   // Whether to use minimal width that fits content, pass number for additional character offset
   compact: type.OneOf([type.Boolean, type.Number]),
   // Whether to lock selected value when `value` prop is given
