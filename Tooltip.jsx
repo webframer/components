@@ -215,13 +215,13 @@ function TooltipRender ({
     return () => events.forEach(unsubscribe => unsubscribe())
   }, [on])
 
-  return ( // tag this with `_tooltip` for other components, like Select to persist dropdown
+  return (
     <div className={cn('tooltip col position-fixed', `theme-${theme}`,
       !prerender && `tooltip-${position} tooltip-${align}`,
       open ? 'pointer-events-auto z-10' : 'pointer-events-none', {
         'invisible': prerender, // tailwind only recognizes text literal
         [animation]: open && !prerender,
-      })} style={style} ref={self.ref} _tooltip=''>
+      })} style={style} ref={self.ref}>
       <div className={cn(className, 'tooltip__content', {
         col, row, fill, reverse, rtl, left, right, top, bottom, center, middle,
         pointer: props.onClick && props.tabIndex !== -1,

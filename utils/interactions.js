@@ -21,7 +21,7 @@ export function cursorUnset () {
 /**
  * Get Pointer Event Position Offset from Target Element
  * @param {Event|PointerEvent|MouseEvent} event - pointer event
- * @param {Object<left, top>} rectangle - from event.target.getBoundingClientRect()
+ * @param {object|{left: number, top: number}} rectangle - from event.target.getBoundingClientRect()
  * @return {{x: number, y: number}} offset - coordinates relative to event.target
  */
 export function offsetFrom (event, rectangle) {
@@ -31,14 +31,25 @@ export function offsetFrom (event, rectangle) {
 }
 
 /**
- * Create `on<Event>` handler function that stops event propagation
+ * Create `on<Event>` handler function that stops event propagation, and sets
+ *  `event.propagationStopped === true`
  * @param {function|function[]} [func] - callback(s) to wrap
  * @returns {(function(*): void)|*} callback - that stops event propagation before calling given `func`
  */
 export function onEventStopPropagation (...func) {
+  // Override Event prototype with a checker
+  if (!eventStopPropagation) {
+    eventStopPropagation = Event.prototype.stopPropagation
+    Event.prototype.stopPropagation = function () {
+      this.propagationStopped = true
+      return eventStopPropagation.apply(this, arguments)
+    }
+  }
   return function (e) {
     e.stopPropagation()
     if (func[0] && func.length === 1) return func[0].apply(this, arguments)
     return func.filter(v => v).map(fn => fn.apply(this, arguments))
   }
 }
+
+let eventStopPropagation

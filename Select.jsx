@@ -89,6 +89,7 @@ export function Select (_props) {
   let [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
   self.open = open // for internal logic
   open = open || animating // for rendering and styling
+  query = state.query
   useEffect(() => (self.didMount = true) && (() => {self.willUnmount = true}), [])
   const [, changedValue] = useSyncedState({value: props.value})
 
@@ -214,9 +215,10 @@ export function Select (_props) {
   if (search) {
     if (!self.fuse) self.fuse = new Fuse([], {...fuzzyOpt, ...searchOptions})
     if (!self.getOptions) self.getOptions = function (query) {
+      if (!query) return getOptionsFiltered(self)
       const {queryParser} = self.props
       if (queryParser) query = queryParser(query)
-      return self.fuse.search(query).map(v => v.item)
+      return self.fuse.search(query).map(v => v.item) // returns no result for empty string
     }
     if (!self.searchQuery) self.searchQuery = function (e) {
       const {onSearch, name} = self.props
@@ -229,7 +231,7 @@ export function Select (_props) {
     }
     if (!self.updateOptions) self.updateOptions = debounce((query) => {
       if (self.willUnmount) return
-      self.setState({options: query ? self.getOptions(query) : getOptionsFiltered(self), query})
+      self.setState({options: self.getOptions(query), query})
     }, TIME_DURATION_INSTANT)
   }
 
@@ -241,20 +243,20 @@ export function Select (_props) {
     const {query} = self.state
     self.fuse.setCollection(toFuseList(options))
     if (query) self.state.options = self.getOptions(query) // initial mount and subsequent updates
-  }, [search, options])
+  }, [search, options]) // query is updated by mutation
 
   // Accessibility ---------------------------------------------------------------------------------
   if (!self.subscribeToEvents) self.subscribeToEvents = function () {
     if (self.subscribed) return
     self.subscribed = true
     subscribeTo('keydown', self.press)
-    subscribeTo('pointerdown', self.click)
+    subscribeTo('click', self.click) // only propagated events get fired here
   }
   if (!self.unsubscribeEvents) self.unsubscribeEvents = function () {
     if (!self.subscribed) return
     self.subscribed = false
     unsubscribeFrom('keydown', self.press)
-    unsubscribeFrom('pointerdown', self.click)
+    unsubscribeFrom('click', self.click)
   }
   if (!self.click) self.click = function (e) {
     if (!self.node || !self.open) return
@@ -263,7 +265,7 @@ export function Select (_props) {
     let node = e.target
     while (node.parentElement) {
       node = node.parentElement
-      if (node === self.node || node.getAttribute('_tooltip') != null) return
+      if (node === self.node) return
     }
     self.hasFocus = false
     self.closeOptions.apply(this, arguments) // If clicked outside - close this
@@ -331,7 +333,6 @@ export function Select (_props) {
 
   // UI Props --------------------------------------------------------------------------------------
   value = state.value
-  query = state.query
   options = state.options // filtered by search results and selected values
   focusIndex = state.focusIndex // focused selection without actual focus
   const optPos = self.optPos = self.getOptionsPosition()
