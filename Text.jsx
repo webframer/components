@@ -31,7 +31,7 @@ function createText () {
     return (
       <span className={cn(className, 'text', {
         small, smaller, smallest, large, larger, largest,
-        fill, reverse, rtl, pointer: props.onClick,
+        fill, reverse, rtl, pointer: props.onClick && props.tabIndex !== -1,
       })} {...props}>{children}{tooltip}</span>
     )
   }

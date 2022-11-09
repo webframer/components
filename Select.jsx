@@ -263,7 +263,7 @@ export function Select (_props) {
     let node = e.target
     while (node.parentElement) {
       node = node.parentElement
-      if (node === self.node) return
+      if (node === self.node || node.getAttribute('_tooltip') != null) return
     }
     self.hasFocus = false
     self.closeOptions.apply(this, arguments) // If clicked outside - close this

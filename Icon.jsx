@@ -21,7 +21,7 @@ function createIcon () {
     }
 
     return (
-      <i className={cn(`icon-${name}`, className, {mask, pointer: props.onClick})}
+      <i className={cn(`icon-${name}`, className, {mask, pointer: props.onClick && props.tabIndex !== -1})}
          aria-hidden='true' {...props}>{mask && <span className='icon__mask' style={mask} />}{children}</i>
     )
   }

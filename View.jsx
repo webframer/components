@@ -37,7 +37,7 @@ export function createView (defaultProp) {
         className, {
           col, row, fill, reverse, rtl,
           left, right, top, bottom, center, middle,
-          pointer: props.onClick,
+          pointer: props.onClick && props.tabIndex !== -1,
         },
       )
       return <div className={className} {...props}>{children}{tooltip}</div>
@@ -189,7 +189,7 @@ export function createView (defaultProp) {
       scrollClass, row ? 'min-width no-max-width' : 'min-height no-max-height', {
         col, row, fill, reverse, rtl,
         left, right, top, bottom, center, middle,
-        pointer: props.onClick,
+        pointer: props.onClick && props.tabIndex !== -1,
         'margin-auto-h': center, // when layout is row and inner div is smaller than outer
         'margin-auto-v': middle, // when layout is col and inner div is smaller than outer
       },
