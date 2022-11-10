@@ -10,10 +10,10 @@ import {
   KEY,
   l,
   last,
-  localiseTranslation,
   subscribeTo,
   TIME_DURATION_INSTANT,
   toUniqueListFast,
+  translate,
   trimSpaces,
   unsubscribeFrom,
 } from '@webframer/js'
@@ -650,7 +650,7 @@ const opts = {
   preserveSpace: true,
 }
 
-localiseTranslation({
+translate({
   SELECT: {
     [l.ENGLISH]: 'Select',
   },

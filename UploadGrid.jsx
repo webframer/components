@@ -10,12 +10,12 @@ import {
   isFunction,
   isString,
   l,
-  localiseTranslation,
   previewSize,
   previewSizes,
   shortNumber,
   SIZE_KB,
   toList,
+  translate,
 } from '@webframer/js'
 import cn from 'classnames'
 import React, { useEffect } from 'react'
@@ -319,7 +319,7 @@ function toCSSValue (v) {
 
 const obj = {}
 
-localiseTranslation({
+translate({
   _width__X__height_: {
     [l.ENGLISH]: '{width} x {height}',
   },

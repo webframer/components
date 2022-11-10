@@ -1,14 +1,4 @@
-import {
-  _,
-  __CLIENT__,
-  hasListValue,
-  ips,
-  l,
-  localiseTranslation,
-  shortNumber,
-  SIZE_KB,
-  toListTotal,
-} from '@webframer/js'
+import { _, __CLIENT__, hasListValue, ips, l, shortNumber, SIZE_KB, toListTotal, translate } from '@webframer/js'
 import cn from 'classnames'
 import React, { useId } from 'react'
 import Icon from './Icon.jsx'
@@ -272,7 +262,7 @@ function setInputFiles (inputNode, files) {
   inputNode.files = dataTransfer.files
 }
 
-localiseTranslation({
+translate({
   DO_YOU_WANT_TO_REMOVE___file___: {
     [l.ENGLISH]: `Do you want to remove "{file}"?`,
   },
