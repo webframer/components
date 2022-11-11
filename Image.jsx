@@ -28,8 +28,9 @@ function createImage () {
   const ImageRef = React.forwardRef(Image)
 
   Image.defaultProps = ImageRef.defaultProps = {
-    decoding: 'async',
+    name: 'image.svg', // to prevent error and for better UX
     loading: 'lazy',
+    decoding: 'async',
   }
 
   Image.propTypes = ImageRef.propTypes = {
@@ -44,8 +45,8 @@ function createImage () {
     path: type.String,
     // Image file source path or URL
     src: type.String,
-    decoding: type.Enum(['auto', 'async', 'sync']),
     loading: type.Enum(['eager', 'lazy']),
+    decoding: type.Enum(['auto', 'async', 'sync']),
   }
 
   return [Image, ImageRef]

@@ -21,7 +21,7 @@ export function createView (defaultProp) {
   function View ({
     row, col = !(row), fill, reverse, rtl,
     left, right, top, bottom, center, middle, sound,
-    className, children, childBefore, childAfter, _ref,
+    className, children, childBefore, childAfter, preventOffset, _ref,
     scroll, scrollClass, scrollStyle, scrollAlongDirectionOnly, scrollRef, scrollProps,
     scrollOffset, scrollOverflowProps, reverseScroll,
     ...props
@@ -30,6 +30,7 @@ export function createView (defaultProp) {
     props = accessibilitySupport(props, sound)
     if (isRef(ref)) props.ref = ref // forwarded ref may not exist on mount
     else if (_ref) props.ref = _ref // preferred way to ensure ref exists on mount
+    if (preventOffset) props._no_offset = ''
 
     // Ordinary View
     if (!(scroll)) {
@@ -200,7 +201,8 @@ export function createView (defaultProp) {
     return (
       <div className={className} {...props} ref={self.ref} onScroll={self.onScroll}>
         {renderProp(childBefore, self)}
-        <div className={scrollClass} style={scrollStyle} ref={scrollRef} {...scrollProps}>
+        <div className={scrollClass} style={scrollStyle} ref={scrollRef}
+             {...preventOffset && {_no_offset: ''}} {...scrollProps}>
           {children}
         </div>
         {renderProp(childAfter, self)}
@@ -262,6 +264,11 @@ export function createView (defaultProp) {
     childAfter: type.NodeOrFunction,
     // Ref for the View or outer Scroll container
     _ref: type.Ref,
+    /**
+     * Whether to prevent components from setting size offset for this component.
+     * This can prevent bugs caused by children Scroll components with `scrollOffset` enabled.
+     */
+    preventOffset: type.Boolean,
     // Whether to make the View scrollable
     scroll: type.Boolean,
     // Whether to restrict scrolling along the layout direction.
@@ -371,7 +378,7 @@ export function maxSizeScrollOffset (parentElement, side, className = 'scroll', 
 
   while (parent.parentElement) {
     // Escape hatch to manually prevent Scroll offset on parents when inside another Scroll view
-    if (parent.getAttribute('_no_scroll_offset') != null) break
+    if (parent.getAttribute('_no_offset') != null) break
 
     grandParent = parent.parentElement
     // Skip offset calculation if the ancestor does not affect layout flow of its siblings, like Modal

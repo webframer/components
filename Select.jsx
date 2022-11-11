@@ -89,7 +89,6 @@ export function Select (_props) {
   let [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
   self.open = open // for internal logic
   open = open || animating // for rendering and styling
-  query = state.query
   useEffect(() => (self.didMount = true) && (() => {self.willUnmount = true}), [])
   const [, changedValue] = useSyncedState({value: props.value})
 
@@ -107,6 +106,7 @@ export function Select (_props) {
     state.value = format ? format(props.value, name, void 0, self) : props.value
     if (!multiple) state.query = getValueText(props.value, options)
   }
+  query = state.query
 
   // Simulate class instance props
   self.props = _props
@@ -618,8 +618,8 @@ function getFixedOptionsStyle (optionsPosition, desiredPosition) {
  */
 function getValueText (value, options) {
   if (!options.length) return String(value)
-  const option = options.find(o => (o || {}).value === value)
-  return String(option ? (option.text || option.value) : value)
+  const o = options.find(o => o === value || (o && o.value === value))
+  return String(o === void 0 ? value : (isObject(o) ? (o.text || o.value) : o))
 }
 
 function getOptionByValue (value, options) {
