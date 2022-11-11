@@ -152,18 +152,17 @@ export function Select (_props) {
   }
   if (!self.selectOption) self.selectOption = function (item, e) { // options clicked
     const {multiple, onChange, name, parse} = self.props
-    self.hasFocus = multiple
     let {value = item, text = value} = isObject(item) ? item : {}
     if (multiple) value = toUniqueListFast((self.state.value || []).concat(value))
     if (onChange) onChange.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
     if (e.defaultPrevented) return
-    const options = getOptionsFiltered(self)
+    const options = getOptionsFiltered(self) // compute new options to get next focus index
     self.setState({
       value, query: multiple ? '' : String(text), options,
       focusIndex: options.findIndex(i => i === item),
     })
     if (multiple && self.inputNode) self.inputNode.focus()
-    if (self.open) setTimeout(() => self.closeOptions.call(this, e), 0)
+    if (self.open && !(self.hasFocus = multiple)) setTimeout(() => self.closeOptions.call(this, e), 0)
   }
   if (multiple && !self.deleteValue) self.deleteValue = function (val, e) {
     const {onChange, name, parse} = self.props
@@ -215,14 +214,13 @@ export function Select (_props) {
   if (search) {
     if (!self.fuse) self.fuse = new Fuse([], {...fuzzyOpt, ...searchOptions})
     if (!self.getOptions) self.getOptions = function (query) {
-      if (!query) return getOptionsFiltered(self)
       const {queryParser} = self.props
       if (queryParser) query = queryParser(query)
+      if (!query) return getOptionsFiltered(self)
       return self.fuse.search(query).map(v => v.item) // returns no result for empty string
     }
-    if (!self.searchQuery) self.searchQuery = function (e) {
+    if (!self.searchQuery) self.searchQuery = function (e, query = e.target.value) {
       const {onSearch, name} = self.props
-      const query = e.target.value
       if (onSearch) onSearch.call(this, query, name, e, self)
       if (e.defaultPrevented) return
       self.setState({query, focusIndex: 0})
