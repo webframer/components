@@ -72,7 +72,7 @@ import { onEventStopPropagation } from './utils/interactions.js'
  */
 export function Select (_props) {
   let {
-    options, defaultValue, name, defaultOpen, searchOptions, focusIndex,
+    options, defaultValue, name, defaultOpen, searchOptions, searchNonce, focusIndex,
     multiple, query, search, compact, controlledValue, excludeSelected, forceRender, fixed, upward,
     onChange, onFocus, onBlur, onSearch, onSelect, onClickValue, queryParser,
     icon, iconEnd,
@@ -241,7 +241,7 @@ export function Select (_props) {
     const {query} = self.state
     self.fuse.setCollection(toFuseList(options))
     if (query) self.state.options = self.getOptions(query) // initial mount and subsequent updates
-  }, [search, options]) // query is updated by mutation
+  }, [search, searchNonce, options]) // query is updated by mutation
 
   // Accessibility ---------------------------------------------------------------------------------
   if (!self.subscribeToEvents) self.subscribeToEvents = function () {
@@ -521,6 +521,8 @@ Select.propTypes = {
   queryParser: type.Function,
   // Whether to enable search by options, pass Handler(query, options) => value for custom search
   search: type.OneOf([type.Boolean, type.Function]),
+  // Unique ID to trigger search options re-indexing
+  searchNonce: type.Any,
   // Fuzzy [search options](https://fusejs.io/api/options.html)
   searchOptions: type.Obj({
     distance: type.Integer,
