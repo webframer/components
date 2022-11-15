@@ -249,6 +249,9 @@ type.PropTypes = type.ObjectOf(type.PropType)
 // (uses Integer type to ensure valid numbers for use as Image dimension).
 type.Px = type.Integer
 
+// Component CSS class modifier (eg. 'spacer-large')
+type.SizeModifier = type.Enum(['smallest', 'smaller', 'small', 'base', 'large', 'larger', 'largest'])
+
 // UNIX Timestamp number in milliseconds
 type.Timestamp = type.UnsignedInteger
 

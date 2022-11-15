@@ -1,7 +1,6 @@
 import cn from 'classnames'
 import PropTypes from 'prop-types'
 import React from 'react'
-import './spinner.css'
 import { type } from './types.js'
 import View from './View.jsx'
 
@@ -16,12 +15,14 @@ import View from './View.jsx'
  * @returns {object} - React Component
  */
 export function Spinner ({
-  size = 'base',  // Enum
-  color = 'primary',  // Enum
+  size,  // Enum
+  color,  // Enum
   loading = true,
   className,
   ...props
 }) {
+  if (size) size = 'spinner-' + size
+  if (color) color = 'spinner-' + color
   return <View className={cn(className, 'spinner', size, color, {loading})} {...props} >
     <div />
     <div />
@@ -39,7 +40,7 @@ export function Spinner ({
 }
 
 Spinner.propTypes = {
-  size: type.Enum(['largest', 'larger', 'large', 'base', 'small', 'smaller', 'smallest']),
+  size: type.SizeModifier,
   color: type.Enum(['primary', 'secondary', 'tertiary', 'light', 'dark', 'white', 'black']),
   className: PropTypes.string,
 }

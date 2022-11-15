@@ -21,7 +21,7 @@ import { extractViewProps, View } from './View.jsx'
  */
 export function Loader ({
   loading = true,
-  size = 'base',  // Enum
+  size,  // Enum
   className,
   iconClass,
   transparent = false,
@@ -41,7 +41,7 @@ export function Loader ({
 
 Loader.propTypes = {
   loading: type.Boolean,
-  size: type.String,
+  size: type.SizeModifier,
   className: type.ClassName,
   iconClass: type.ClassName,
   // ...other props to pass to Spinner

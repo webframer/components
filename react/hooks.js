@@ -10,12 +10,12 @@ import {
   update,
 } from '@webframer/js'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useEvent, useIsomorphicLayoutEffect } from 'react-use'
+import { useIsomorphicLayoutEffect } from 'react-use'
 import { resizeWidth } from '../utils/element.js'
 import { animateSize } from './animations.js'
 
 export * from 'react-use'
-export { useEvent, useIsomorphicLayoutEffect }
+export { useIsomorphicLayoutEffect }
 
 export const useAnimatedHeight = hookAnimatedSize('height')
 export const useAnimatedWidth = hookAnimatedSize('width')
