@@ -1,5 +1,12 @@
 import { isFileSrc, isFunction } from '@webframer/js'
 
+export const FONT = {
+  FAMILY: { // Font family that has fallback in common operating systems for all glyphs
+    UI: 'ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,' +
+      'Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji',
+  },
+}
+
 /**
  * Apply CSS styles to Node element, with original styles extracted.
  * @example:
