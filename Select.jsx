@@ -306,7 +306,8 @@ export function Select (_props) {
         if (e.target !== self.inputNode && e.target !== self.node) return
         e.stopPropagation()
         self.hasFocus = false
-        return self.closeOptions.apply(this, arguments)
+        self.closeOptions.apply(this, arguments)
+        return e.preventDefault()
       }
     }
   }
