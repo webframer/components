@@ -20,9 +20,20 @@ export function SelectOptions ({
   fixed = fixed && !!self.optPos
   optionsProps = useMemo(() => {
     let {className, style} = optionsProps || {}
-    if (fixed && open) style = {
-      ...self.getOptStyle(self.optPos, upward ? 'top' : 'bottom'),
-      ...style,
+    if (open) {
+      // Set max-height possible for the Options (CSS can override with !important if desired)
+      if (self.node) {
+        const {top, bottom} = self.node.getBoundingClientRect()
+        style = {
+          maxHeight: Math.max(16, (self.upward ? top : window.innerHeight - bottom) - 16) + 'px',
+          ...style,
+        }
+      }
+      // Set fixed style
+      if (fixed) style = {
+        ...self.getOptStyle(self.optPos, upward ? 'top' : 'bottom'),
+        ...style,
+      }
     }
     return {
       ...optionsProps,
