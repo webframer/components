@@ -22,7 +22,7 @@ export function JsonView ({data, dark, open, theme, className, style, fill, ...p
   if (open) props.shouldExpandNode = expandNode
   return (
     <View className={cn('json-tree', className, {fill})} style={style}>
-      <JSONTree hideRoot invertTheme={!dark} theme={theme} data={data} {...props} />
+      <JSONTree hideRoot invertTheme={!!dark} theme={theme} data={data} {...props} />
     </View>
   )
 }
@@ -32,6 +32,8 @@ const expandNode = () => true
 JsonView.propTypes = {
   // JSON data to show as JavaScript Object
   data: type.Collection.isRequired,
+  // Whether to expand all nodes
+  open: type.Boolean,
   // Color scheme
   theme: type.Object,
 }

@@ -1,7 +1,7 @@
 export const nicinabox = {
   scheme: 'nicinabox',
   author: 'nicinabox (http://github.com/nicinabox)',
-  base00: 'rgba(0, 0, 0, 0)', // modified to match site's background
+  base00: 'rgba(255,255,255,0)', // transparent to match site's background (gets flipped if `invertedTheme`)
   base01: '#3C444F',
   base02: '#4F5A65',
   base03: '#BEBEBE',
