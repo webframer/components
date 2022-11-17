@@ -8,7 +8,7 @@ import { type } from './types.js'
 
 // Select Dropdown Option Item
 export function SelectOption ({
-  option, onClick, onBlur, onFocus, focus, selected, search, query,
+  option, onClick, onBlur, onFocus, focused, selected, search, query,
   className, ...props
 }) {
   // Event Handlers --------------------------------------------------------------------------------
@@ -40,12 +40,12 @@ export function SelectOption ({
 
   // Custom Option children
   if (_props.children != null) _props.children = renderProp(_props.children, {
-    text: t, props: {...props, className, option, focus, selected, search, query},
+    text: t, props: {...props, className, option, focused, selected, search, query},
   })
   const {children = <Text>{t}</Text>, className: _className, ...rest} = _props
 
   return (
-    <Row className={cn('select__option', className, _className, {focus, selected})}
+    <Row className={cn('select__option', className, _className, {focused, selected})}
          {...props} {...rest}>{children}</Row>
   )
 }
@@ -59,7 +59,7 @@ SelectOption.propTypes = {
   // Handler(option, event) => void - on option focus event
   onFocus: type.Function.isRequired,
   // Whether the current option has focus
-  focus: type.Boolean,
+  focused: type.Boolean,
   // Whether the current option is selected
   selected: type.Boolean,
   // Whether Select has search enabled to highlight matched query
@@ -105,7 +105,7 @@ export function useSelectionOptionProps ({
     return {
       key: k,
       option,
-      focus: index === focusIndex,
+      focused: index === focusIndex,
       selected: isSelected(v),
       search, query,
       ...optionProps,
