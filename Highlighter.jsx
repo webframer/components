@@ -12,22 +12,23 @@ import { type } from './types.js'
  *
  */
 export function Highlighter (props) {
-  return <SyntaxHighlighter style={theme} {...props} />
+  return <SyntaxHighlighter {...props} />
 }
 
 /**
  * Create `components` prop for use with `<Markdown>`
  * @see: `HighlightJSX.js` for example
  *
- * @param {string} lang - one of the supported code languages (eg. 'jsx')
+ * @param {string} language - one of the supported code languages (eg. 'jsx')
+ * @param {object} [style] - SyntaxHighlighter theme
  * @returns {object} `components` prop
  */
-export function createMarkdownComponentsProp (lang) {
+export function createMarkdownComponentsProp (language, style = theme) {
   return {
     code ({node, inline, className, children, ...props}) {
       const match = /language-(\w+)/.exec(className || '')
       return !inline && match ? (
-        <HighlightCode children={String(children).replace(/\n$/, '')} language={lang} {...props} />
+        <HighlightCode children={String(children).replace(/\n$/, '')} {...{language, style}} {...props} />
       ) : (
         <code className={className} {...props}>
           {children}
