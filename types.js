@@ -298,7 +298,12 @@ type.Option = type.OneOf([
   type.Number,
   type.Boolean,
   type.Obj({
-    // Internal option value to store as selected value (required)
+    // Internal option value to store as selected value.
+    // Since PropTypes.isRequired cannot be `null` (hardcoded logic),
+    // `value` as `null` will throw error in development mode.
+    // => just ignore this, because PropTypes does not run in production.
+    //    and Select component logic checks using `value !== void 0`, which allows `null` as value.
+    // `null` value is commonly used for an all-encompassing option, such as 'Any' option.
     value: type.Any.isRequired,
     // Searchable text as displayed label if `children` not defined (derived from `value` if undefined)
     text: type.String,

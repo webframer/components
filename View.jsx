@@ -421,10 +421,10 @@ export function maxSizeScrollOffset (parentElement, side, className = 'scroll', 
 }
 
 export const overflowScrollProps = {
-  top: {className: 'bg-fade-top'},
-  bottom: {className: 'bg-fade-bottom'},
-  left: {className: 'bg-fade-left'},
-  right: {className: 'bg-fade-right'},
+  top: {className: 'fade-top'},
+  bottom: {className: 'fade-bottom'},
+  left: {className: 'fade-left'},
+  right: {className: 'fade-right'},
 }
 const scrollOffsetExclude = {
   'absolute': true,
