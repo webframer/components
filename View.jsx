@@ -168,6 +168,15 @@ export function createView (defaultProp) {
       // 'max-size' class is to be extended inside _layout.less to reduce html footprint
       // 'max-size', // row ? 'max-width' : 'max-height', // a scroll can overflow in any direction
     )
+
+    // Allow override for inner direction
+    if (scrollProps && scrollProps.row != null) {
+      scrollProps = {...scrollProps}
+      row = scrollProps.row
+      col = !(row)
+      delete scrollProps.row
+    }
+
     scrollClass = cn( // inner div directly wrapping the children
       // @note: this will not prevent overflow in the other direction (ex. Row inside Scroll column)
       // The only way to prevent that is with overflow-x: hidden, but applied to the outer div.

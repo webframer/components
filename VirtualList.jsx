@@ -1,5 +1,6 @@
-import { debounce, last, throttle, TIME_DURATION_INSTANT } from '@webframer/js'
-import React from 'react'
+import { debounce, last, throttle, TIME_DURATION_INSTANT, toListAvg } from '@webframer/js'
+import cn from 'classnames'
+import React, { useMemo } from 'react'
 import { assignRef, useInstance, useIsomorphicLayoutEffect, usePreviousProp } from './react.js'
 import { renderProp } from './react/render.js'
 import { type } from './types.js'
@@ -23,20 +24,21 @@ import { View } from './View.jsx'
  */
 export function VirtualList (_props) {
   const {
-    items, initialItems, renderRadius,
+    items, initialItems, grid, renderRadius,
     renderItem = ((item, i, items, self) => <VirtualItem key={i} children={item} />),
-    ...props
+    row, scrollProps, ...props
   } = _props
   let [self, {visibleIndices}] = useInstance()
   self.justChangedItems = usePreviousProp(items)[1]
   self.props = _props
-  self.offsetSide = props.row ? 'offsetWidth' : 'offsetHeight'
-  self.minSide = props.row ? 'minWidth' : 'minHeight'
-  self.maxSide = props.row ? 'maxWidth' : 'maxHeight'
+  self.offsetSide = row ? 'offsetWidth' : 'offsetHeight'
+  self.offsetStart = row ? 'offsetLeft' : 'offsetTop'
+  self.minSide = row ? 'minWidth' : 'minHeight'
+  self.maxSide = row ? 'maxWidth' : 'maxHeight'
   self.isBusy = true // halt scroll event handler until component has updated
   // Reset rendered child node index within its parent by virtual list index
   self.renderedItemByIndex = {}
-  
+
   // Sync indices when items change
   if (self.justChangedItems) {
     // Child node sizes by their virtual list index
@@ -84,12 +86,13 @@ export function VirtualList (_props) {
     self.setRenderIndices = function () {
       if (self.isBusy || self.willUnmount || self.state.visibleIndices.length === 0) return
       const {visibleIndices} = self.state
-      const {items, renderRadius} = self.props
+      const {items, grid, renderRadius} = self.props
       const {renderedItemByIndex} = self
       const start = self.offsetSide === 'offsetHeight' ? 'top' : 'left'
       const end = self.offsetSide === 'offsetHeight' ? 'bottom' : 'right'
       const {[scrollSide[start]]: top, [offsetSize[end]]: size} = self.node
       const bottom = top + size
+      const avgItemSize = self.averageItemSize / self.avgItemsPerSize
       let renderedItems = self.renderedItems
 
       // Calculate number of items to pre-render around the visible view
@@ -110,7 +113,7 @@ export function VirtualList (_props) {
         // restrict prerender radius to minimum 320, and maximum is viewPortSize
         prerenderSize = Math.max(320, Math.min(window[innerSize[start]], Math.abs(prerenderSize)))
       }
-      let prerenderItems = Math.ceil(prerenderSize / self.averageItemSize)
+      let prerenderItems = Math.ceil(prerenderSize / avgItemSize)
       self.lastScrollStart = top
 
       // Get the index of the first and last visible item in view
@@ -135,8 +138,8 @@ export function VirtualList (_props) {
       renderedItems = null
 
       // Cover full view on resize because `initialItems` may be too small to cover the view
-      let emptySize = self.node[self.offsetSide] - renderedSize
-      if (emptySize > 0) prerenderItems += Math.ceil(emptySize / self.averageItemSize)
+      let emptySize = self.node[self.offsetSide] - renderedSize / self.avgItemsPerSize
+      if (emptySize > 0) prerenderItems += Math.ceil(emptySize / avgItemSize)
 
       /**
        * Predict layout if start or end indices not found. This happens when:
@@ -144,13 +147,23 @@ export function VirtualList (_props) {
        *    b). User scrolls by dragging the scrollbar directly to an un-rendered area.
        *    => use an estimated guess based on average size of items to compute new indices
        */
-      if (startIndex == null) startIndex = Math.floor(top / self.averageItemSize) // scrolling up
-      if (endIndex == null) endIndex = Math.ceil(bottom / self.averageItemSize) // scrolling down
+      if (startIndex == null) startIndex = Math.floor(top / avgItemSize) // scrolling up
+      if (endIndex == null) endIndex = Math.ceil(bottom / avgItemSize) // scrolling down
 
       // Update state if visible indices range is outside the current range
       startIndex = Math.max(0, startIndex - prerenderItems)
       endIndex = Math.min(items.length - 1, endIndex + prerenderItems)
       if (visibleIndices[0] <= startIndex && endIndex <= last(visibleIndices)) return
+
+      // Grid layout requires indices to be rounded to minimize items jumping during scroll
+      if (grid) {
+        if (startIndex)
+          startIndex = Math.max(0, Math.floor(startIndex - startIndex % self.avgItemsPerSize))
+        if (endIndex < items.length - 1)
+          endIndex = Math.min(items.length - 1, Math.ceil(endIndex + self.avgItemsPerSize - endIndex % self.avgItemsPerSize))
+      }
+
+      // Update visible indices
       self.setState({
         visibleIndices: new Array(endIndex - startIndex + 1).fill(startIndex).map((v, i) => v + i),
       })
@@ -171,6 +184,7 @@ export function VirtualList (_props) {
         for (const index of startIndices) {
           startSize += renderedItemSizeByIndex[index] || self.averageItemSize
         }
+        startSize /= self.avgItemsPerSize
         startSize += 'px'
         applyStyles(self.startNode.style, {[self.minSide]: startSize, [self.maxSide]: startSize})
       }
@@ -181,6 +195,7 @@ export function VirtualList (_props) {
         for (const index of endIndices) {
           endSize += renderedItemSizeByIndex[index] || self.averageItemSize
         }
+        endSize /= self.avgItemsPerSize
         endSize += 'px'
         applyStyles(self.endNode.style, {[self.minSide]: endSize, [self.maxSide]: endSize})
       }
@@ -197,14 +212,22 @@ export function VirtualList (_props) {
   // Update offset divs' information on every render
   useIsomorphicLayoutEffect(() => {
     const {visibleIndices} = self.state
-    let index, visibleSize = 0, visibleCount = 0
+    let index, visibleSize = 0, visibleCount = 0, countPerSize = 0, lastStart = 0, sizeCounts = []
     // Calculate item sizes (Mutation Observer does not work, because mutation.removedNodes have 0 size)
     self.renderedItems.forEach((node, i) => {
       index = visibleIndices[i] // rendered order matches visible indices because they're mounted
       self.renderedItemByIndex[index] = i
       visibleSize += self.renderedItemSizeByIndex[index] = node[self.offsetSide]
       visibleCount++
+      if (lastStart !== node[self.offsetStart]) {
+        lastStart = node[self.offsetStart]
+        if (countPerSize) sizeCounts.push(countPerSize)
+        countPerSize = 0
+      }
+      countPerSize++
     })
+    // Grid list may have multiple items per row/column, this handles grid layout
+    self.avgItemsPerSize = toListAvg(sizeCounts) || 1
     self.averageItemSize = visibleSize / visibleCount
     self.updateOffsetDivs()
     self.isBusy = false // flag to enable scroll event handler
@@ -225,11 +248,19 @@ export function VirtualList (_props) {
     }
   }, [])
 
+  // Display as grid ('top' or 'left' alignment is required for correct offset size on initial render)
+  if (grid) props.scrollClass = cn(props.scrollClass, 'wrap', row ? 'left' : 'top')
+  props.scrollProps = useMemo(() => grid ? {...scrollProps, row: !(row)} : scrollProps, [grid, row, scrollProps])
+  const styleOffset = useMemo(() => grid ? {[row ? 'height' : 'width']: '100%'} : null, [grid, row])
+  if (row != null) props.row = row
+
   return (
     <View {...props} _ref={self.ref} scrollRef={self.scrollRef} onScroll={self.onScroll}>
-      {visibleIndices[0] > 0 && <div className='virtual-list__offset-start' ref={self.startRef} />}
+      {visibleIndices[0] > 0 &&
+        <div className='virtual-list__offset-start' style={styleOffset} ref={self.startRef} />}
       {visibleIndices.map((index) => renderItem(items[index], index, items, self))}
-      {last(visibleIndices) < items.length - 1 && <div className='virtual-list__offset-end' ref={self.endRef} />}
+      {last(visibleIndices) < items.length - 1 &&
+        <div className='virtual-list__offset-end' style={styleOffset} ref={self.endRef} />}
     </View>
   )
 }
@@ -246,6 +277,10 @@ VirtualList.propTypes = {
   items: type.ListOf(type.Any).isRequired,
   // Number of items to render initially or when list `items` array changes
   initialItems: type.Integer,
+  // Whether to render as grid (alias for `scrollClass='row top wrap'` for col)
+  grid: type.Boolean,
+  // Whether to render as row of items
+  row: type.Boolean,
   // Function(item, index, items, self) to render each item in the list, default is `renderProp()`
   renderItem: type.Function,
   /**
