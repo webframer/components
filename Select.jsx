@@ -30,7 +30,7 @@ import SelectOptions from './SelectOptions.jsx'
 import Text from './Text.jsx'
 import { type } from './types.js'
 import { resizeWidth, setFocus } from './utils/element.js'
-import { onEventStopPropagation } from './utils/interactions.js'
+import { onEventStopPropagation } from './utils/interaction.js'
 
 /**
  * Dropdown List of Searchable Select Options and Nested Category Hierarchy

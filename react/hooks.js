@@ -1,8 +1,10 @@
 import {
+  __CLIENT__,
   cloneDeep,
   debounce,
   Id,
   isEqual,
+  isEqualJSON,
   isFunction,
   objChanges,
   subscribeTo,
@@ -12,6 +14,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useIsomorphicLayoutEffect } from 'react-use'
 import { resizeWidth } from '../utils/element.js'
+import { getUIState, saveUIState, setUIState } from '../utils/storage.js'
 import { animateSize } from './animations.js'
 
 export * from 'react-use'
@@ -205,7 +208,7 @@ export function useEventListener (eventName, handler, ref, options) {
 }
 
 /**
- * React Hook to calculate `compact` styles to apply to props
+ * Computed `compact` style object to apply to Element props
  * @param {boolean|number|null|void} compact - whether to use minimal width that fits content
  * @param {string|number} [content] - value to use for calculating compact width
  * @param {object|{placeholder: string}} [props] - Component props to mutate with compact `style`
@@ -307,7 +310,7 @@ export function useInputValue (props, {controlledValue, format} = {}, self = use
 }
 
 /**
- * React Hook to simulate Class Component behaviors with `this` instance (self).
+ * Simulate React Class Component behaviors with `this` (self) Function Component instance.
  * @example:
  *    const [self, state] = useInstance({count: 0, length: 10})
  *
@@ -524,7 +527,7 @@ export function useSyncedProp (prop, stateValue = prop) {
 }
 
 /**
- * React Hook to update Component state when props change, similar to class.componentWillReceiveProps
+ * Update Component state when props change, similar to class.componentWillReceiveProps
  * @example:
  *    const {current: self} = useRef({})
  *    const [state, justChanged] = useSyncedState({value}, self.state)[0]
@@ -584,9 +587,9 @@ export function useUId (id) {
  *       is3K: boolean,
  *     }] state - for UIContext.Provider
  */
-export function useUIState (initialState = getUIState()) {
+export function useUIContext (initialState = getUIContext()) {
   const [self, state] = useInstance(initialState)
-  if (!self.resize) self.resize = debounce(() => self.setState(getUIState()))
+  if (!self.resize) self.resize = debounce(() => self.setState(getUIContext()))
   useEffect(() => {
     subscribeTo('resize', self.resize)
     return () => {unsubscribeFrom('resize', self.resize)}
@@ -594,8 +597,34 @@ export function useUIState (initialState = getUIState()) {
   return [state, self.setState]
 }
 
+/**
+ * Persistent UI_STATE in Local Storage
+ *
+ * @param {String} storageKey - keyPath inside UI_STATE object to store state
+ * @param {any} [initialState] - initial value to use when UI_STATE does not yet have `storageKey`
+ * @returns [state: any, setStorage(state) => void, saveStorage(payload) => void]
+ */
+export function useUIStorage (storageKey, initialState) {
+  const self = useRef({}).current
+  const [cache, setCache] = useState(0)
+  self.state = useMemo(() => __CLIENT__ ? getUIState(storageKey, initialState) : initialState, [cache])
+  if (!self.update) {
+    self.update = async function (payload, storageFunc) {
+      // Since LocalStorage uses json, check as JSON to allow updating object key orders
+      if (isEqualJSON(payload, self.state)) return
+      await storageFunc(storageKey, payload)
+      setCache(Date.now())
+    }
+    self.setStorage = (payload) => self.update(payload, setUIState)
+    self.saveStorage = (payload) => self.update(payload, saveUIState)
+  }
+  return [self.state, self.setStorage, self.saveStorage]
+}
+
+// HELPERS -----------------------------------------------------------------------------------------
+
 // Get state for UIContext Provider
-export function getUIState () {
+export function getUIContext () {
   if (typeof window !== 'undefined') {
     const {innerWidth} = window
     // https://gs.statcounter.com/screen-resolution-stats
