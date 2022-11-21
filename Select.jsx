@@ -44,9 +44,15 @@ import { onEventStopPropagation } from './utils/interactions.js'
  *    7. Copy/Paste selected options
  *    8. Nested option category (options grouped into categories)
  *    9. Text literal with variables suggestion (prefixed with `$`).
+ *
+ * Usage:
+ *    - To keep Select open while interacting with content inside dropdown:
+ *      1. Set the container of interactive content with `onClick: onEventStopPropagation()`
+ *      2. Set `onBlur: (e) => e.preventDefault()` with your custom logic.
+ *
  * Notes:
- *    - `compact` true sets input to dynamic character width, and increases when options open
- *    - Options use position `absolute` initially, then `fixed` if `defaultOpen` = false,
+ *    - `compact` true sets input to dynamic character width, and increases when options open.
+ *    - Options use position `absolute` initially, even when `fixed` is set to true,
  *      to remain visible inside overflow hidden Scroll
  *      => `.select__options` class must have `max-height` set to explicit unit, such as `px`
  *    - There are use cases when Select is used to concatenate string value from array.

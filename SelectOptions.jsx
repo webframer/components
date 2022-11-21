@@ -1,5 +1,6 @@
 import cn from 'classnames'
 import React, { useMemo } from 'react'
+import { renderProp } from './react/render.js'
 import { Scroll } from './Scroll.jsx'
 import { useSelectionOptionProps } from './SelectOption.jsx'
 import { VirtualList } from './VirtualList.jsx'
@@ -19,7 +20,7 @@ export function SelectOptions ({
   // Options Props ---------------------------------------------------------------------------------
   fixed = fixed && !!self.optPos
   optionsProps = useMemo(() => {
-    let {className, style} = optionsProps || {}
+    let {className, style, childBefore, childAfter} = optionsProps || {}
     if (open) {
       // Set max-height possible for the Options (CSS can override with !important if desired)
       if (self.node) {
@@ -37,6 +38,8 @@ export function SelectOptions ({
     }
     return {
       ...optionsProps,
+      ...childBefore != null && {childBefore () {return renderProp(childBefore, self)}},
+      ...childAfter != null && {childAfter () {return renderProp(childAfter, self)}},
       className: cn('select__options', className, {fixed, open, upward, reverse: upward}),
       style,
       reverse: upward,

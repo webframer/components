@@ -19,7 +19,7 @@ export function createView (defaultProp) {
    * (to replace browser's `<div>` with a platform-agnostic component for React Native, etc.)
    */
   function View ({
-    row, col = !(row), fill, reverse, rtl,
+    row, col = !(row), grid, fill, reverse, rtl,
     left, right, top, bottom, center, middle, sound,
     className, children, childBefore, childAfter, preventOffset, _ref,
     scroll, scrollClass, scrollStyle, scrollAlongDirectionOnly, scrollRef, scrollProps,
@@ -169,6 +169,12 @@ export function createView (defaultProp) {
       // 'max-size', // row ? 'max-width' : 'max-height', // a scroll can overflow in any direction
     )
 
+    if (grid) {
+      scrollClass = cn(scrollClass, 'wrap')
+      row = !(row)
+      col = !(row)
+    }
+
     // Allow override for inner direction
     if (scrollProps && scrollProps.row != null) {
       scrollProps = {...scrollProps}
@@ -233,6 +239,8 @@ export function createView (defaultProp) {
     col: type.Boolean,
     // Whether to use row layout, column by default
     row: type.Boolean,
+    // Whether to render as grid with automatic items distribution using flex wrap
+    grid: type.Boolean,
     // Whether to make the view fill up available height and width
     fill: type.Boolean,
     // Whether to reverse the order of rendering
