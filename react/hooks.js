@@ -4,7 +4,6 @@ import {
   debounce,
   Id,
   isEqual,
-  isEqualJSON,
   isFunction,
   objChanges,
   subscribeTo,
@@ -602,7 +601,7 @@ export function useUIContext (initialState = getUIContext()) {
  *
  * @param {String} storageKey - keyPath inside UI_STATE object to store state
  * @param {any} [initialState] - initial value to use when UI_STATE does not yet have `storageKey`
- * @returns [state: any, setStorage(state) => void, saveStorage(payload) => void]
+ * @returns [state: any, saveStorage(payload) => void, setStorage(state) => void]
  */
 export function useUIStorage (storageKey, initialState) {
   const self = useRef({}).current
@@ -610,15 +609,13 @@ export function useUIStorage (storageKey, initialState) {
   self.state = useMemo(() => __CLIENT__ ? getUIState(storageKey, initialState) : initialState, [cache])
   if (!self.update) {
     self.update = async function (payload, storageFunc) {
-      // Since LocalStorage uses json, check as JSON to allow updating object key orders
-      if (isEqualJSON(payload, self.state)) return
-      await storageFunc(storageKey, payload)
-      setCache(Date.now())
+      const updated = await storageFunc(storageKey, payload)
+      if (updated) setCache(Date.now())
     }
     self.setStorage = (payload) => self.update(payload, setUIState)
     self.saveStorage = (payload) => self.update(payload, saveUIState)
   }
-  return [self.state, self.setStorage, self.saveStorage]
+  return [self.state, self.saveStorage, self.setStorage]
 }
 
 // HELPERS -----------------------------------------------------------------------------------------

@@ -345,6 +345,7 @@ export function Select (_props) {
   const {disabled, readOnly: readonly} = props
   const hasValue = multiple ? hasListValue(value) : value != null
   if (hasValue) delete props.placeholder // remove for multiple search
+  else if (!search && value === null) query = '' // show `null` value as placeholder
 
   // Compact Input ---------------------------------------------------------------------------------
   // Logic to get compact input width:

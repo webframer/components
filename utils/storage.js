@@ -1,6 +1,10 @@
-import { get, GET, isCollection, performStorage, SET, set, UI_STATE, update } from '@webframer/js'
+import { GET, isCollection, isEqualJSON, performStorage, SET, UI_STATE } from '@webframer/js'
+import { cloneDeep, get, set, update } from '@webframer/js/object.js'
 
 // UI STORAGE HELPERS ==============================================================================
+
+// Cache of UI State object in Local Storage
+let uiStateCache
 
 /**
  * Get Persistent UI State object (at optional `keyPath`) from Local Storage
@@ -10,9 +14,9 @@ import { get, GET, isCollection, performStorage, SET, set, UI_STATE, update } fr
  * @returns {object|any} UI_STATE object if no `keyPath` provided, else value for `keyPath`
  */
 export function getUIState (keyPath, fallback) {
-  let result = performStorage(GET, UI_STATE) || {}
-  if (keyPath) return get(result, keyPath, fallback)
-  return result
+  if (!uiStateCache) uiStateCache = performStorage(GET, UI_STATE) || {}
+  if (keyPath) return get(uiStateCache, keyPath, fallback)
+  return uiStateCache
 }
 
 /**
@@ -20,12 +24,15 @@ export function getUIState (keyPath, fallback) {
  *
  * @param {string} keyPath - to set `value`
  * @param {any} value - to set at `keyPath`
- * @returns {Promise|any} result of performStorage(SET, ...)
+ * @returns {Promise<boolean>|any|void} result of performStorage(SET, ...), or true if updated, else void
  */
 export function setUIState (keyPath, value) {
+  // Since LocalStorage uses json, check as JSON to allow updating object key orders
+  if (isEqualJSON(getUIState(keyPath), value)) return
   const uiState = getUIState()
   set(uiState, keyPath, value)
-  return performStorage(SET, UI_STATE, uiState)
+  uiStateCache = null
+  return performStorage(SET, UI_STATE, uiState) || true
 }
 
 /**
@@ -34,12 +41,14 @@ export function setUIState (keyPath, value) {
  *
  * @param {string} keyPath - to set `payload`
  * @param {object|array} payload - collection with partial changes to set at `keyPath`
- * @returns {Promise|any} result of performStorage(SET, ...)
+ * @returns {Promise<boolean>|any|void} result of performStorage(SET, ...), or true if updated, else void
  */
 export function saveUIState (keyPath, payload) {
+  const ui = getUIState(keyPath)
+  // Pre-check if it should skip update to avoid expensive Local Storage call
+  if (isCollection(ui) && isEqualJSON(ui, payload = update(cloneDeep(ui), payload))) return
   const uiState = getUIState()
-  const ui = get(uiState, keyPath)
-  if (isCollection(ui)) update(ui, payload)
-  else set(uiState, keyPath, payload)
-  return performStorage(SET, UI_STATE, uiState)
+  set(uiState, keyPath, payload)
+  uiStateCache = null
+  return performStorage(SET, UI_STATE, uiState) || true
 }

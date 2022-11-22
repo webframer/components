@@ -1,4 +1,4 @@
-import { alphaNumIdPattern, FILE } from '@webframer/js'
+import { FILE } from '@webframer/js'
 import cn from 'classnames'
 import React from 'react'
 import { accessibilitySupport, isRef } from './react.js'
@@ -15,8 +15,7 @@ function createIcon () {
 
     let mask
     if (!font && name) {
-      mask = `url(${path}${name.replace(/\s/g, '-').replace(alphaNumIdPattern, '')
-        .toLowerCase()}.svg) no-repeat center / contain`
+      mask = `url(${path}${name}.svg) no-repeat center / contain`
       mask = {WebkitMask: mask, mask}
     }
 
