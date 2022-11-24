@@ -22,7 +22,8 @@ export function SelectOption ({
   // Option Text or Children Display ---------------------------------------------------------------
   let t, _props = {}
   if (isObject(option)) {
-    const {value, text = String(value), key, ...rest} = option
+    // Removing private `_data` (used for search filters) from Option props before rendering
+    const {value, text = String(value), key, _data, ...rest} = option
     _props = rest
     t = text
   } else {

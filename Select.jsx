@@ -80,7 +80,7 @@ export function Select (_props) {
   let {
     options, defaultValue, name, defaultOpen, searchOptions, searchNonce, focusIndex,
     multiple, query, search, compact, controlledValue, excludeSelected, forceRender, fixed, upward,
-    onChange, onFocus, onBlur, onSearch, onSelect, onClickValue, queryParser,
+    onChange, onFocus, onBlur, onSearch, onSelect, onClickValue, onMount, queryParser,
     icon, iconEnd,
     addOption, addOptionMsg, noOptionsMsg, optionProps, optionsProps, virtualOptionsMinimum,
     format, parse, // these are serializer and deserializer
@@ -95,7 +95,12 @@ export function Select (_props) {
   let [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
   self.open = open // for internal logic
   open = open || animating // for rendering and styling
-  useEffect(() => (self.didMount = true) && (() => {self.willUnmount = true}), [])
+  state.open = open // for external components to check
+  useEffect(() => {
+    self.didMount = true
+    if (onMount) onMount(self)
+    return () => {self.willUnmount = true}
+  }, [])
   const [, changedValue] = useSyncedState({value: props.value})
 
   // Initialize once
@@ -491,6 +496,8 @@ Select.propTypes = {
   onSelect: type.Function,
   // Handler(value: any, name?, event, self) when a multiple selected value is clicked
   onClickValue: type.Function,
+  // Handler(self: object) when this component has mounted
+  onMount: type.Function,
   /**
    * Whether to allow users to add new options (in combination with search)
    * Set to `true` to allow adding new term.

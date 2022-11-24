@@ -316,7 +316,7 @@ type.Option = type.OneOf([
 ])
 
 // Select options array of option values
-type.Options = type.ListOf(type.Option.isRequired)
+type.Options = type.ListOf(type.Option)
 
 // Object `{current?: Element}` created by React.useRef() or React.createRef()
 type.RefObject = type.Obj({current: type.Element})
