@@ -1,5 +1,5 @@
-import { GET, performStorage, SET, set, UI_STATE, update } from '@webframer/js'
 import { type } from '../types.js'
+import { getUIState, saveUIState, setUIState } from '../utils/storage.js'
 
 /**
  * React Component Timer Decorator to clearTimeout() and clearInterval() automatically on componentWillUnmount()
@@ -67,7 +67,7 @@ export function withUIStorage (Class) {
     get () { // retrieve UI State everytime to sync updates from other React Components
       const {uiStorageKey} = this.props
       if (typeof window !== 'undefined') {
-        return performStorage(GET, UI_STATE) || {[uiStorageKey]: {}}
+        return getUIState() || {[uiStorageKey]: {}}
       } else {
         return {[uiStorageKey]: {}}
       }
@@ -79,7 +79,7 @@ export function withUIStorage (Class) {
     get () {return this.uiState[this.props.uiStorageKey]},
   })
 
-  // Retrieve UI State for given `keyPath` with `fallback` value in Local Storage
+  // Retrieve UI State for given `keyPath` (with `fallback` value) in Local Storage
   Class.prototype.getUI = function (keyPath, fallback) {
     return get(this.uiState, `${this.props.uiStorageKey}.${keyPath}`, fallback)
   }
@@ -87,19 +87,13 @@ export function withUIStorage (Class) {
   // Persist UI State for given `UI_STATE[uiStorageKey][keyPath]` with `value` in Local Storage
   Class.prototype.setUI = function (keyPath, value) {
     if (typeof window === 'undefined') throw new Error('setUI should only be called in frontend!')
-    const uiState = this.uiState
-    set(uiState, `${this.props.uiStorageKey}.${keyPath}`, value)
-    performStorage(SET, UI_STATE, uiState)
+    return setUIState(`${this.props.uiStorageKey}.${keyPath}`, value)
   }
 
   // Persist UI State for `UI_STATE[uiStorageKey]` with partial update `payload` in Local Storage
   Class.prototype.saveUI = function (payload) {
     if (typeof window === 'undefined') throw new Error('saveUI should only be called in frontend!')
-    const {uiStorageKey} = this.props
-    const uiState = this.uiState
-    if (!uiState[uiStorageKey]) uiState[uiStorageKey] = {}
-    update(uiState[uiStorageKey], payload)
-    performStorage(SET, UI_STATE, uiState)
+    return saveUIState(this.props.uiStorageKey, payload)
   }
 
   return Class
