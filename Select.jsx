@@ -376,13 +376,13 @@ export function Select (_props) {
   if (icon) icon = (
     <Label className='input__icon' htmlFor={id}>{(isString(icon)
         ? <Icon name={icon} />
-        : <Icon {...icon} />
+        : (isObject(icon) ? <Icon {...icon} /> : renderProp(icon, self))
     )}</Label>
   )
   if (iconEnd) iconEnd = (
     <Label className='input__icon' htmlFor={id}>{(isString(iconEnd)
         ? <Icon name={iconEnd} />
-        : <Icon {...iconEnd} />
+        : (isObject(iconEnd) ? <Icon {...iconEnd} /> : renderProp(iconEnd, self))
     )}</Label>
   )
   let iconDefault = icon == null && iconEnd == null && (
@@ -523,9 +523,9 @@ Select.propTypes = {
   // Custom Icon name or props to render before input node.
   // Default is 'dropdown' icon at the end, or 'search' icon at the start if `search = true`
   // and icons are undefined or null.
-  icon: type.OneOf([type.String, type.Object, type.Boolean]),
+  icon: type.OneOf([type.String, type.Object, type.Boolean, type.NodeOrFunction]),
   // Custom Icon name or props to render after input node
-  iconEnd: type.OneOf([type.String, type.Object, type.Boolean]),
+  iconEnd: type.OneOf([type.String, type.Object, type.Boolean, type.NodeOrFunction]),
   // Whether to allow multiple selections and store values as array
   multiple: type.Boolean,
   // Whether to set options with position fixed on open to remain visible inside Scroll
