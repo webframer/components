@@ -1,10 +1,11 @@
-import { ips, isFunction, isObject, toList, trimSpaces } from '@webframer/js'
+import { ips, isFunction, isObject, TIME_DURATION_INSTANT, toList, trimSpaces } from '@webframer/js'
 import cn from 'classnames'
 import React, { useCallback, useMemo } from 'react'
 import { renderProp } from './react/render.js'
 import { Row } from './Row.jsx'
 import Text from './Text.jsx'
 import { type } from './types.js'
+import { onEventStopPropagation } from './utils/interaction.js'
 
 // Select Dropdown Option Item
 export function SelectOption ({
@@ -70,6 +71,12 @@ SelectOption.propTypes = {
 }
 
 export default React.memo(SelectOption)
+
+// Tooltip Props for Select Option
+export const optionTooltipProps = { // offset dropdown scrollbar to avoid loosing focus
+  className: 'max-width-600', position: 'right', on: 'hover', style: {marginInlineStart: '-0.5em'},
+  onClick: onEventStopPropagation(), tabIndex: -1, delay: TIME_DURATION_INSTANT,
+}
 
 // Create Option props to work with Select Component
 export function useSelectionOptionProps ({
