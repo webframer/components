@@ -164,8 +164,9 @@ export function VirtualList (_props) {
       }
 
       // Update visible indices
-      self.setState({
-        visibleIndices: new Array(endIndex - startIndex + 1).fill(startIndex).map((v, i) => v + i),
+      let newCount = endIndex - startIndex + 1
+      if (newCount > 0) self.setState({
+        visibleIndices: Array(newCount).fill(startIndex).map((v, i) => v + i),
       })
     }
     self.setRenderIndicesDebounced = debounce(self.setRenderIndices, TIME_DURATION_INSTANT)
