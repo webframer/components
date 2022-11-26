@@ -324,6 +324,9 @@ type.RefObject = type.Obj({current: type.Element})
 // `Function(node) => void` or the Object created by React.useRef() or React.createRef()
 type.Ref = type.OneOf([type.Function, type.RefObject])
 
+// File source URL or directory path
+type.Src = type.OneOf([type.Url, type.String])
+
 // CSS style object with camelCase attribute keys
 type.Style = type.ObjectOf(type.OneOf([
   type.CSSLength,

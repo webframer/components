@@ -43,8 +43,8 @@ function createImage () {
     name: type.String,
     // Directory path to the file (without file name) if `src` not given
     path: type.String,
-    // Image file source path or URL
-    src: type.String,
+    // Image file source URL or directory path
+    src: type.Src,
     loading: type.Enum(['eager', 'lazy']),
     decoding: type.Enum(['auto', 'async', 'sync']),
   }

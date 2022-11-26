@@ -1,5 +1,6 @@
-import { isFileSrc, isFunction } from '@webframer/js'
+import { isFileSrc, isFunction, toCamelCase, toCapCase } from '@webframer/js'
 
+export const cssVendorPrefixPattern = /^(-webkit-|-moz|-o-|-ms-).+$/
 export const FONT = {
   FAMILY: { // Font family that has fallback in common operating systems for all glyphs
     UI: 'ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,' +
@@ -51,4 +52,34 @@ export function cssBgImageFrom (src) {
  */
 export function inlineSvg (svgString, x = 0, y = 0) {
   return `url('data:image/svg+xml;utf8,${svgString.replace(/#/g, '%23')}') ${x} ${y}, auto`
+}
+
+/**
+ * Convert DOM's inline `style` attribute value to style object (example: for use with React)
+ * @param {string} string - example: 'color: red; border-width: 1px;'
+ * @returns {object} style - example: `{color: 'red', borderWidth: '1px'}`
+ */
+export function styleObjFrom (string) {
+  return toCamelCaseKeys(
+    string.split(';').map(v => v.trim()).filter(v => v).reduce((acc, d) => {
+      const [key, value] = d.split(':').map(v => v.trim()).filter(v => v)
+      if (key && value) acc[key] = Number.isNaN(Number(value)) ? value : Number(value)
+      return acc
+    }, {}),
+  )
+}
+
+/**
+ * Convert CSS object to style object with camelCase key properties for rendering.
+ * @param {object} css - to convert to style object with camelCase properties
+ * @returns {object} style - ready for use as Component prop or `applyStyles()`
+ */
+export function toCamelCaseKeys (css) {
+  const style = {}
+  for (const key in css) {
+    if (key.indexOf('--') === 0) style[key] = css[key] // variables
+    else if (cssVendorPrefixPattern.test(key)) style[toCapCase(key)] = css[key] // vendor prefix
+    else style[toCamelCase(key)] = css[key] // other attributes
+  }
+  return style
 }
