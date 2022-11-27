@@ -202,6 +202,9 @@ type.Fraction = type.String
 // One of `withForm()` HOC or `useForm` hook value getters
 type.FormValueType = type.Enum(['changedValues', 'registeredValues', 'formValues'])
 
+// Icon file name string (without file extension) relative to icons directory (ex. 'wf/search')
+type.Icon = type.String
+
 // Unique identifier string
 type.Id = type.String
 

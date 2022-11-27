@@ -29,7 +29,7 @@ function createIcon () {
 
   Icon.propTypes = IconRef.propTypes = {
     // Icon name, can be empty string to be styled with custom CSS
-    name: type.String.isRequired,
+    name: type.Icon.isRequired,
     className: type.ClassName,
     style: type.Style,
     // If true, use Font Icon, instead of CSS Mask Icon - the default

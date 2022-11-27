@@ -26,7 +26,7 @@ import { extractViewProps, View } from './View.jsx'
 export function Input ({
   compact, error, info, id = useId(), idHelp = `${id}-help`, helpTransition,
   className, style, reverse, _ref,
-  ...props
+  controls, ...props
 }) {
   const viewProps = extractViewProps(props)
   if (props.type === 'hidden') return <input {...{id, className, style, ref: _ref, ...props}} />
@@ -50,25 +50,26 @@ export function Input ({
   props['aria-describedby'] = idHelp
   compact = compact != null && compact !== false
   const {required} = props
+  const Control = (controls && controls[props.type]) || (() => {
+    switch (props.type) {
+      case 'select':
+        return Select
+      case 'switch':
+        return Switch
+      case 'upload':
+        return Upload
+      case 'file':
+        return UploadGrid
+      case 'textarea':
+        return TextArea
+      default:
+        return InputNative
+    }
+  })()
 
   return (
     <View className={cn(className, 'input-group', {compact, error, required})} style={style} {...viewProps}>
-      {(() => {
-        switch (props.type) {
-          case 'select':
-            return <Select {...props} />
-          case 'switch':
-            return <Switch {...props} />
-          case 'upload':
-            return <Upload {...props} />
-          case 'file':
-            return <UploadGrid {...props} />
-          case 'textarea':
-            return <TextArea {...props} />
-          default:
-            return <InputNative {...props} />
-        }
-      })()}
+      <Control {...props} />
       <View id={idHelp} className='input__help' {...helpTransition}>
         {error != null && <Label className='input__error'>{renderProp(error)}</Label>}
         {info != null && <Label className='input__info'>{renderProp(info)}</Label>}
@@ -93,6 +94,8 @@ Input.propTypes = {
   helpTransition: type.OneOf([type.Boolean, type.Object]),
   // Tooltip props or value to display as tooltip
   tooltip: type.Tooltip,
+  // Map of Input Control components by their `type` string to use for rendering
+  controls: type.ObjectOf(type.JSXElementType),
   // ...other native HTML `<input/>` props
 }
 
