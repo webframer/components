@@ -357,7 +357,7 @@ export function Select (_props) {
   //   - Take the maximum char count from: placeholder?, value?, options? if open
   //   - set input box-sizing to content-box
   const {placeholder} = props
-  const styleI = useMemo(() => {
+  self.styleInput = useMemo(() => {
     // Prevent flickering when selecting the first value in multiple (no width should be set)
     if ((compact == null || compact === false) && !(multiple && hasValue)) return
     let maxContent = query || placeholder || ''
@@ -449,7 +449,7 @@ export function Select (_props) {
 
       <input
         className={cn('select__input', {'fill-width': !compact && (multiple || !hasValue), iconStart: icon, iconEnd})}
-        style={styleI}
+        style={self.styleInput}
         id={id} readOnly={!search} {...props} ref={self.inputRef}
         value={query} onChange={self.searchQuery} onFocus={self.focus} onBlur={self.blur}
         onClick={search ? onEventStopPropagation(self.openOptions, props.onClick) : void 0} />
@@ -555,8 +555,9 @@ Select.propTypes = {
   upward: type.Boolean,
   // Selected value(s) - if passed, becomes a controlled component
   value: type.Any,
-  // Message to display when there are no options left for multiple select
-  noOptionsMsg: type.String,
+  // Message string to display when there are no options left for multiple select, or
+  // Handler(self) => string - function to render message dynamically (example: using query)
+  noOptionsMsg: type.NodeOrFunction,
   // Minimum number of Select options to use Virtual List renderer to optimize for performance
   virtualOptionsMinimum: type.UnsignedInteger,
   // Message to display when there are no matching results for search select

@@ -1,3 +1,4 @@
+import { isNumber } from '@webframer/js'
 import cn from 'classnames'
 import React, { useMemo } from 'react'
 import { renderProp } from './react/render.js'
@@ -22,6 +23,7 @@ export function SelectOptions ({
   optionsProps = useMemo(() => {
     let {className, style, childBefore, childAfter} = optionsProps || {}
     if (open) {
+      let width = style && style.width
       // Set max-height possible for the Options (CSS can override with !important if desired)
       if (self.node) {
         const {top, bottom} = self.node.getBoundingClientRect()
@@ -31,9 +33,23 @@ export function SelectOptions ({
         }
       }
       // Set fixed style
-      if (fixed) style = {
-        ...self.getOptStyle(self.optPos, upward ? 'top' : 'bottom'),
-        ...style,
+      if (fixed) {
+        style = {
+          ...self.getOptStyle(self.optPos, upward ? 'top' : 'bottom'),
+          ...style,
+        }
+        // When opening a fixed dropdown, compact input may transition in width and become bigger
+        // => use the bigger width value to avoid collapsing dropdown options
+        if (width == null && self.inputNode && self.styleInput && self.styleInput.width) {
+          let {paddingLeft, paddingRight, borderLeftWidth, borderRightWidth} = getComputedStyle(self.inputNode)
+          let {offsetWidth} = self.inputNode
+          offsetWidth = self.node.offsetWidth - offsetWidth +
+            parseFloat(paddingLeft) + parseFloat(paddingRight) +
+            parseFloat(borderLeftWidth) + parseFloat(borderRightWidth)
+          width = self.styleInput.width
+          style.width = isNumber(width) ? (width + offsetWidth) : `calc(${width} + ${offsetWidth}px)`
+          style.transition = '500ms'
+        }
       }
     }
     return {

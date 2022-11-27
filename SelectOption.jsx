@@ -137,7 +137,7 @@ export function useSelectionOptionProps ({
   // Convert noOptionsMsg to a component ready for rendering
   const hasNoOptions = !options.length
   const noOptions = useMemo(() => hasNoOptions && !!noOptionsMsg && shouldRender &&
-      <Row className='select__option' children={<Text>{noOptionsMsg}</Text>} />,
+      <Row className='select__option' children={renderProp(noOptionsMsg, self)} />,
     [hasNoOptions, noOptionsMsg, shouldRender])
 
   return {addOption, noOptions, optionPropsGetter, renderOption, shouldRender}
