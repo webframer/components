@@ -40,7 +40,7 @@ function createImage () {
     // Alternative text description of the image
     alt: type.String,
     // File name (required if `src` or `alt` not defined)
-    name: type.String,
+    name: type.Src,
     // Directory path to the file (without file name) if `src` not given
     path: type.String,
     // Image file source URL or directory path

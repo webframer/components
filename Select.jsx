@@ -94,6 +94,7 @@ export function Select (_props) {
   const [self, state] = useInstance({options, query, value, focusIndex})
   let [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
   self.open = open // for internal logic
+  self.animating = animating // to prevent multiple opening when toggling Label -> input to close
   open = open || animating // for rendering and styling
   state.open = open // for external components to check
   useEffect(() => {
@@ -123,102 +124,108 @@ export function Select (_props) {
   self.props = _props
 
   // Node Handlers ---------------------------------------------------------------------------------
-  if (!self.ref) self.ref = function (node) {
-    self.node = node
-    return assignRef.call(this, _ref, ...arguments)
+  if (!self.ref) {
+    self.ref = function (node) {
+      self.node = node
+      return assignRef.call(this, _ref, ...arguments)
+    }
+    self.inputRef = function (node) {
+      self.inputNode = node
+      return assignRef.call(this, inputRef, ...arguments)
+    }
+    self.optionsRef = function (node) {
+      self.optNode = node
+      return assignRef.call(this, ref, ...arguments)
+    }
+    self.optionsScrollRef = (node) => self.scrollNode = node
+    self.getOptionsPosition = getOptionsPosition
+    self.getOptStyle = getFixedOptionsStyle
   }
-  if (!self.inputRef) self.inputRef = function (node) {
-    self.inputNode = node
-    return assignRef.call(this, inputRef, ...arguments)
-  }
-  if (!self.optionsRef) self.optionsRef = function (node) {
-    self.optNode = node
-    return assignRef.call(this, ref, ...arguments)
-  }
-  if (!self.optionsScrollRef) self.optionsScrollRef = (node) => self.scrollNode = node
-  if (!self.getOptionsPosition) self.getOptionsPosition = getOptionsPosition
-  if (!self.getOptStyle) self.getOptStyle = getFixedOptionsStyle
 
   // Event Handlers --------------------------------------------------------------------------------
-  if (!self.focus) self.focus = function (e) {
-    self.hasFocus = true
-    self.openOptions.apply(this, arguments)
-  }
-  // if (!self.focusInput) self.focusInput = function () {
-  //   if (!self.inputNode) return
-  //   self.inputNode.focus() // setting focus on input will trigger input.onFocus handler
-  // }
-  if (!self.focusOption) self.focusOption = function (item, e) {
-    const {onSelect, name} = self.props
-    self.hasFocus = true
-    if (onSelect) onSelect.call(this, item, name, e, self) // pass selected item by reference
-  }
-  if (!self.blur) self.blur = function (e) {
-    self.hasFocus = false
-    if (self.open) setTimeout(() => self.closeOptions.call(this, e), 0)
-  }
-  if (!self.blurOption) self.blurOption = function (e) {
-    self.hasFocus = false
-    if (self.open) setTimeout(() => self.closeOptions.call(this, e), 0)
-  }
-  if (!self.selectOption) self.selectOption = function (item, e) { // options clicked
-    const {multiple, onChange, name, parse} = self.props
-    let {value = item, text = value} = isObject(item) ? item : {}
-    if (multiple) value = toUniqueListFast((self.state.value || []).concat(value))
-    if (onChange) onChange.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
-    if (e.defaultPrevented) return
-    const options = getOptionsFiltered(self) // compute new options to get next focus index
-    self.setState({
-      value, query: multiple ? '' : String(text), options,
-      focusIndex: options.findIndex(i => i === item),
-    })
-    if (multiple && self.inputNode) self.inputNode.focus()
-    if (self.open && !(self.hasFocus = multiple)) setTimeout(() => self.closeOptions.call(this, e), 0)
-  }
-  if (multiple && !self.deleteValue) self.deleteValue = function (val, e) {
-    const {onChange, name, parse} = self.props
-    const value = self.state.value.filter(v => v !== val)
-    if (onChange) onChange.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
-    if (e.defaultPrevented) return
-    self.setState({value})
-  }
-  if (!self.closeOptions) self.closeOptions = function (e) {
-    if (self.willUnmount || self.hasFocus || !self.open) return
-    const {onBlur, name, parse} = self.props
-    if (onBlur) {
-      const {value} = self.state
-      onBlur.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
+  if (!self.focus) {
+    self.focus = function (e) {
+      self.hasFocus = true
+      self.openOptions.apply(this, arguments)
     }
-    if (e.defaultPrevented) return
-    // Input query on close use-cases:
-    // Single search query
-    //    - match selected value if selected,
-    //    - or reset to query from props (empty by default)
-    // Multiple search query
-    //    - reset to query from props (empty by default)
-    // Single/Multiple select query (no logic needed because user cannot change query)
-    const {multiple, search, options} = self.props
-    if (search) {
-      const {value, query} = self.state
-      if (!multiple && value != null && String(value) !== query) // single search
-        self.state.query = getValueText(value, options)
-      else if (multiple || value == null) // multiple or unselected single search
-        self.state.query = self.props.query
-      if (query !== self.state.query) self.state.options = self.getOptions(self.state.query)
+    self.focusOption = function (item, e) {
+      const {onSelect, name} = self.props
+      self.hasFocus = true
+      if (onSelect) onSelect.call(this, item, name, e, self) // pass selected item by reference
     }
-    toggleOpen.apply(this, arguments)
-    self.unsubscribeEvents()
-  }
-  if (!self.openOptions) self.openOptions = function (e) {
-    if (self.open) return
-    const {onFocus, name, parse} = self.props
-    if (onFocus) {
-      const {value} = self.state
-      onFocus.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
+    self.blur = function (e) {
+      self.hasFocus = false
+      if (self.open) setTimeout(() => self.closeOptions.call(this, e), 0)
     }
-    if (e.defaultPrevented) return
-    toggleOpen.apply(this, arguments)
-    self.subscribeToEvents()
+    self.blurOption = function (e) {
+      self.hasFocus = false
+      if (self.open) setTimeout(() => self.closeOptions.call(this, e), 0)
+    }
+    self.selectOption = function (item, e) { // options clicked
+      const {multiple, onChange, name, parse} = self.props
+      let {value = item, text = value} = isObject(item) ? item : {}
+      if (multiple) value = toUniqueListFast((self.state.value || []).concat(value))
+      if (onChange) onChange.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
+      if (e.defaultPrevented) return
+      const options = getOptionsFiltered(self) // compute new options to get next focus index
+      self.setState({
+        value, query: multiple ? '' : String(text), options,
+        focusIndex: options.findIndex(i => i === item),
+      })
+      if (multiple && self.inputNode) self.inputNode.focus()
+      if (self.open && !(self.hasFocus = multiple)) setTimeout(() => self.closeOptions.call(this, e), 0)
+    }
+    self.deleteValue = function (val, e) {
+      const {onChange, name, parse} = self.props
+      const value = self.state.value.filter(v => v !== val)
+      if (onChange) onChange.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
+      if (e.defaultPrevented) return
+      self.setState({value})
+    }
+    self.closeOptions = function (e) {
+      if (self.willUnmount || self.hasFocus || !self.open) return
+      const {onBlur, name, parse} = self.props
+      if (onBlur) {
+        const {value} = self.state
+        onBlur.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
+      }
+      if (e.defaultPrevented) return
+      // Input query on close use-cases:
+      // Single search query
+      //    - match selected value if selected,
+      //    - or reset to query from props (empty by default)
+      // Multiple search query
+      //    - reset to query from props (empty by default)
+      // Single/Multiple select query (no logic needed because user cannot change query)
+      const {multiple, search, options} = self.props
+      if (search) {
+        const {value, query} = self.state
+        if (!multiple && value != null && String(value) !== query) // single search
+          self.state.query = getValueText(value, options)
+        else if (multiple || value == null) // multiple or unselected single search
+          self.state.query = self.props.query
+        if (query !== self.state.query) self.state.options = self.getOptions(self.state.query)
+      }
+      toggleOpen.apply(this, arguments)
+      self.unsubscribeEvents()
+    }
+    self.openOptions = function (e) {
+      // When clicking on Label, if already focused, the input first gets `blur` event
+      // => this calls closeOptions as expected.
+      // Then immediately, Label causes input to receive 'focus',
+      // so this handler is triggered multiple times: 'focus', then 'click'.
+      // => this is undesired behavior, so we disable it if there is closing animation.
+      if (self.open || self.animating) return
+      const {onFocus, name, parse} = self.props
+      if (onFocus) {
+        const {value} = self.state
+        onFocus.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
+      }
+      if (e.defaultPrevented) return
+      self.open = true // prevent further callback firing multiple times
+      self.subscribeToEvents()
+      toggleOpen.apply(this, arguments)
+    }
   }
 
   // Fuzzy Search ----------------------------------------------------------------------------------
@@ -235,13 +242,16 @@ export function Select (_props) {
       if (onSearch) onSearch.call(this, query, name, e, self)
       if (e.defaultPrevented) return
       self.setState({query, focusIndex: 0})
-      self.openOptions.apply(this, arguments) // reopen if it was closed when Enter pressed
-      self.updateOptions(query)
+      if (!self.open) self.openOptions.apply(this, arguments) // reopen on search if it was closed
+      self.updateOptionsDebounced(query)
     }
-    if (!self.updateOptions) self.updateOptions = debounce((query) => {
-      if (self.willUnmount) return
-      self.setState({options: self.getOptions(query), query})
-    }, TIME_DURATION_INSTANT)
+    if (!self.updateOptions) {
+      self.updateOptions = (query) => {
+        if (self.willUnmount) return
+        self.setState({options: self.getOptions(query), query})
+      }
+      self.updateOptionsDebounced = debounce(self.updateOptions, TIME_DURATION_INSTANT)
+    }
   }
 
   // Sync Options prop with state ------------------------------------------------------------------
@@ -255,88 +265,96 @@ export function Select (_props) {
   }, [search, searchNonce, options]) // query is updated by mutation
 
   // Accessibility ---------------------------------------------------------------------------------
-  if (!self.subscribeToEvents) self.subscribeToEvents = function () {
-    if (self.subscribed) return
-    self.subscribed = true
-    subscribeTo('keydown', self.press)
-    subscribeTo('click', self.click) // only propagated events get fired here
-  }
-  if (!self.unsubscribeEvents) self.unsubscribeEvents = function () {
-    if (!self.subscribed) return
-    self.subscribed = false
-    unsubscribeFrom('keydown', self.press)
-    unsubscribeFrom('click', self.click)
-  }
-  if (!self.click) self.click = function (e) {
-    if (!self.node || !self.open) return
-    // Ignore clicks originating from this Select instance (anything within this node)
-    if (e.target === self.node) return
-    let node = e.target
-    while (node.parentElement) {
-      node = node.parentElement
-      if (node === self.node) return
+  if (!self.subscribeToEvents) {
+    self.subscribeToEvents = function () {
+      if (self.subscribed) return
+      self.subscribed = true
+      subscribeTo('keydown', self.press)
+      subscribeTo('click', self.click) // only propagated events get fired here
     }
-    self.hasFocus = false
-    self.closeOptions.apply(this, arguments) // If clicked outside - close this
-  }
-  if (!self.press) self.press = function (e) {
-    if (!isPureKeyPress(e) || !self.scrollNode || !self.inputNode) return
-    // Check that keypress originates from this Select instance (input or options node)
-    if (e.target !== self.inputNode && e.target !== self.node && e.target.parentElement !== self.scrollNode)
-      return
-    switch (e.keyCode) {
-      case KEY.ArrowDown:
-        e.preventDefault() // prevent scrolling within outer parent
-        return self.setOptionFocus(self.state.focusIndex + (self.upward ? -1 : 1))
-      case KEY.ArrowUp:
-        e.preventDefault() // prevent scrolling within outer parent
-        return self.setOptionFocus(self.state.focusIndex + (self.upward ? 1 : -1))
-      case KEY.Enter: {// Enter will open dropdown or select the focusIndex option in the result
-        if (e.target !== self.inputNode && e.target !== self.node) return
-        if (!self.open) return self.openOptions.call(this, e)
-        const {query, options, focusIndex} = self.state
-        const {addOption} = self.props
-        // prevent event propagation to onClick that toggles open state, or selects accidentally
-        if (!options.length && !addOption) return e.preventDefault()
-        let selected = options.length ? options[focusIndex] : null
-        if (selected == null && addOption && query && (!isFunction(addOption) || addOption(query)))
-          selected = trimSpaces(query)
-        if (selected == null) return e.preventDefault()
-        self.selectOption.call(this, selected, ...arguments)
-        return e.stopPropagation() // allow closing after selection for single select
+    self.unsubscribeEvents = function () {
+      if (!self.subscribed) return
+      self.subscribed = false
+      unsubscribeFrom('keydown', self.press)
+      unsubscribeFrom('click', self.click)
+    }
+    self.click = function (e) {
+      if (!self.node || !self.open) return
+      // Ignore clicks originating from this Select instance (anything within this node)
+      if (e.target === self.node) return
+      let node = e.target
+      while (node.parentElement) {
+        node = node.parentElement
+        if (node === self.node) return
       }
-      case KEY.Backspace: {// input search Backspace will delete the last selected option
-        const {multiple} = self.props
-        if (!multiple || e.target !== self.inputNode) return
-        const {query, value} = self.state
-        if (query || !value || !value.length) return
-        self.deleteValue.call(this, last(value), ...arguments)
-        return e.preventDefault()
-      }
-      case KEY.Escape: {
-        if (e.target !== self.inputNode && e.target !== self.node) return
-        e.stopPropagation()
-        self.hasFocus = false
-        self.closeOptions.apply(this, arguments)
-        return e.preventDefault()
+      self.hasFocus = false
+      self.closeOptions.apply(this, arguments) // If clicked outside - close this
+    }
+    self.press = function (e) {
+      if (!isPureKeyPress(e) || !self.scrollNode || !self.inputNode) return
+      // Check that keypress originates from this Select instance (input or options node)
+      if (e.target !== self.inputNode && e.target !== self.node && e.target.parentElement !== self.scrollNode)
+        return
+      switch (e.keyCode) {
+        case KEY.ArrowDown:
+          e.preventDefault() // prevent scrolling within outer parent
+          return self.setOptionFocus(self.state.focusIndex + (self.upward ? -1 : 1))
+        case KEY.ArrowUp:
+          e.preventDefault() // prevent scrolling within outer parent
+          return self.setOptionFocus(self.state.focusIndex + (self.upward ? 1 : -1))
+        case KEY.Enter: {// Enter will open dropdown or select the focusIndex option in the result
+          if (e.target !== self.inputNode && e.target !== self.node) return
+          if (!self.open) return self.openOptions.call(this, e)
+          const {query, options, focusIndex} = self.state
+          const {addOption} = self.props
+          // prevent event propagation to onClick that toggles open state, or selects accidentally
+          if (!options.length && !addOption) return e.preventDefault()
+          let selected = options.length ? options[focusIndex] : null
+          if (selected == null && addOption && query && (!isFunction(addOption) || addOption(query)))
+            selected = trimSpaces(query)
+          if (selected == null) return e.preventDefault()
+          self.selectOption.call(this, selected, ...arguments)
+          return e.stopPropagation() // allow closing after selection for single select
+        }
+        case KEY.Backspace: {// input search Backspace will delete the last selected option
+          const {multiple} = self.props
+          if (!multiple || e.target !== self.inputNode) return
+          const {query, value} = self.state
+          if (query || !value || !value.length) return
+          self.deleteValue.call(this, last(value), ...arguments)
+          return e.preventDefault()
+        }
+        case KEY.Escape: {
+          if (e.target !== self.inputNode && e.target !== self.node) return
+          e.stopPropagation()
+          self.hasFocus = false
+          self.closeOptions.apply(this, arguments)
+          return e.preventDefault()
+        }
       }
     }
-  }
-  if (!self.setOptionFocus) self.setOptionFocus = function (focusIndex) {
-    if (!self.open || !self.scrollNode || !self.inputNode) return
-    const {addOption, search} = self.props
-    const {query} = self.state
-    if (focusIndex === -1 && addOption && search && query && (!isFunction(addOption) || addOption(query))) {
-      // Focus on addOption
-      setFocus(self.optNode.children, 0)
-    } else {
-      // Focus on the option to scroll if necessary
-      // this returns -1 if no options available, thus automatically focusing on addOption
-      focusIndex = setFocus(self.scrollNode.children, focusIndex, self.state.options.length)
+    self.pressInput = function (e) { // Enter when dropdown is closed (unsubscribed from self.press)
+      // This handler is needed to reopen dropdown after pressing Esc when in focus
+      // Note that `e.keyCode !== KEY.Enter`, instead e.keyCode === 0 (like mouse click)
+      if (!isPureKeyPress(e) || e.key !== 'Enter') return
+      self.openOptions.apply(this, arguments)
     }
-    // Then focus back to input for possible query change, keeping focused state
-    self.inputNode.focus()
-    self.setState({focusIndex})
+    self.setOptionFocus = function (focusIndex) {
+      if (!self.open || !self.scrollNode || !self.inputNode) return
+      const {addOption, search} = self.props
+      const {query} = self.state
+      if (focusIndex === -1 && addOption && search && query && (!isFunction(addOption) || addOption(query))) {
+        // Focus on addOption
+        setFocus(self.optNode.children, 0)
+      } else {
+        // Focus on the option to scroll if necessary
+        // this returns -1 if no options available, thus automatically focusing on addOption
+        focusIndex = setFocus(self.scrollNode.children, focusIndex, self.state.options.length)
+      }
+      // Then focus back to input for possible query change, keeping focused state
+      self.inputNode.focus()
+      self.setState({focusIndex})
+    }
   }
   if (self.open) self.subscribeToEvents()
   useEffect(() => self.unsubscribeEvents, [])
@@ -417,8 +435,7 @@ export function Select (_props) {
     <Row className={cn(className, `select`, {
       active: open, done: hasValue, multiple, search, upward, query,
       compact, disabled, readonly, loading, error,
-    })} style={style}
-         {...{row}} onClick={toggleOpen} tabIndex={-1} _ref={self.ref}>
+    })} style={style} {...{row}} _ref={self.ref}>
       {childBefore != null && renderProp(childBefore, self)}
       {icon}
 
@@ -452,7 +469,11 @@ export function Select (_props) {
         style={self.styleInput}
         id={id} readOnly={!search} {...props} ref={self.inputRef}
         value={query} onChange={self.searchQuery} onFocus={self.focus} onBlur={self.blur}
-        onClick={search ? onEventStopPropagation(self.openOptions, props.onClick) : void 0} />
+        {...!self.open && {
+          onClick: onEventStopPropagation(self.openOptions, props.onClick),
+          onKeyPress: onEventStopPropagation(self.pressInput, props.onKeyPress),
+        }}
+      />
 
       {iconEnd}
       {childAfter != null && renderProp(childAfter, self)}
