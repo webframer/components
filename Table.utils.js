@@ -8,7 +8,7 @@ import { cloneDeep, Id } from '@webframer/js'
 export function onToggleLayout (view, { vertical }) {
   view.vertical = vertical
   if (vertical) {
-    // rearrange #items for head and body slots
+    // rearrange #child for head and body slots
   } else {
 
   }
@@ -17,45 +17,45 @@ export function onToggleLayout (view, { vertical }) {
 /**
  * Add Column in horizontal layout, or Row in vertical layout
  */
-export function onAddHeader ({vertical, ['#items']: items}) {
+export function onAddHeader ({vertical, ['#child']: items}) {
   const body = items.find((slot) => slot.name === 'body')
   const newHeader = {
-    '#view': 'th',
+    '#tag': 'th',
     '#drop': false, // '#drop' false gets converted to '_nodrop=""' in HTML markup
-    '#items': [
+    '#child': [
       {
-        '#view': 'Text',
+        '#tag': 'Text',
         children: 'Header',
       },
     ],
   }
   const newCell = {
-    '#view': 'td',
+    '#tag': 'td',
     '#drag': false, // '#drag' false gets converted to '_nodrag=""' in HTML markup
-    '#items': [
+    '#child': [
       {
-        '#view': 'Text',
+        '#tag': 'Text',
         children: 'Cell',
       },
     ],
   }
   if (!vertical) {
     const head = items.find((slot) => slot.name === 'head')
-    head['#items'].forEach(tr => {
-      tr['#items'].push(newHeader)
+    head['#child'].forEach(tr => {
+      tr['#child'].push(newHeader)
     })
-    body['#items'].forEach(tr => {
-      tr['#items'].push(cloneDeep(newCell))
+    body['#child'].forEach(tr => {
+      tr['#child'].push(cloneDeep(newCell))
     })
   } else {
     let columns = 1
-    body['#items'].forEach(tr => {
-      if (tr['#items'].length - 1 > columns) columns = tr['#items'].length - 1
+    body['#child'].forEach(tr => {
+      if (tr['#child'].length - 1 > columns) columns = tr['#child'].length - 1
     })
-    body['#items'].push({
-      '#view': 'tr',
+    body['#child'].push({
+      '#tag': 'tr',
       '#id': Id({caseSensitive: true}), // '#id' gets converted to '_id' in HTML markup
-      '#items': [
+      '#child': [
         newHeader,
         ...Array(columns - 1).fill(true).map(() => cloneDeep(newCell)),
       ],
@@ -66,18 +66,18 @@ export function onAddHeader ({vertical, ['#items']: items}) {
 /**
  * Remove Column in horizontal layout, or Row in vertical layout
  */
-export function onRemoveHeader ({vertical, ['#items']: items}, {index}) {
+export function onRemoveHeader ({vertical, ['#child']: items}, {index}) {
   const body = items.find((slot) => slot.name === 'body')
 
   // If index not defined, delete the last element
   if (index == null) {
     if (!vertical) {
       index = 1
-      body['#items'].forEach(tr => {
-        if (tr['#items'].length - 1 > index) index = tr['#items'].length - 1
+      body['#child'].forEach(tr => {
+        if (tr['#child'].length - 1 > index) index = tr['#child'].length - 1
       })
     } else {
-      index = body['#items'].length - 1
+      index = body['#child'].length - 1
     }
   }
 
@@ -88,12 +88,12 @@ export function onRemoveHeader ({vertical, ['#items']: items}, {index}) {
     // since grouped cell can have colSpan >= 1, which should not be deleted
     // todo: handle grouped cells with colSpan >= 1, for now just delete the indexed cell
     const head = items.find((slot) => slot.name === 'head')
-    head['#items'].forEach(tr => {
-      tr['#items'].splice(index, 1)
+    head['#child'].forEach(tr => {
+      tr['#child'].splice(index, 1)
     })
-    body['#items'].forEach(tr => tr['#items'].splice(index, 1))
+    body['#child'].forEach(tr => tr['#child'].splice(index, 1))
   } else {
-    body['#items'].splice(index, 1)
+    body['#child'].splice(index, 1)
   }
 }
 

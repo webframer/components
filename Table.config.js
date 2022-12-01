@@ -26,7 +26,7 @@ export default {
       action: onToggleLayout, // (state: ui.json, args: object)
       // If label returns an object (ui.json), action needs to be triggered manually
       label: ({vertical}) => ({
-        '#view': 'Input',
+        '#tag': 'Input',
         name: 'vertical', // ui.json attribute to modify
         type: 'tabs',
         label: 'Table Layout',
@@ -50,32 +50,32 @@ export default {
   // default ui.json attributes
   defaultProps: {
     class: 'table',
-    '#items': [
+    '#child': [
       { // all private attributes (starting with #) will be ignored in production
-        '#view': 'slot',
+        '#tag': 'slot',
         '#dnd': false, // dnd is enabled by default in Edit mode
         name: 'head',
-        '#items': [
+        '#child': [
           {
-            '#view': 'tr',
+            '#tag': 'tr',
             '#drop': false,
-            '#items': [
+            '#child': [
               {
-                '#view': 'th', // `@id` is to be injected by the platform automatically
+                '#tag': 'th', // `@id` is to be injected by the platform automatically
                 '#drag': false,
-                '#items': [
+                '#child': [
                   {
-                    '#view': 'Text',
+                    '#tag': 'Text',
                     children: 'Header A',
                   },
                 ],
               },
               {
-                '#view': 'th',
+                '#tag': 'th',
                 '#drag': false,
-                '#items': [
+                '#child': [
                   {
-                    '#view': 'Text',
+                    '#tag': 'Text',
                     children: 'Header B',
                   },
                 ],
@@ -85,30 +85,30 @@ export default {
         ],
       },
       {
-        '#view': 'slot',
+        '#tag': 'slot',
         '#dnd': false,
         name: 'body',
-        '#items': [
+        '#child': [
           {
-            '#view': 'tr',
+            '#tag': 'tr',
             '#drop': false,
-            '#items': [
+            '#child': [
               {
-                '#view': 'td',
+                '#tag': 'td',
                 '#drag': false,
-                '#items': [
+                '#child': [
                   {
-                    '#view': 'Text',
+                    '#tag': 'Text',
                     children: 'Cell A1',
                   },
                 ],
               },
               {
-                '#view': 'td',
+                '#tag': 'td',
                 '#drag': false,
-                '#items': [
+                '#child': [
                   {
-                    '#view': 'Text',
+                    '#tag': 'Text',
                     children: 'Cell B1',
                   },
                 ],
@@ -116,25 +116,25 @@ export default {
             ],
           },
           {
-            '#view': 'tr',
+            '#tag': 'tr',
             '#drop': false,
-            '#items': [
+            '#child': [
               {
-                '#view': 'td',
+                '#tag': 'td',
                 '#drag': false,
-                '#items': [
+                '#child': [
                   {
-                    '#view': 'Text',
+                    '#tag': 'Text',
                     children: 'Cell A2',
                   },
                 ],
               },
               {
-                '#view': 'td',
+                '#tag': 'td',
                 '#drag': false,
-                '#items': [
+                '#child': [
                   {
-                    '#view': 'Text',
+                    '#tag': 'Text',
                     children: 'Cell B2',
                   },
                 ],
