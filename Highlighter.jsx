@@ -129,7 +129,7 @@ export const theme = {
   'constant': {
     'color': '#EEFFFF',
   },
-  'property': {
+  'property': { // json keys
     'color': '#EEFFFF',
   },
   'tag': { // property key for object expression
@@ -178,19 +178,19 @@ export const theme = {
     'color': '#F78C6C',
   },
   'boolean': {
-    'color': '#C792EA',
+    'color': 'rgb(190,150,240)',
   },
   'keyword': {
-    'color': '#C792EA',
+    'color': 'rgb(190,150,240)',
   },
   'operator': {
-    'color': '#C792EA',
-  },
-  'punctuation': { // < : ; | = ' , / >
-    'color': 'rgb(191,148,239)',
+    'color': 'rgb(190,150,240)',
   },
   'url': {
-    'color': '#C792EA',
+    'color': 'rgb(190,150,240)',
+  },
+  'punctuation': { // < : ; | = ' , / >
+    'color': 'rgb(190,150,240)',
   },
   'symbol': {
     'color': '#FF99FF',
