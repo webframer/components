@@ -30,9 +30,9 @@ export function ErrorTable ({
       {hasListValue(items) &&
         items.map(({id, status, statusCode, code, title, error, content, detail, message, msg, ...data}, index) => (
           <tr key={id || index}>
-            {hasId && <Table.Cell scope='row' className='font-smaller'>{id}</Table.Cell>}
-            {hasStatus && <Table.Cell>{status || statusCode || code}</Table.Cell>}
-            {hasTitle && <Table.Cell>{title || error}</Table.Cell>}
+            {hasId && <td scope='row' className='font-smaller'>{id}</td>}
+            {hasStatus && <td>{status || statusCode || code}</td>}
+            {hasTitle && <td>{title || error}</td>}
             <td style={styleMsg}>
               {content || detail || message || msg || get(data, 'details[0].message', String(items[index]))}
             </td>

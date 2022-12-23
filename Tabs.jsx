@@ -232,12 +232,12 @@ export function TabPanel ({id, className, forceRender, mustRender, ...props}) {
 
   // Skip rendering if not active
   const active = activeId === id
-  if (!active && !(forceRender = forceRender || f) && !mustRender) return null
+  if (!(active) && !(forceRender = forceRender || f) && !mustRender) return null
 
   // Accessibility
   props.id = `panel_${id}_${tabsId}`
   props['aria-labelledby'] = `tab_${id}_${tabsId}`
-  if (forceRender && !active) {
+  if (forceRender && !(active)) {
     props['aria-expanded'] = 'false'
     props.hidden = true // must be boolean because this is native attribute
   } else {
