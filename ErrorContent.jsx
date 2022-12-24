@@ -10,6 +10,7 @@ export function ErrorContent ({
   items,
   ...props
 }) {
+  items = items.filter(v => v) // remove null errors
   // Filter out User vs Server Errors
   const serverErrors = items.filter(({
     status,
