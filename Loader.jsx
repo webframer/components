@@ -9,15 +9,6 @@ import { extractViewProps, View } from './View.jsx'
 
 /**
  * Loading Overlay - Pure Component
- *
- * @param {Boolean} [loading] - whether to show this Component or not
- * @param {String} [size] - spinner size
- * @param {String} [className] - css class to add
- * @param {String} [classIcon] - css class to add to spinner icon
- * @param {Boolean} [transparent] - whether to add 'transparent' css class
- * @param {*} [children] - optional content to render
- * @param {*} props - other attributes to pass to spinner
- * @returns {object} - React Component
  */
 export function Loader ({
   loading = true,
@@ -40,7 +31,9 @@ export function Loader ({
 }
 
 Loader.propTypes = {
+  // Whether to show this Component or not
   loading: type.Boolean,
+  // Spinner size
   size: type.SizeModifier,
   className: type.ClassName,
   iconClass: type.ClassName,
