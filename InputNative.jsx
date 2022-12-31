@@ -1,4 +1,4 @@
-import { __CLIENT__, isString, numericPattern, parseNumberLocale } from '@webframer/js'
+import { __CLIENT__, isObject, isString, numericPattern, parseNumberLocale } from '@webframer/js'
 import cn from 'classnames'
 import React, { useId, useState } from 'react'
 import Icon from './Icon.jsx'
@@ -62,6 +62,23 @@ export function InputNative ({className, error, loading, ..._props}) {
       {childAfter}
     </Row>
   </>)
+}
+
+/**
+ * Icon Before and After Input Renderer
+ * @param {object}
+ *   {string|object|function} icon - name string, props object, or render function
+ *   {string} id - input id
+ * @param {object} self - function Component instance
+ * @returns {JSX.Element}
+ */
+export function renderInputIcon ({icon, id}, self) {
+  return (
+    <Label className='input__icon' htmlFor={id}>{(isString(icon)
+        ? <Icon name={icon} />
+        : (isObject(icon) ? <Icon {...icon} /> : renderProp(icon, self))
+    )}</Label>
+  )
 }
 
 /**
@@ -160,18 +177,8 @@ export function useInputSetup ({
 
   // Icon ------------------------------------------------------------------------------------------
   if (enabled.icon) {
-    if (icon != null) icon = (
-      <Label className='input__icon' htmlFor={id}>{(isString(icon)
-          ? <Icon name={icon} />
-          : <Icon {...icon} />
-      )}</Label>
-    )
-    if (iconEnd != null) iconEnd = (
-      <Label className='input__icon' htmlFor={id}>{(isString(iconEnd)
-          ? <Icon name={iconEnd} />
-          : <Icon {...iconEnd} />
-      )}</Label>
-    )
+    if (icon) icon = renderInputIcon({icon, id}, self)
+    if (iconEnd) iconEnd = renderInputIcon({icon: iconEnd, id}, self)
   }
 
   // Sticky Placeholder ----------------------------------------------------------------------------
@@ -302,8 +309,8 @@ InputNative.propTypes = {
   // Custom UI to render after input node (inside .input wrapper with focus state)
   childAfter: type.NodeOrFunction,
   // Custom Icon name or props to render before input node
-  icon: type.OneOf([type.String, type.Object]),
+  icon: type.OneOf([type.String, type.Object, type.Boolean, type.NodeOrFunction]),
   // Custom Icon name or props to render after input node (if `onRemove` not defined)
-  iconEnd: type.OneOf([type.String, type.Object]),
+  iconEnd: type.OneOf([type.String, type.Object, type.Boolean, type.NodeOrFunction]),
   // ...other native HTML `<input/>` props
 }

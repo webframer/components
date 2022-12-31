@@ -1,27 +1,14 @@
 // noinspection JSValidateTypes,JSCheckFunctionSignatures
 // noinspection JSCheckFunctionSignatures
-import {
-  _,
-  debounce,
-  hasListValue,
-  isFunction,
-  isObject,
-  isString,
-  KEY,
-  l,
-  last,
-  subscribeTo,
-  TIME_DURATION_INSTANT,
-  toUniqueListFast,
-  translate,
-  trimSpaces,
-  unsubscribeFrom,
-} from '@webframer/js'
+import { _, debounce, isFunction, isObject, subscribeTo, translate, trimSpaces, unsubscribeFrom } from '@webframer/js'
+import { hasListValue, last, toUniqueListFast } from '@webframer/js/array.js'
+import { KEY, l, TIME_DURATION_INSTANT } from '@webframer/js/constants.js'
 import { isPureKeyPress } from '@webframer/js/keyboard.js'
 import cn from 'classnames'
 import Fuse from 'fuse.js'
 import React, { useEffect, useId, useMemo } from 'react'
 import Icon from './Icon.jsx'
+import { renderInputIcon } from './InputNative.jsx'
 import Label from './Label.jsx'
 import { assignRef, toReactProps, useExpandCollapse, useInstance, useSyncedState } from './react.js'
 import { renderProp } from './react/render.js'
@@ -391,23 +378,14 @@ export function Select (_props) {
   }, [hasValue, query, compact, multiple, open, options, placeholder])
 
   // Icon ------------------------------------------------------------------------------------------
-  if (icon) icon = (
-    <Label className='input__icon' htmlFor={id}>{(isString(icon)
-        ? <Icon name={icon} />
-        : (isObject(icon) ? <Icon {...icon} /> : renderProp(icon, self))
-    )}</Label>
-  )
-  if (iconEnd) iconEnd = (
-    <Label className='input__icon' htmlFor={id}>{(isString(iconEnd)
-        ? <Icon name={iconEnd} />
-        : (isObject(iconEnd) ? <Icon {...iconEnd} /> : renderProp(iconEnd, self))
-    )}</Label>
-  )
-  let iconDefault = icon == null && iconEnd == null && (
-    <Label className='input__icon' htmlFor={id}>
-      <Icon className='fade' name={search ? 'search' : 'dropdown'} />
-    </Label>
-  )
+  if (icon) icon = renderInputIcon({icon, id}, self)
+  if (iconEnd) iconEnd = renderInputIcon({icon: iconEnd, id}, self)
+  let iconDefault = icon == null && iconEnd == null && renderInputIcon({
+    icon: {
+      className: 'fade',
+      name: search ? 'search' : 'dropdown',
+    }, id,
+  }, self)
   if (iconDefault) {
     if (search) icon = iconDefault
     else iconEnd = iconDefault
