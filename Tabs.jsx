@@ -5,10 +5,15 @@ import Icon from './Icon.jsx'
 import { useInstance } from './react/hooks.js'
 import { renderProp } from './react/render.js'
 import { type } from './types.js'
-import View from './View.jsx'
+import { createView, View } from './View.jsx'
 
 const TabInstance = React.createContext({})
 const TabState = React.createContext({})
+
+export const [
+  // Optional Wrapper for TabPanel(s) for consistent styling
+  TabBody,
+] = createView()
 
 /**
  * Tabs --------------------------------------------------------------------------------------------
