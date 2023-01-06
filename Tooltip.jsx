@@ -16,6 +16,8 @@ import { renderProp } from './react/render.js'
 import { tooltipProptypes } from './types.js'
 
 /**
+ * todo: component improvement 3 - usage without Portal to allow drag event bubbling
+ * todo: component improvement 3 - option to toggle tooltip with click, or disable on click
  * todo: component improvement 3 - align tooltip + RTL position support
  * Tooltip Component
  * Notes:
