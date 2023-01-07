@@ -22,7 +22,9 @@ import { tooltipProptypes } from './types.js'
  * Tooltip Component
  * Notes:
  *  - Offset position should use margin to allow hovering over Tooltip, without loosing mouse hover
- *  - Rendering as Portal to cover use cases, such as absolute positioned parent with transform.
+ *  - Rendering as Portal to cover use cases, such as absolute positioned parent with transform,
+ *    because "position:fixed under something with a transform no longer has fixed behavior"
+ *    @see https://stackoverflow.com/a/37953806
  *
  * Side notes;
  *    - Portal elements do not keep hover state on the parent element
