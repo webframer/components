@@ -330,14 +330,29 @@ export function useInstance (initialState = {}) {
   const {current: self} = useRef({})
   const [state, setState] = useState(initialState)
   self.state = state
+
+  // Initial setup
   if (!self.setState) {
     self.forceUpdate = () => setState(state => ({...state}))
-    self.setState = (newState) => {
-      if (isFunction(newState)) return setState(newState)
+    self.setState = (newState, callback) => {
+      if (isFunction(newState)) {
+        if (callback) self.setStateCallbacks.push(callback)
+        setState(state => newState(state, self.props || {}))
+        return
+      }
       if (isEqual({...self.state, ...newState}, self.state)) return
+      if (callback) self.setStateCallbacks.push(callback)
       setState(state => ({...state, ...newState}))
     }
+    self.setStateCallbacks = []
   }
+
+  // Simulate callback after self.setState()
+  if (self.setStateCallbacks.length) {
+    self.setStateCallbacks.forEach(callback => callback())
+    self.setStateCallbacks = []
+  }
+
   return [self, self.state]
 }
 
