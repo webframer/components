@@ -26,7 +26,7 @@ import { extractViewProps, View } from './View.jsx'
 export function Input ({
   compact, error, info, id = useId(), idHelp = `${id}-help`, helpTransition,
   className, style, reverse, _ref,
-  controls, ...props
+  controls, children, ...props
 }) {
   const viewProps = extractViewProps(props)
   if (props.type === 'hidden') return <input {...{id, className, style, ref: _ref, ...props}} />
@@ -48,6 +48,7 @@ export function Input ({
   props.error = error
   props.reverse = reverse
   props['aria-describedby'] = idHelp
+  if (children != null) props.children = children
   compact = compact != null && compact !== false
   const {required} = props
   const Control = (controls && controls[props.type]) || (() => {
