@@ -16,10 +16,14 @@ import { renderProp } from './react/render.js'
 import { tooltipProptypes } from './types.js'
 
 /**
- * todo: component improvement 3 - usage without Portal to allow drag event bubbling
  * todo: component improvement 3 - option to toggle tooltip with click, or disable on click
  * todo: component improvement 3 - align tooltip + RTL position support
  * Tooltip Component
+ *
+ * Logic:
+ *  - `on='click'` toggles Tooltip on parent element click, and closes it when clicking outside
+ *  - `embedded={true}` renders Tooltip inside the parent element (document.body by default)
+ *
  * Notes:
  *  - Offset position should use margin to allow hovering over Tooltip, without loosing mouse hover
  *  - Rendering as Portal to cover use cases, such as absolute positioned parent with transform,
@@ -35,17 +39,17 @@ import { tooltipProptypes } from './types.js'
  *    => Need to capture mouse enter event on the tooltip itself with debounce to check open state.
  */
 export function Tooltip ({
-  position, on: onEvent, open, delay, style, ...props
+  position, on: onEvent, offset, open, onMount, delay, embedded, style, ...props
 }) {
-  const ref = useRef(null)
+  const ref = useRef(null) // empty span container embedded inside the parent element
   const [self, state] = useInstance({position}) // initially always closed to prerender
   const prerender = state.prerender
-  self.props = {open, position}
+  self.props = {offset, open, onMount, position}
   const on = useMemo(() => toUniqueListFast(toList(onEvent)), [onEvent])
 
   // Event Handlers --------------------------------------------------------------------------------
   if (!self.ref) {
-    self.ref = (node) => self.node = node
+    self.ref = (node) => self.node = node // Tooltip node
     self.open = () => {
       if (self.canceled || self.state.open || self.willUnmount) return
       self.setState({prerender: true, style: {bottom: 0, right: 0}})
@@ -70,18 +74,22 @@ export function Tooltip ({
       self.close()
     }, 16) // debounce to capture cursor transition to tooltip
     self.toggleOpenOnClick = (event) => {
-      const isTarget = event.target === self.parent
-      if (isTarget) { // toggle state when clicking on the parent node directly
+      // For Button with Icon and Tooltip, the target is the Icon -> consider it as target as well.
+      // If needed, create `directClickOnly` prop to only consider direct target element
+      let isTarget = event.target === self.parent
+      if (!isTarget) {
+        let target = event.target
+        while (target.parentElement) {
+          if (target === self.node) return // ignore clicks from the tooltip itself
+          if ((isTarget = target === self.parent)) break
+          target = target._parentElement || target.parentElement
+        }
+        target = null
+      }
+      if (isTarget) { // toggle state when clicking on the parent node
         if (self.state.open) self.close()
         else self.open()
       } else if (self.state.open) { // close tooltip if clicking anywhere outside the parent node
-        // except for clicking inside the tooltip itself
-        let target = event.target
-        while (target.parentElement) {
-          if (target === self.node) return
-          target = target.parentElement
-        }
-        target = null
         self.close()
       }
     }
@@ -122,12 +130,15 @@ export function Tooltip ({
   }, [on])
   useEffect(() => {
     self.mounted = true
-    if (self.props.open) self.open() // Show Tooltip on mount
+    const {onMount, open} = self.props
+    if (onMount) onMount(self)
+    if (open) self.open() // Show Tooltip on mount
     return () => self.willUnmount = true
   }, [])
   useIsomorphicLayoutEffect(() => {
     if (!prerender || !self.parent || !self.node) return
-    self.setState({prerender: false, open: true, ...positionFrom(self.node, self.parent, self.props.position)})
+    const {offset, position} = self.props
+    self.setState({prerender: false, open: true, ...positionFrom(self.node, self.parent, position, offset)})
   }, [prerender])
 
   // Render Props ----------------------------------------------------------------------------------
@@ -135,11 +146,13 @@ export function Tooltip ({
   if (state.style) style = style ? {...style, ...state.style} : state.style
 
   return (
-    <span style={hidden} ref={ref}>
-      {shouldRender && createPortal(
-        <TooltipRender {...props} {...state} on={on} style={style} self={self} />,
-        document.body,
-      )}
+    <span style={(shouldRender && embedded) ? collapsed : hidden} ref={ref}>
+      {shouldRender && (embedded
+        ? <TooltipRender {...props} {...state} on={on} style={style} self={self} />
+        : createPortal(
+          <TooltipRender {...props} {...state} on={on} style={style} self={self} />,
+          document.body,
+        ))}
     </span>
   )
 
@@ -185,6 +198,7 @@ Tooltip.defaultProps = {
   animation: 'fade-in',
   delay: 1000,
   on: ['hover', 'click'],
+  offset: 15,
   position: 'top',
   theme: 'dark',
   role: 'tooltip',
@@ -306,10 +320,10 @@ function eventsFromProp (on) {
  * @param {Element} node - the Tooltip outer div element
  * @param {Element} parentElement - the Tooltip container
  * @param {string} position - desired initially
- * @param {number} [offset] - to account for Tooltip offset position and pointer
+ * @param {number} [offset] - to account for Tooltip offset position and pointer (ex. triangle)
  * @returns {{position: string, style: object}} state - props for optimum placement
  */
-function positionFrom (node, parentElement, position, offset = 15) {
+function positionFrom (node, parentElement, position, offset = 0) {
   // The outer div can have 0 height if Tooltip children is an inline element.
   // Use .tooltip__content div to guarantee correct Tooltip dimensions.
   // offsetHeight/offsetWidth dimensions may be incorrect within scroll, make sure the outer div has
@@ -373,3 +387,4 @@ function positionComputed (position, top, bottom, left, right, offsetWidth, offs
 }
 
 const hidden = {display: 'none'}
+const collapsed = {display: 'block', width: 0, height: 0, padding: 0, border: 0, overflow: 'visible'}

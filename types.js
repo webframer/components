@@ -501,8 +501,14 @@ export const tooltipProptypes = {
   animation: type.String,
   // Popup delay duration in milliseconds
   delay: type.Millisecond,
+  // Whether to render Tooltip as child element of the parent Node, by default it renders as Portal
+  embedded: type.Boolean,
+  // Tooltip pointer offset from the parent element, default is `15`
+  offset: type.Px,
   // Whether to show Tooltip by default
   open: type.Boolean,
+  // Callback(self: object) => void - when Tooltip container has mounted
+  onMount: type.Function,
   // Name of the theme style to apply - must be one of the available themes
   theme: type.String,
 }
