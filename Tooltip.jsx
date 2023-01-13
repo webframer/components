@@ -17,7 +17,7 @@ import { tooltipProptypes } from './types.js'
 
 /**
  * todo: component improvement 3 - option to toggle tooltip with click, or disable on click
- * todo: component improvement 3 - align tooltip + RTL position support
+ * todo: component improvement 3 - RTL position/align support
  * Tooltip Component
  *
  * Logic:
@@ -38,13 +38,14 @@ import { tooltipProptypes } from './types.js'
  *    This was not due to CSS margin or gaps, because it did not work even with overlapping padding.
  *    => Need to capture mouse enter event on the tooltip itself with debounce to check open state.
  */
-export function Tooltip ({
-  position, on: onEvent, offset, open, onMount, delay, embedded, style, ...props
-}) {
+export function Tooltip (_props) {
+  let {
+    position, on: onEvent, offset, open, onMount, delay, embedded, style, ...props
+  } = _props
   const ref = useRef(null) // empty span container embedded inside the parent element
   const [self, state] = useInstance({position}) // initially always closed to prerender
   const prerender = state.prerender
-  self.props = {offset, open, onMount, position}
+  self.props = _props
   const on = useMemo(() => toUniqueListFast(toList(onEvent)), [onEvent])
 
   // Event Handlers --------------------------------------------------------------------------------
@@ -137,8 +138,7 @@ export function Tooltip ({
   }, [])
   useIsomorphicLayoutEffect(() => {
     if (!prerender || !self.parent || !self.node) return
-    const {offset, position} = self.props
-    self.setState({prerender: false, open: true, ...positionFrom(self.node, self.parent, position, offset)})
+    self.setState({prerender: false, open: true, ...positionFrom(self.node, self.parent, self.props)})
   }, [prerender])
 
   // Render Props ----------------------------------------------------------------------------------
@@ -235,7 +235,7 @@ function TooltipRender ({
 
   return (
     <div className={cn('tooltip col position-fixed', `theme-${theme}`,
-      !prerender && `tooltip-${position} tooltip-${align}`,
+      !prerender && `t-pos-${position} t-align-${align}`,
       open ? 'pointer-events-auto z-10' : 'pointer-events-none', {
         'invisible': prerender, // tailwind only recognizes text literal
         [animation]: open && !prerender,
@@ -319,16 +319,18 @@ function eventsFromProp (on) {
  * Compute correct Tooltip position to try to fit it within viewport
  * @param {Element} node - the Tooltip outer div element
  * @param {Element} parentElement - the Tooltip container
- * @param {string} position - desired initially
- * @param {number} [offset] - to account for Tooltip offset position and pointer (ex. triangle)
+ * @param {object} props
+ *    align: string - desired initially
+ *    position: string - desired initially
+ *    offset: number - to account for Tooltip offset position and pointer (ex. triangle)
  * @returns {{position: string, style: object}} state - props for optimum placement
  */
-function positionFrom (node, parentElement, position, offset = 0) {
+function positionFrom (node, parentElement, {align, position, offset = 0}) {
   // The outer div can have 0 height if Tooltip children is an inline element.
   // Use .tooltip__content div to guarantee correct Tooltip dimensions.
   // offsetHeight/offsetWidth dimensions may be incorrect within scroll, make sure the outer div has
   // fixed bottom and right positions set to 0 during the prerender phase.
-  const {offsetHeight, offsetWidth} = node.children[0]
+  const {offsetHeight, offsetWidth} = node.children[0] // tooltip content
   const {top, left, bottom, right, width, height} = parentElement.getBoundingClientRect()
   const {innerWidth, innerHeight} = window
   const _bottom = innerHeight - Math.max(0, top + height) // available space from the edge of viewport
@@ -341,7 +343,18 @@ function positionFrom (node, parentElement, position, offset = 0) {
   switch (position) {
     case 'left':
     case 'right':
-      style = {top: Math.max(0, top + height / 2 - offsetHeight / 2)}
+      style = {}
+      switch (align) {
+        case 'start':
+          style.top = Math.max(0, top)
+          break
+        case 'end':
+          style.top = Math.min(innerHeight, bottom) - offsetHeight // prevent bottom clipping
+          style.top = Math.max(0, style.top)
+          break
+        default: // align to the middle
+          style.top = Math.max(0, top + height / 2 - offsetHeight / 2)
+      }
       style.top = Math.min(innerHeight - offsetHeight, style.top) // prevent bottom clipping
       if (position === 'left') style.right = innerWidth - left
       if (position === 'right') style.left = right
@@ -349,7 +362,18 @@ function positionFrom (node, parentElement, position, offset = 0) {
     case 'bottom':
     case 'top':
     default:
-      style = {left: Math.max(0, left + width / 2 - offsetWidth / 2)}
+      style = {}
+      switch (align) {
+        case 'start':
+          style.left = Math.max(0, left)
+          break
+        case 'end':
+          style.left = Math.min(innerWidth, right) - offsetWidth // prevent right clipping
+          style.left = Math.max(0, style.left)
+          break
+        default: // align to the center
+          style.left = Math.max(0, left + width / 2 - offsetWidth / 2)
+      }
       style.left = Math.min(innerWidth - offsetWidth, style.left) // prevent right clipping
       if (position === 'bottom') style.top = bottom
       if (position === 'top') style.bottom = innerHeight - top
