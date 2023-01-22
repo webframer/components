@@ -146,7 +146,7 @@ export function Tooltip (_props) {
   if (state.style) style = style ? {...style, ...state.style} : state.style
 
   return (
-    <span style={(shouldRender && embedded) ? collapsed : hidden} ref={ref}>
+    <span className='tooltip-wrap' style={(shouldRender && embedded) ? collapsed : hidden} ref={ref}>
       {shouldRender && (embedded
         ? <TooltipRender {...props} {...state} on={on} style={style} self={self} />
         : createPortal(
