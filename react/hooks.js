@@ -324,7 +324,7 @@ export function useInputValue (props, {controlledValue, format} = {}, self = use
  *    self.forceUpdate()
  *
  * @param {object} [initialState]
- * @returns [self: object, state: object] instance - that persists for the entire component existence
+ * @returns {[self: object, state: object]} [self, state] - that persists for the entire component existence
  */
 export function useInstance (initialState = {}) {
   const {current: self} = useRef({})
