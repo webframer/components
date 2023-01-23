@@ -1,5 +1,5 @@
 import cn from 'classnames'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Button } from './Button.jsx'
 import { Icon } from './Icon.jsx'
 import { useInstance } from './react/hooks.js'
@@ -15,13 +15,13 @@ import { View } from './View.jsx'
  */
 export function DropdownMenu (_props) {
   const [self, state] = useInstance({open: _props.open})
-  self.props = _props
-  if (self.open == null) {
+  if (!self.props) {
     // noinspection JSValidateTypes
     self.open = !!_props.open // initial open state
     self.toggleMenu = () => self.setState({open: !self.state.open})
     self.onMountTooltip = (tooltip) => {
       const {open: setOpen, close: setClose} = tooltip
+      self.tooltip = tooltip
 
       // Sync Tooltip state with Icon
       tooltip.open = function () {
@@ -38,6 +38,11 @@ export function DropdownMenu (_props) {
       }
     }
   }
+  self.props = _props
+  useEffect(() => {
+    const {onMount} = self.props
+    if (onMount) onMount(self)
+  }, [])
 
   // Render Props ----------------------------------------------------------------------------------
   const {

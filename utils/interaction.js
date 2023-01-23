@@ -33,7 +33,7 @@ export function offsetFrom (event, rectangle) {
 /**
  * Create `on<Event>` handler function that stops event propagation, and sets
  *  `event.propagationStopped === true`
- * @param {function|function[]} [func] - callback(s) to wrap
+ * @param {function|function[]} [func] - optional callback(s) to wrap
  * @returns {(function(*): void)|*} callback - that stops event propagation before calling given `func`
  */
 export function onEventStopPropagation (...func) {
