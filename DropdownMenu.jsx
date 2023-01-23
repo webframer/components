@@ -46,7 +46,7 @@ export function DropdownMenu (_props) {
 
   // Render Props ----------------------------------------------------------------------------------
   const {
-    className, children, btnProps, iconProps, iconOpen, iconClose, open: _1, ...props
+    className, children, btnProps, iconProps, iconOpen, iconClose, open: _1, onMount: _2, ...props
   } = _props
   return (
     <View className={cn(className, 'dropdown-menu')} {...props}>
@@ -83,6 +83,8 @@ DropdownMenu.propTypes = {
   iconClose: type.Icon,
   className: type.ClassName,
   style: type.Style,
+  // Handler(self: object) when this component has mounted
+  onMount: type.Function,
 }
 
 export default React.memo(DropdownMenu)
