@@ -93,7 +93,7 @@ export function Select (_props) {
 
   // Initialize once
   if (!self.props && value !== void 0) {
-    if (format) state.value = format(value, name, void 0, self)
+    if (format) state.value = format(value, name, self)
     if (!multiple) state.query = getValueText(value, options)
   }
 
@@ -102,7 +102,7 @@ export function Select (_props) {
     // State should store pure value as is, because `value` can be an array for multiple selection
     // Then let the render logic compute what to display based on given value.
     // For single selection, when no custom option render exists, input shows text value.
-    state.value = format ? format(props.value, name, void 0, self) : props.value
+    state.value = format ? format(props.value, name, self) : props.value
     if (!multiple) state.query = getValueText(props.value, options)
   }
   query = state.query
@@ -135,10 +135,10 @@ export function Select (_props) {
       self.hasFocus = true
       self.openOptions.apply(this, arguments)
     }
-    self.focusOption = function (item, e) {
+    self.focusOption = function (e, item) {
       const {onSelect, name} = self.props
       self.hasFocus = true
-      if (onSelect) onSelect.call(this, item, name, e, self) // pass selected item by reference
+      if (onSelect) onSelect.call(this, e, item, name, self) // pass selected item by reference
     }
     self.blur = function (e) {
       self.hasFocus = false
@@ -148,11 +148,11 @@ export function Select (_props) {
       self.hasFocus = false
       if (self.open) setTimeout(() => self.closeOptions.call(this, e), 0)
     }
-    self.selectOption = function (item, e) { // options clicked
+    self.selectOption = function (e, item) { // options clicked
       const {multiple, onChange, name, parse} = self.props
       let {value = item, text = value} = isObject(item) ? item : {}
       if (multiple) value = toUniqueListFast((self.state.value || []).concat(value))
-      if (onChange) onChange.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
+      if (onChange) onChange.call(this, e, parse ? parse(value, name, self, e) : value, name, self)
       if (e.defaultPrevented) return
       const options = getOptionsFiltered(self) // compute new options to get next focus index
       self.setState({
@@ -162,10 +162,10 @@ export function Select (_props) {
       if (multiple && self.inputNode) self.inputNode.focus()
       if (self.open && !(self.hasFocus = multiple)) setTimeout(() => self.closeOptions.call(this, e), 0)
     }
-    self.deleteValue = function (val, e) {
+    self.deleteValue = function (e, val) {
       const {onChange, name, parse} = self.props
       const value = self.state.value.filter(v => v !== val)
-      if (onChange) onChange.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
+      if (onChange) onChange.call(this, e, parse ? parse(value, name, self, e) : value, name, self)
       if (e.defaultPrevented) return
       self.setState({value})
     }
@@ -174,7 +174,7 @@ export function Select (_props) {
       const {onBlur, name, parse} = self.props
       if (onBlur) {
         const {value} = self.state
-        onBlur.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
+        onBlur.call(this, e, parse ? parse(value, name, self, e) : value, name, self)
       }
       if (e.defaultPrevented) return
       // Input query on close use-cases:
@@ -206,7 +206,7 @@ export function Select (_props) {
       const {onFocus, name, parse} = self.props
       if (onFocus) {
         const {value} = self.state
-        onFocus.call(this, parse ? parse(value, name, e, self) : value, name, e, self)
+        onFocus.call(this, e, parse ? parse(value, name, self, e) : value, name, self)
       }
       if (e.defaultPrevented) return
       self.open = true // prevent further callback firing multiple times
@@ -226,7 +226,7 @@ export function Select (_props) {
     }
     if (!self.searchQuery) self.searchQuery = function (e, query = e.target.value) {
       const {onSearch, name} = self.props
-      if (onSearch) onSearch.call(this, query, name, e, self)
+      if (onSearch) onSearch.call(this, e, query, name, self)
       if (e.defaultPrevented) return
       self.setState({query, focusIndex: 0})
       if (!self.open) self.openOptions.apply(this, arguments) // reopen on search if it was closed
@@ -300,7 +300,7 @@ export function Select (_props) {
           if (selected == null && addOption && query && (!isFunction(addOption) || addOption(query)))
             selected = trimSpaces(query)
           if (selected == null) return e.preventDefault()
-          self.selectOption.call(this, selected, ...arguments)
+          self.selectOption.call(this, e, selected)
           return e.stopPropagation() // allow closing after selection for single select
         }
         case KEY.Backspace: {// input search Backspace will delete the last selected option
@@ -308,7 +308,7 @@ export function Select (_props) {
           if (!multiple || e.target !== self.inputNode) return
           const {query, value} = self.state
           if (query || !value || !value.length) return
-          self.deleteValue.call(this, last(value), ...arguments)
+          self.deleteValue.call(this, e, last(value))
           return e.preventDefault()
         }
         case KEY.Escape: {
@@ -422,10 +422,10 @@ export function Select (_props) {
         const {text = String(v), key = v} = getOptionByValue(v, self.props.options)
         // Use <a> tag, so it can link to another page as selected Tag
         return <a key={key} onClick={onClickValue && onEventStopPropagation(function (e) {
-          onClickValue.call(this, v, name, e, self)
+          onClickValue.call(this, e, v, name, self)
         })}>
-          <Text>{text}</Text><Icon name='delete' onClick={onEventStopPropagation(function () {
-          self.deleteValue.call(this, v, ...arguments)
+          <Text>{text}</Text><Icon name='delete' onClick={onEventStopPropagation(function (e) {
+          self.deleteValue.call(this, e, v)
         })} tabIndex={-1} />
         </a>
       })}
@@ -449,7 +449,7 @@ export function Select (_props) {
         value={query} onChange={self.searchQuery} onFocus={self.focus} onBlur={self.blur}
         {...!self.open && {
           onClick: onEventStopPropagation(self.openOptions, props.onClick),
-          onKeyPress: onEventStopPropagation(self.pressInput, props.onKeyPress),
+          onKeyUp: onEventStopPropagation(self.pressInput, props.onKeyUp),
         }}
       />
 
@@ -483,17 +483,17 @@ Select.propTypes = {
   optionProps: type.Object,
   // Options container props to pass
   optionsProps: type.Object,
-  // Handler(value: any, name?, event, self) when selected value changes
+  // Handler(event, value: any, name?, self) when selected value changes
   onChange: type.Function,
-  // Handler(value: any, name?: string, event: Event, self) on select focus
+  // Handler(event, value: any, name?: string, self) on select focus
   onFocus: type.Function,
-  // Handler(value: any, name?: string, event: Event, self) on select blur
+  // Handler(event, value: any, name?: string, self) on select blur
   onBlur: type.Function,
-  // Handler(query: string, name?, event, self) when search input value changes
+  // Handler(event, query: string, name?, self) when search input value changes
   onSearch: type.Function,
-  // Handler(value: any, name?, event, self) when an option gets focus
+  // Handler(event, value: any, name?, self) when an option gets focus
   onSelect: type.Function,
-  // Handler(value: any, name?, event, self) when a multiple selected value is clicked
+  // Handler(event, value: any, name?, self) when a multiple selected value is clicked
   onClickValue: type.Function,
   // Handler(self: object) when this component has mounted
   onMount: type.Function,
@@ -512,9 +512,9 @@ Select.propTypes = {
   defaultOpen: type.Boolean,
   // Whether to filter out selected value from options dropdown
   excludeSelected: type.Boolean,
-  // Function(value, name?, event?, self) => any - Serializer for internal Select state value
+  // Function(value, name?, self) => any - Serializer for internal Select state value
   format: type.Function,
-  // Function(value, name?, event, self) => any - Deserializer for onChange/onBlur/onFocus value
+  // Function(value, name?, self, event) => any - Deserializer for onChange/onBlur/onFocus value
   // Select always stores the `value` or `value[]` internally for its logic, like fuzzy search
   parse: type.Function,
   // Whether to always render options, even when closed

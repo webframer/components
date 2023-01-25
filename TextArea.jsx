@@ -26,14 +26,14 @@ export function TextArea ({
   const {active, compact, disabled, readonly, icon, iconEnd, props, self} = useInputSetup(_props)
 
   // Autoresize height to fit content length -------------------------------------------------------
-  if (!self.keyUp) self.keyUp = function (e) {
+  if (!self.onKeyUp) self.onKeyUp = function (e) {
     // Must use onKeyUp because onKeyDown/onKeyPress does not register `Enter` or fire too many times
     const {onKeyUp} = self.props
     if (onKeyUp) onKeyUp.apply(this, arguments)
     if (e.defaultPrevented) return
     ((e.key === 'Enter') ? toTextHeight : toTextHeightDebounce)(e) // resize instantly for Enter
   }
-  if (resize) props.onKeyUp = self.keyUp
+  if (resize) props.onKeyUp = self.onKeyUp
 
   return (<>
     {label != null &&
@@ -60,13 +60,13 @@ TextArea.propTypes = {
   defaultValue: type.Any,
   // Internal value for controlled state
   value: type.Any,
-  // Handler(value: any, name?: string, event: Event, self) on textarea value changes
+  // Handler(event, value: any, name?: string, self) on textarea value changes
   onChange: type.Function,
-  // Handler(value: any, name?: string, event: Event, self) on textarea focus
+  // Handler(event, value: any, name?: string, self) on textarea focus
   onFocus: type.Function,
-  // Handler(value: any, name?: string, event: Event, self) on textarea blur
+  // Handler(event, value: any, name?: string, self) on textarea blur
   onBlur: type.Function,
-  // Handler(value: any, name?: string, event: Event, self) on textarea removal.
+  // Handler(event, value: any, name?: string, self) on textarea removal.
   // `onChange` handler will fire after with `null` as value, unless event.preventDefault().
   // To let `onChange` update form instance first before removing the field,
   // use setTimeout to execute code inside `onRemove` handler.

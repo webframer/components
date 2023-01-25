@@ -15,10 +15,10 @@ export function SelectOption ({
   // Event Handlers --------------------------------------------------------------------------------
   props.onClick = useCallback(function (e) {
     e.stopPropagation()
-    onClick.call(this, option, ...arguments)
+    onClick.call(this, e, option)
   }, [option, onClick])
-  props.onBlur = useCallback(function () {onBlur.call(this, option, ...arguments)}, [option, onBlur])
-  props.onFocus = useCallback(function () {onFocus.call(this, option, ...arguments)}, [option, onFocus])
+  props.onBlur = useCallback(function (e) {onBlur.call(this, e, option)}, [option, onBlur])
+  props.onFocus = useCallback(function (e) {onFocus.call(this, e, option)}, [option, onFocus])
 
   // Option Text or Children Display ---------------------------------------------------------------
   let t, _props = {}
@@ -54,11 +54,11 @@ export function SelectOption ({
 
 SelectOption.propTypes = {
   option: type.Option.isRequired,
-  // Handler(option, event) => void - when option is clicked
+  // Handler(event, option) => void - when option is clicked
   onClick: type.Function.isRequired,
-  // Handler(option, event) => void - on option blur event
+  // Handler(event, option) => void - on option blur event
   onBlur: type.Function.isRequired,
-  // Handler(option, event) => void - on option focus event
+  // Handler(event, option) => void - on option focus event
   onFocus: type.Function.isRequired,
   // Whether the current option has focus
   focused: type.Boolean,

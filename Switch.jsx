@@ -26,7 +26,7 @@ export function Switch ({
 
   // Event Handler ---------------------------------------------------------------------------------
   if (!self.changeChecked) self.changeChecked = function (e) {
-    return self.change.call(this, e, e.target.checked) // extend the base pattern
+    return self.onChange.call(this, e, e.target.checked) // extend the base pattern
   }
   props.onChange = self.changeChecked
 
@@ -87,11 +87,11 @@ Switch.propTypes = {
   checkedLabel: type.NodeOrFunction,
   // UI to show for unchecked state inside the Switch, defaults to empty Spacer
   uncheckedLabel: type.NodeOrFunction,
-  // Handler(value: any, name?: string, event: Event, self) on input value changes
+  // Handler(event, value: any, name?: string, self) on input value changes
   onChange: type.Function,
-  // Handler(value: any, name?: string, event: Event, self) on input focus
+  // Handler(event, value: any, name?: string, self) on input focus
   onFocus: type.Function,
-  // Handler(value: any, name?: string, event: Event, self) on input blur
+  // Handler(event, value: any, name?: string, self) on input blur
   onBlur: type.Function,
   // Internal value for controlled checked or unchecked state
   value: type.Any,

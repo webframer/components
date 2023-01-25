@@ -289,12 +289,12 @@ export function useInputValue (props, {controlledValue, format} = {}, self = use
 
   // Initialize value once
   if (!self.setValue && value !== void 0) {
-    self.state.value = format ? format(value, name, void 0, self) : value
+    self.state.value = format ? format(value, name, self) : value
   }
 
   // Sync controlled state
   else if (props.value !== void 0 && (controlledValue || justSynced)) {
-    self.state.value = format ? format(props.value, name, void 0, self) : props.value
+    self.state.value = format ? format(props.value, name, self) : props.value
   }
 
   // fix for React controlled value error

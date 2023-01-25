@@ -104,7 +104,7 @@ export function useInputSetup ({
   props.type = type
   props = toReactProps(props)
   const [self] = useInstance()
-  const [value, setValue] = useInputValue(props, {controlledValue, format}, self)
+  const [value] = useInputValue(props, {controlledValue, format}, self)
   const [active, setFocus] = useState(props.autoFocus)
   const hasValue = value != null && value !== ''
   self.props = {
@@ -118,54 +118,56 @@ export function useInputSetup ({
     self.inputNode = node
     return assignRef.call(this, inputRef, ...arguments)
   }
-  if (!self.change) self.change = function (e, value = e.target.value) {
+  if (!self.onChange) self.onChange = function (e, value = e.target.value) {
     const {onChange, name} = self.props
-    if (onChange) onChange.call(this, self.getParsedValue.call(this, e, value), name, e, self)
+    if (onChange) onChange.call(this, e, self.getParsedValue.call(this, e, value), name, self)
     if (e.defaultPrevented) return
-    setValue(value)
+    self.setState({value})
   }
-  if (!self.blur) self.blur = function (e) {
+  if (!self.onBlur) self.onBlur = function (e) {
     const {onBlur, name} = self.props
-    if (onBlur) onBlur.call(this, self.getParsedValue.call(this, e), name, e, self)
+    if (onBlur) onBlur.call(this, e, self.getParsedValue.call(this, e), name, self)
     if (e.defaultPrevented) return
     setFocus(false)
   }
-  if (!self.focus) self.focus = function (e) {
+  if (!self.onFocus) self.onFocus = function (e) {
     const {onFocus, name} = self.props
-    if (onFocus) onFocus.call(this, self.getParsedValue.call(this, e), name, e, self)
+    if (onFocus) onFocus.call(this, e, self.getParsedValue.call(this, e), name, self)
     if (e.defaultPrevented) return
     setFocus(true)
   }
-  if (!self.remove) self.remove = function (e) {
+  if (!self.onRemove) self.onRemove = function (e) {
     const {onRemove, name} = self.props
-    if (onRemove) onRemove.call(this, self.getParsedValue.call(this, e), name, e, self)
+    if (onRemove) onRemove.call(this, e, self.getParsedValue.call(this, e), name, self)
     if (e.defaultPrevented) return
-    self.change(e, null)
+    self.onChange(e, null)
   }
   if (!self.getParsedValue) self.getParsedValue = function (e, value = self.state.value) {
     const {parse, name} = self.props
-    if (parse) value = parse.call(this, value, name, e, self)
+    if (parse) value = parse.call(this, value, name, self, e)
     return value
   }
   // Fix for Safari/Firefox bug returning empty input value when typing invalid characters
-  if (type === 'number' && __CLIENT__ && !self.keyPress) self.keyPress = function (e) {
+  // Must use `onKeyPress` or equivalent that does not capture modifier keys, like `Escape`.
+  // `onKeyUp` will capture `Escape`, `Shift`, and common shortcuts, which is not correct behavior.
+  if (type === 'number' && __CLIENT__ && !self.onKeyPress) self.onKeyPress = function (e) {
     const {onKeyPress} = self.props
     if (onKeyPress) onKeyPress.apply(this, arguments)
     if (e.defaultPrevented) return
     // Prevent Safari from sending empty value when there is invalid character
     if (!numericPattern().test(e.key)) e.preventDefault()
   }
-  if (self.keyPress) props.onKeyPress = self.keyPress
+  if (self.onKeyPress) props.onKeyPress = self.onKeyPress
 
-  props.onChange = self.change
-  props.onBlur = self.blur
-  props.onFocus = self.focus
+  props.onChange = self.onChange
+  props.onBlur = self.onBlur
+  props.onFocus = self.onFocus
 
   // Compact Input ---------------------------------------------------------------------------------
   if (enabled.compact) compact = useCompactStyle(compact, value, props).compact
 
   // Remove handler --------------------------------------------------------------------------------
-  if (onRemove) iconEnd = {name: 'delete', onClick: self.remove}
+  if (onRemove) iconEnd = {name: 'delete', onClick: self.onRemove}
 
   // Child Components ------------------------------------------------------------------------------
   if (enabled.childBefore && childBefore != null) childBefore = renderProp(childBefore, self)
@@ -277,13 +279,13 @@ InputNative.propTypes = {
   defaultValue: type.Any,
   // Internal value for controlled state
   value: type.Any,
-  // Handler(value: any, name?: string, event: Event, self) on input value changes
+  // Handler(event, value: any, name?: string, self) on input value changes
   onChange: type.Function,
-  // Handler(value: any, name?: string, event: Event, self) on input focus
+  // Handler(event, value: any, name?: string, self) on input focus
   onFocus: type.Function,
-  // Handler(value: any, name?: string, event: Event, self) on input blur
+  // Handler(event, value: any, name?: string, self) on input blur
   onBlur: type.Function,
-  // Handler(value: any, name?: string, event: Event, self) on input removal.
+  // Handler(event, value: any, name?: string, self) on input removal.
   // `onChange` handler will fire after with `null` as value, unless event.preventDefault().
   // To let `onChange` update form instance first before removing the field,
   // use setTimeout to execute code inside `onRemove` handler.
