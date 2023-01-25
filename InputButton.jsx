@@ -1,4 +1,5 @@
 import { debounce, TIME_DURATION_INSTANT } from '@webframer/js'
+import { isPureKeyPress } from '@webframer/js/keyboard.js'
 import cn from 'classnames'
 import React from 'react'
 import { Button } from './Button.jsx'
@@ -7,6 +8,7 @@ import Label from './Label.jsx'
 import { useInputValue, useInstance } from './react/hooks.js'
 import { renderProp } from './react/render.js'
 import { type } from './types.js'
+import { onEventHandler } from './utils/interaction.js'
 
 /**
  * Button that turns into Input on single/double click, and back on Blur/Enter/Escape events:
@@ -14,6 +16,7 @@ import { type } from './types.js'
  *  - Input can be native or any custom input `type` defined by the `controls` prop.
  *  - Button state allows dragging to reorder, and single/double click to edit Input,
  *    whereas dragging Input becomes text selection (ie. highlight text).
+ *  - Drag events do not fire `onClick`.
  *
  * Requirements:
  *  - Input component must have internal `value` state attached to `event.target.value`
@@ -50,6 +53,7 @@ export function InputButton (_props) {
   if (!self.props) {
     // Click event handlers
     self.onClick = function (e) {
+      if (self.isDrag) return
       switch (e.detail) {
         case 2:
           const {onDoubleClick} = self.props
@@ -67,6 +71,10 @@ export function InputButton (_props) {
     }
     self.onClickDelayed = debounce(self.onClick, TIME_DURATION_INSTANT)
 
+    // To differentiate `click` from `drag`, we monitor `pointermove` events on the Button
+    self.onPointerDown = onEventHandler('onPointerDown', self, () => (self.isDrag = false))
+    self.onPointerMove = onEventHandler('onPointerMove', self, () => (self.isDrag = true))
+
     // Input `onBlur` handler that fires `onChange` value
     self.onBlur = function (e) {
       const {onBlur, onChange} = self.props
@@ -77,11 +85,8 @@ export function InputButton (_props) {
     }
 
     // Do not use `onKeyPress` because its deprecated and does not capture Escape
-    self.onKeyUp = function (e) {
-      const {onKeyUp} = self.props
-      if (onKeyUp) onKeyUp.call(this, arguments)
-      if (e.defaultPrevented) return
-
+    self.onKeyUp = onEventHandler('onKeyUp', self, function (e) {
+      if (!isPureKeyPress(e)) return
       switch (e.key) {
         case 'Enter': // fires `onChange` without loosing focus
           self.change.apply(this, arguments)
@@ -90,7 +95,7 @@ export function InputButton (_props) {
           self.blur.apply(this, arguments)
           break
       }
-    }
+    })
 
     // Simulate `onBlur` event for consistency, without changing `value` (does not fire `self.onBlur`)
     self.blur = function (e) {
@@ -122,6 +127,8 @@ export function InputButton (_props) {
     let {childBefore, childAfter, inputClicks, onDoubleClick, ...btnProps} = _props
     inputOnlyProps.forEach(key => delete btnProps[key])
     btnProps.onClick = (inputClicks > 1 || onDoubleClick) ? self.onClickDelayed : self.onClick
+    btnProps.onPointerDown = self.onPointerDown
+    btnProps.onPointerMove = self.onPointerMove
     btnProps.children = renderProp(self.state.value, self) // wrap with Text for styling cursor indicator
     if (btnProps.label != null) {
       Component = ButtonWithLabel
@@ -132,10 +139,17 @@ export function InputButton (_props) {
   // Input props
   else {
     let {onClick, onChange, ...inputProps} = _props // remove onClick (for Button only)
+    // todo: improvement 3 - set caret position on click
+    // It's quite tricky to simulate click -> input does not get focused like when
+    // the user clicks for real. The only way to focus on input programmatically, at the moment
+    // of writing, is to call `input.focus()`, then `input.setSelectionRange()`,
+    // which requires the `selectionStart` position that we do not have a way to compute.
+    // => so using autofocus for now.
     inputProps.autoFocus = true
     if (inputProps.compact == null) inputProps.compact = 0
     inputProps.onKeyUp = self.onKeyUp
     inputProps.onBlur = self.onBlur
+    inputProps.value = self.state.value
     props = inputProps
   }
   delete props.inputClicks
