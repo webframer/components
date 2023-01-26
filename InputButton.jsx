@@ -19,8 +19,9 @@ import { onEventHandler } from './utils/interaction.js'
  *  - Drag events do not fire `onClick`.
  *
  * Requirements:
- *  - Input component must have internal `value` state attached to `event.target.value`
- *    for `onKeyUp` and `onBlur` events.
+ *  - Input component must have internal `value` state attached to `self.state.value` or
+ *    `event.target.value` for `onBlur` and `onKeyUp` events.
+ *    See `self.getStateValue` for reference.
  *
  * Logic:
  *    - `onChange` event only fires on Blur/Enter events from Input,
@@ -41,7 +42,7 @@ import { onEventHandler } from './utils/interaction.js'
  */
 export function InputButton (_props) {
   const [self, {isInput}] = useInstance()
-  let Component = isInput ? Input : Button
+  let Component = isInput ? _props.Input : _props.Button
 
   // onBlur event may send parsed value for backend, but input state stores formatted value.
   // This component should sync with input state to render correct value (ie. e.target.value)
@@ -80,8 +81,9 @@ export function InputButton (_props) {
       const {onBlur, onChange} = self.props
       if (onBlur) onBlur.call(this, arguments)
       if (e.defaultPrevented) return
-      if (onChange && e.target.value !== self.state.value) onChange.call(this, arguments)
-      self.setState({isInput: false, value: e.defaultPrevented ? self.state.value : e.target.value})
+      const value = self.getStateValue.apply(this, arguments)
+      if (onChange && value !== self.state.value) onChange.call(this, arguments)
+      self.setState({isInput: false, value: e.defaultPrevented ? self.state.value : value})
     }
 
     // Do not use `onKeyPress` because its deprecated and does not capture Escape
@@ -105,16 +107,24 @@ export function InputButton (_props) {
       self.setState({isInput: false})
     }
 
-    // Duplicated code from `useInputSetup` to sync with Input behavior ----------------------------
-    self.change = function (e, value = e.target.value) {
+    // Syncs with `useInputSetup` behavior ---------------------------------------------------------
+    self.change = function (e) {
+      const value = self.getStateValue.apply(this, arguments)
       const {onChange, name} = self.props
-      if (onChange) onChange.call(this, e, self.getParsedValue.call(this, e, value), name, self)
+      if (onChange && value !== self.state.value)
+        onChange.call(this, e, self.getParsedValue.call(this, e, value), name, self)
       if (e.defaultPrevented) return
       self.setState({value})
     }
     self.getParsedValue = function (e, value = self.state.value) {
       const {parse, name} = self.props
       if (parse) value = parse.call(this, value, name, self, e)
+      return value
+    }
+
+    // Get `self.state.value` or `event.target.value` from event
+    self.getStateValue = function (e, v, n, s) {
+      const {state: {value = e.target.value} = {}} = s || {}
       return value
     }
   }
@@ -154,17 +164,24 @@ export function InputButton (_props) {
   }
   delete props.inputClicks
   delete props.onDoubleClick
+  delete props.Button
+  delete props.Input
   props.className = cn(props.className, 'input--btn')
 
   return <Component {...props} />
 }
 
 InputButton.defaultProps = {
-  // Double Click to edit as Input
-  inputClicks: 2,
+  Button,
+  Input,
+  inputClicks: 1,
 }
 InputButton.propTypes = {
-  // Number of clicks to turn into Input
+  // Button Component to use
+  Button: type.JSXElementType.isRequired,
+  // Input Component to use
+  Input: type.JSXElementType.isRequired,
+  // Number of clicks to turn into Input, set as 2 for Double Click, default is single click
   inputClicks: type.Enum([1, 2]),
   // ...other props to pass to Button or Input
 }
