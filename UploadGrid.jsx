@@ -1,22 +1,7 @@
-import {
-  _,
-  __CLIENT__,
-  by,
-  canAccept,
-  closestDivisor,
-  FILE,
-  hasListValue,
-  ips,
-  isFunction,
-  isString,
-  l,
-  previewSize,
-  previewSizes,
-  shortNumber,
-  SIZE_KB,
-  toList,
-  translate,
-} from '@webframer/js'
+import { _, __CLIENT__, ips, isFunction, isString, l, SIZE_KB, translate } from '@webframer/js'
+import { by, hasListValue, toList } from '@webframer/js/array.js'
+import { canAccept, FILE, previewSize, previewSizes } from '@webframer/js/file.js'
+import { closestDivisor, shortNumber } from '@webframer/js/number.js'
 import cn from 'classnames'
 import React, { useEffect } from 'react'
 import Image from './Image.jsx'
@@ -87,12 +72,11 @@ export function UploadGrid ({
   if (!self.change) {
     /**
      * Handle selected Files & update internal state
+     * @param {Event} e - click event object to pass to handlers
      * @param {File[]} files - objects from input type="file"
      * @param {string|number} i - identifier or index position
-     * @param {string} [name] - unused
-     * @param {Event} event - click event object to pass to handlers
      */
-    self.change = function (files, i, name, event) {
+    self.change = function (e, files, i) {
       if (!hasListValue(files)) return // we already handle this case with self.remove
       const indexBy = {}
       const {kind} = self.props
@@ -102,21 +86,17 @@ export function UploadGrid ({
         indexBy[identifier] = true
         return ({i: identifier, kind, name: file.name, file})
       })
-      self.updateFiles.call(
-        this,
-        self.state.fileInputs.filter(f => !indexBy[f.i]).concat(changedFiles),
-        changedFiles,
-        event,
-      )
+      const fileInputs = self.state.fileInputs.filter(f => !indexBy[f.i]).concat(changedFiles)
+      self.updateFiles.call(this, e, fileInputs, changedFiles)
     }
 
     /**
      * Update Internal State
+     * @param {Event} e - click event object to pass to handlers
      * @param {FileInput[]} fileInputs - all files in state of type.FileInput
      * @param {{i, remove, file}[]} changedFiles - list of changed files of type.FileInput
-     * @param {Event} event - click event object to pass to handlers
      */
-    self.updateFiles = function (fileInputs, changedFiles, event) {
+    self.updateFiles = function (e, fileInputs, changedFiles) {
       const {onChange, onChangeLast, maxFiles, asArray, name} = self.props
       const {changedValues} = self.state
       const isArray = maxFiles > 1 || asArray
@@ -130,24 +110,24 @@ export function UploadGrid ({
         fileInputs: self.isIncremental ? fileInputs.sort(by('i')).filter(f => f.i < maxFiles) : fileInputs,
       })
       if (onChangeLast) {
-        onChangeLast.call(this, isArray ? changedFiles : changedFiles[0], name, event)
+        onChangeLast.call(this, e, isArray ? changedFiles : changedFiles[0], name, self)
       } else if (onChange) {
-        onChange.call(this, isArray ? Object.values(changedValues) : changedFiles[0], name, event)
+        onChange.call(this, e, isArray ? Object.values(changedValues) : changedFiles[0], name, self)
       }
     }
 
     /**
      * Remove file from State
-     * @param {{name}} fileInput - to remove
      * @param {Event} e - from Upload.onRemove
+     * @param {{name}} fileInput - to remove
      * @param {function} callback - from Upload.onRemove
      */
-    self.remove = function (fileInput, e, callback) {
+    self.remove = function (e, fileInput, callback) {
       e.stopPropagation() // disable onClick for Dropzone
       const {asArray, maxFiles, onRemove, name} = self.props
       const isArray = maxFiles > 1 || asArray
       if (onRemove) onRemove.call(
-        this, isArray ? [fileInput] : fileInput, name, e, () => self.removeFiles.apply(this, arguments),
+        this, e, isArray ? [fileInput] : fileInput, name, self, () => self.removeFiles.apply(this, arguments),
       )
       if (e.defaultPrevented) return
 
@@ -155,10 +135,10 @@ export function UploadGrid ({
       if (confirm(ips(_.DO_YOU_WANT_TO_REMOVE___file___, {file: fileInput.name})))
         self.removeFiles.apply(this, arguments)
     }
-    self.removeFiles = function ({i, kind}, e, callback) {
+    self.removeFiles = function (e, {i, kind}, callback) {
       callback.call(this) // clear Upload input value
       const fileInputs = self.state.fileInputs.filter(f => f.i !== i) // name may not be unique, using URI
-      self.updateFiles.call(this, fileInputs, [{i, kind, remove: true}], e)
+      self.updateFiles.call(this, e, fileInputs, [{i, kind, remove: true}])
     }
   }
 
@@ -240,8 +220,8 @@ export function UploadGrid ({
               value={file ? [file] : []}
               maxFiles={maxFiles}
               childAfter={fileLabel}
-              onChange={function (files, ...args) {self.change.call(this, files, i, ...args)}}
-              onRemove={function (files, name, e, cb) {self.remove.call(this, fileInput, e, cb)}}
+              onChange={function (e, files) {self.change.call(this, e, files, i)}}
+              onRemove={function (e, files, name, s, cb) {self.remove.call(this, e, fileInput, cb)}}
               children={filePreview}
             />
           </View>
@@ -261,11 +241,11 @@ UploadGrid.defaultProps = {
 UploadGrid.propTypes = {
   // Uploaded FileInput(s) value to render initially or to sync with
   initialValues: type.OneOf([type.ListOf(type.FileInput), type.FileInput]),
-  // Handler(fileInput(s), name, event) when file(s) change, receives all changed file(s) since initialization
+  // Handler(event, fileInput(s), name, self) when file(s) change, receives all changed file(s) since initialization
   onChange: type.Function,
   // Similar to `onChange` callback, but receives only last changed file(s), will not call `onChange` if given
   onChangeLast: type.Function,
-  // Handler(fileInput(s), name, event, callback) before input files are to be removed,
+  // Handler(event, fileInput(s), name, self, callback) before input files are to be removed,
   // To use custom behavior, set event.preventDefault, then fire `callback()` yourself.
   // The default behavior uses window.confirm() before calling `onChange` to remove files.
   onRemove: type.Function,

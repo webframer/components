@@ -37,7 +37,7 @@ export function Upload ({
   let [self, {active}] = useInstance()
   const [value, setValue, justSyncedValue] = useInputValue(props)
 
-  Object.assign(self, {
+  Object.assign(self, { // todo: refactor this to self.props
     maxFiles, maxSize, minSize, onChange, onError, onRemove, value,
     accept: props.accept, multiple: props.multiple, name: props.name,
   })
@@ -55,12 +55,12 @@ export function Upload ({
 
       // Has Error - reset input value because it has already changed (either from drop or dialog)
       const files = [...e.target.files]
-      if (self.validate.call(this, files, ...arguments)) {
+      if (self.validate.call(this, e, files)) {
         setInputFiles(self.inputNode, self.value || [])
         return
       }
 
-      if (self.onChange) self.onChange.call(this, files, self.name, ...arguments)
+      if (self.onChange) self.onChange.call(this, e, files, self.name, self)
       if (e.defaultPrevented) return
       setValue(files)
     }
@@ -89,18 +89,18 @@ export function Upload ({
     }
     self.remove = function (e) {
       if (self.onRemove) self.onRemove.call(
-        this, self.value, self.name, e, () => self.removeFiles.apply(this, arguments),
+        this, e, self.value, self.name, self, () => self.removeFiles.apply(this, arguments),
       )
       if (e.defaultPrevented) return
       if (confirm(ips(_.DO_YOU_WANT_TO_REMOVE___file___, {file: self.value.map(f => f.name).join(', ')})))
         self.removeFiles.apply(this, arguments)
     }
     self.removeFiles = function (e) {
-      if (self.onChange) self.onChange.call(this, null, self.name, ...arguments)
+      if (self.onChange) self.onChange.call(this, e, null, self.name, self)
       setInputFiles(self.inputNode, [])
       setValue(null)
     }
-    self.validate = function (files) { // Returns voids if validation passed, else error objects
+    self.validate = function (e, files) { // Returns voids if validation passed, else error objects
       let errors = []
       if (!self.multiple && files.length > 1) errors.push({
         message: _.UPLOAD_A_SINGLE_FILE_ONLY,
@@ -136,7 +136,7 @@ export function Upload ({
         }
       }
       if (errors.length) {
-        if (self.onError) self.onError.call(this, errors, self.name, ...arguments)
+        if (self.onError) self.onError.call(this, e, errors, self.name, self)
         return errors
       }
     }
@@ -198,7 +198,7 @@ Upload.defaultProps = {
   loading: false,
   iconSelect: '',
   iconRemove: '',
-  onError: (errors) => alert(errors.map(e => e.message).join('\n')),
+  onError: (e, errors) => alert(errors.map(e => e.message).join('\n')),
 }
 
 Upload.propTypes = {
@@ -232,11 +232,11 @@ Upload.propTypes = {
   value: type.ListOf(type.File),
   // Initial Input files for uncontrolled-like component
   defaultValue: type.ListOf(type.File),
-  // Handler(acceptedFiles: File[] | null, name?, event) when input value changes
+  // Handler(event, acceptedFiles: File[] | null, name?, self) when input value changes
   onChange: type.Function,
-  // Handler({message: String, file?: File}[], name, event) when input changes and validation fails
+  // Handler(event, {message: String, file?: File}[], name?, self) when input changes and validation fails
   onError: type.Function,
-  // Handler(removedFiles: File[], name, event, callback) before input files are to be removed,
+  // Handler(event, removedFiles: File[], name, self, callback) before input files are to be removed,
   // To use custom behavior, set event.preventDefault, then fire `callback()` yourself.
   // The default behavior uses window.confirm() before calling `onChange` to remove files.
   onRemove: type.Function,
