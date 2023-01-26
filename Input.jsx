@@ -14,7 +14,7 @@ import { UploadGrid } from './UploadGrid.jsx'
 import { extractViewProps, View } from './View.jsx'
 
 /**
- * Universal Input Component that delegates to the corresponding UI component based on given `type`.
+ * Universal Input group that wraps the corresponding Input Control component based on given `type`.
  * Features:
  *  - Info/Error node added below delegated component
  *  - Tooltip support (since this wrapper does not have overflow: hidden).
@@ -26,7 +26,7 @@ import { extractViewProps, View } from './View.jsx'
 export function Input ({
   compact, error, info, id = useId(), idHelp = `${id}-help`, helpTransition,
   className, style, reverse, _ref,
-  controls, children, ...props
+  controls, children, controlProps, ...props
 }) {
   const viewProps = extractViewProps(props)
   if (props.type === 'hidden') return <input {...{id, className, style, ref: _ref, ...props}} />
@@ -70,7 +70,7 @@ export function Input ({
 
   return (
     <View className={cn(className, 'input-group', {compact, error, required})} style={style} {...viewProps}>
-      <Control {...props} />
+      <Control {...props} {...controlProps} />
       <View id={idHelp} className='input__help' {...helpTransition}>
         {error != null && <Label className='input__error'>{renderProp(error)}</Label>}
         {info != null && <Label className='input__info'>{renderProp(info)}</Label>}
@@ -97,6 +97,8 @@ Input.propTypes = {
   tooltip: type.Tooltip,
   // Map of Input Control components by their `type` string to use for rendering
   controls: type.ObjectOf(type.JSXElementType),
+  // Props to pass to Input Control component
+  controlProps: type.Object,
   // ...other native HTML `<input/>` props
 }
 

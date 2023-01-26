@@ -4,31 +4,46 @@ import cn from 'classnames'
 import React from 'react'
 import { Button } from './Button.jsx'
 import { Input } from './Input.jsx'
-import Label from './Label.jsx'
+import { Label } from './Label.jsx'
 import { useInputValue, useInstance } from './react/hooks.js'
 import { renderProp } from './react/render.js'
 import { type } from './types.js'
 import { onEventHandler } from './utils/interaction.js'
 
 /**
- * Button that turns into Input on single/double click, and back on Blur/Enter/Escape events:
+ * Input with dynamic types that switches between Button (`btnType`) and Input (`type`) Control
+ * on single/double click, and back on Blur/Enter/Escape events:
  *
- *  - Input can be native or any custom input `type` defined by the `controls` prop.
+ *  - `btnType` and `type` can be native or any custom input `type` defined by `controls` prop.
  *  - Button state allows dragging to reorder, and single/double click to edit Input,
  *    whereas dragging Input becomes text selection (ie. highlight text).
+ *  - Button state can use any Component, not just Button, by setting `btnType`.
+ *    The same goes for Input, by setting `type`.
  *  - Drag events do not fire `onClick`.
  *
  * Requirements:
- *  - Input component must have internal `value` state attached to `self.state.value` or
- *    `event.target.value` for `onBlur` and `onKeyUp` events.
- *    See `self.getStateValue` for reference.
+ *  1. Input Control component has similar logic to `useInputValue` because `format` is removed.
+ *  2. Input Control component has `value` state attached to `self.state.value` or
+ *     `event.target.value` for `onBlur` and `onKeyUp` events.
+ *     See `self.getStateValue` for reference.
  *
+ * @example:
+ * ┌──── <InputButton/> ─────┐  ┌───────── <Input/> ──────────┐
+ * │                         │  │    (Universal Component)    │
+ * │ Button state: btnType ─┐│  │                             │
+ * │           OR           ├───┼─────> controls[type]        │
+ * │ Input state:    type  ─┘│  │      ┌──────┴──────┐        │
+ * │           +             │  │      ↓             ↓        │
+ * │     (value cache)       │  │  <Button/>   <InputNative/> │
+ * │           ↑             │  │                    │        │
+ * └───────────│─────────────┘  └────────────────────│────────┘
+ *             └─────────────────────────────────────┘
  * Logic:
  *    - `onChange` event only fires on Blur/Enter events from Input,
  *      => to subscribe to any Input value changes while typing, use `onInput` events
- *    - Escape key press will discard any changes made to Input, and simulate `onBlur` event
+ *    - Escape key press will discard any changes made to Input, and simulate `onBlur` event.
+ *    - `onClick` and `onDoubleClick` handlers are removed when in Input state.
  *    - It's possible to pass both `onClick` and `onDoubleClick` handlers (see below).
- *    - `onClick` and `onDoubleClick` handlers are removed from Input.
  *
  * Notes:
  *    - React only has single or double click events.
@@ -39,15 +54,21 @@ import { onEventHandler } from './utils/interaction.js'
  *      this component skips `onClick` event when `onDoubleClick` fires with a delay,
  *      treating `onClick` as single or more than two clicks event.
  *    - `onClick` event can check the count of clicks with `event.detail: number`.
+ *
+ * Architecture:
+ *    - Inner `<input/>` Components can have their own logic to manage internal `state.value`
+ *      using `format` functions. Thus, we must keep it dry and sync with that `state.value`,
+ *      to avoid calling `format` functions twice.
+ *    - Button state is designed for readonly UI, so it should derive value from inner `<input/>`
+ *    - Cache inner `<input/>` state to render Button after edit, and when switching back to Input.
+ *      Alternatively, render both Button and Input, then hide one of them - requires syncing.
+ *      => Cache approach has simpler logic and is more performant with clean markup.
  */
 export function InputButton (_props) {
   const [self, {isInput}] = useInstance()
-  let Component = isInput ? _props.Input : _props.Button
 
-  // onBlur event may send parsed value for backend, but input state stores formatted value.
-  // This component should sync with input state to render correct value (ie. e.target.value)
-  // See Input.md for how `format`/`parse` functions work.
-  const {defaultValue, value} = _props
+  // Compute value for Input Control component
+  const {defaultValue, value, Input} = _props
   useInputValue({defaultValue, value}, _props, self) // this mutates self.state.value
 
   // Event Handlers --------------------------------------------------------------------------------
@@ -76,11 +97,15 @@ export function InputButton (_props) {
     self.onPointerDown = onEventHandler('onPointerDown', self, () => (self.isDrag = false))
     self.onPointerMove = onEventHandler('onPointerMove', self, () => (self.isDrag = true))
 
-    // Input `onBlur` handler that fires `onChange` value
+    // Input `onBlur` handler that may call `onChange` value
     self.onBlur = function (e) {
       const {onBlur, onChange} = self.props
       if (onBlur) onBlur.call(this, arguments)
       if (e.defaultPrevented) return
+
+      // onBlur event may send parsed value for backend, but input state stores formatted value.
+      // This component should sync with input state to render correct value (ie. e.target.value)
+      // See Input.md for how `format`/`parse` functions work.
       const value = self.getStateValue.apply(this, arguments)
       if (onChange && value !== self.state.value) onChange.call(this, arguments)
       self.setState({isInput: false, value: e.defaultPrevented ? self.state.value : value})
@@ -134,21 +159,22 @@ export function InputButton (_props) {
   let props
   // Button props
   if (!isInput) {
-    let {childBefore, childAfter, inputClicks, onDoubleClick, ...btnProps} = _props
-    inputOnlyProps.forEach(key => delete btnProps[key])
+    let {btnType, inputClicks, onDoubleClick, inputOnlyAttrs, ...btnProps} = _props
+    inputOnlyAttrs.forEach(key => delete btnProps[key])
     btnProps.onClick = (inputClicks > 1 || onDoubleClick) ? self.onClickDelayed : self.onClick
     btnProps.onPointerDown = self.onPointerDown
     btnProps.onPointerMove = self.onPointerMove
+    btnProps.type = btnType
     btnProps.children = renderProp(self.state.value, self) // wrap with Text for styling cursor indicator
-    if (btnProps.label != null) {
-      Component = ButtonWithLabel
-      btnProps.self = self
-    }
     props = btnProps
   }
   // Input props
   else {
-    let {onClick, onChange, ...inputProps} = _props // remove onClick (for Button only)
+    let {
+      // Removed props in Input state
+      onClick, onChange, btnType, format, // format is removed to avoid being called twice
+      ...inputProps
+    } = _props
     // todo: improvement 3 - set caret position on click
     // It's quite tricky to simulate click -> input does not get focused like when
     // the user clicks for real. The only way to focus on input programmatically, at the moment
@@ -162,42 +188,45 @@ export function InputButton (_props) {
     inputProps.value = self.state.value
     props = inputProps
   }
-  delete props.inputClicks
-  delete props.onDoubleClick
-  delete props.Button
   delete props.Input
-  props.className = cn(props.className, 'input--btn')
+  delete props.inputClicks
+  delete props.inputOnlyAttrs
+  delete props.onDoubleClick // this is handled by self.onCLick
 
-  return <Component {...props} />
+  return <Input {...props} />
 }
 
 InputButton.defaultProps = {
-  Button,
+  btnType: 'button',
+  controls: {
+    'button': ButtonWithLabel, // use lowercase to avoid markup error when using Button directly
+  },
   Input,
   inputClicks: 1,
+  inputOnlyAttrs: [
+    // 'controls', 'error', 'info', 'helpTransition', 'type',
+    'compact', 'controlledValue', 'defaultValue', 'value', 'onRemove', 'format', 'parse',
+    'prefix', 'suffix', 'stickyPlaceholder', 'noSpellCheck', 'childBefore', 'childAfter',
+    'icon', 'iconEnd',
+  ],
 }
 InputButton.propTypes = {
-  // Button Component to use
-  Button: type.JSXElementType.isRequired,
-  // Input Component to use
-  Input: type.JSXElementType.isRequired,
+  // Button Component `type` to use (as defined by Input `controls` prop)
+  btnType: type.String,
+  // Universal Input Component to use (must render inner `<input/>` by `type`, including `btnType`)
+  Input: type.JSXElementType,
   // Number of clicks to turn into Input, set as 2 for Double Click, default is single click
   inputClicks: type.Enum([1, 2]),
+  // List of props to remove when in Button state (ie. for Input state only)
+  inputOnlyAttrs: type.ListOf(type.String),
   // ...other props to pass to Button or Input
 }
 
 export default React.memo(InputButton)
 
-function ButtonWithLabel ({label, self, ...props}) {
+function ButtonWithLabel ({label, className, type, ...props}) {
   return (<>
-    <Label className='input__label'>{renderProp(label, self)}</Label>
-    <Button {...props} />
+    {label != null && <Label className='input__label'>{renderProp(label)}</Label>}
+    <Button className={cn(className, 'input--btn')} {...props} />
   </>)
 }
-
-const inputOnlyProps = [
-  'controls', 'error', 'info', 'helpTransition', 'type',
-  'compact', 'controlledValue', 'defaultValue', 'value', 'onRemove', 'format', 'parse',
-  'prefix', 'suffix', 'stickyPlaceholder', 'noSpellCheck', 'childBefore', 'childAfter',
-  'icon', 'iconEnd',
-]
