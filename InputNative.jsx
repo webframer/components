@@ -13,6 +13,7 @@ import { extractViewProps } from './View.jsx'
 
 /**
  * Wrapper for Native HTML Input, such as: 'text', 'number', 'email', etc. where value is text.
+ *
  * Features:
  *  1. format and parse functions
  *  2. Label added before input

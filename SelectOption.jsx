@@ -89,8 +89,8 @@ export function useSelectionOptionProps ({
   // Generic Option Props that is common to all options
   const optionProps = useMemo(() => ({
     onClick: self.selectOption,
-    onBlur: self.blurOption,
-    onFocus: self.focusOption,
+    onBlur: self.onBlurOption,
+    onFocus: self.onFocusOption,
     tabIndex: -1, // tab moves to the next input + avoid focusIndex mismatch
     ...optProps,
   }), [optProps])

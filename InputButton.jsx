@@ -2,13 +2,13 @@ import { debounce, TIME_DURATION_INSTANT } from '@webframer/js'
 import { isPureKeyPress } from '@webframer/js/keyboard.js'
 import cn from 'classnames'
 import React from 'react'
-import { Button } from './Button.jsx'
 import { Input } from './Input.jsx'
 import { Label } from './Label.jsx'
 import { useInputValue, useInstance } from './react/hooks.js'
 import { renderProp } from './react/render.js'
 import { type } from './types.js'
 import { onEventHandler } from './utils/interaction.js'
+import { View } from './View.jsx'
 
 /**
  * Input with dynamic types that switches between Button (`btnType`) and Input (`type`) Control
@@ -79,7 +79,7 @@ export function InputButton (_props) {
       switch (e.detail) {
         case 2:
           const {onDoubleClick} = self.props
-          if (onDoubleClick) onDoubleClick.call(this, arguments)
+          if (onDoubleClick) onDoubleClick.apply(this, arguments)
           break
         case 1:
         default:
@@ -88,7 +88,10 @@ export function InputButton (_props) {
       }
       if (e.defaultPrevented) return
 
-      if (e.detail === self.props.inputClicks)
+      if (
+        (e.detail === self.props.inputClicks) ||
+        (e.detail === 0 && self.props.inputClicks === 1) // Enter press will trigger `click` in View
+      )
         self.setState({isInput: true})
     }
     self.onClickDelayed = debounce(self.onClick, TIME_DURATION_INSTANT)
@@ -98,18 +101,15 @@ export function InputButton (_props) {
     self.onPointerMove = onEventHandler('onPointerMove', self, () => (self.isDrag = true))
 
     // Input `onBlur` handler that may call `onChange` value
-    self.onBlur = function (e) {
-      const {onBlur, onChange} = self.props
-      if (onBlur) onBlur.call(this, arguments)
-      if (e.defaultPrevented) return
-
+    self.onBlur = onEventHandler('onBlur', self, function (e) {
       // onBlur event may send parsed value for backend, but input state stores formatted value.
       // This component should sync with input state to render correct value (ie. e.target.value)
       // See Input.md for how `format`/`parse` functions work.
       const value = self.getStateValue.apply(this, arguments)
-      if (onChange && value !== self.state.value) onChange.call(this, arguments)
+      const {onChange} = self.props
+      if (onChange && value !== self.state.value) onChange.apply(this, arguments)
       self.setState({isInput: false, value: e.defaultPrevented ? self.state.value : value})
-    }
+    })
 
     // Do not use `onKeyPress` because its deprecated and does not capture Escape
     self.onKeyUp = onEventHandler('onKeyUp', self, function (e) {
@@ -141,6 +141,7 @@ export function InputButton (_props) {
       if (e.defaultPrevented) return
       self.setState({value})
     }
+
     self.getParsedValue = function (e, value = self.state.value) {
       const {parse, name} = self.props
       if (parse) value = parse.call(this, value, name, self, e)
@@ -197,9 +198,9 @@ export function InputButton (_props) {
 }
 
 InputButton.defaultProps = {
-  btnType: 'button',
+  btnType: 'view', // Use View, because Button does not allow text selection, and has style conflicts
   controls: {
-    'button': ButtonWithLabel, // use lowercase to avoid markup error when using Button directly
+    'view': ViewWithLabel,
   },
   Input,
   inputClicks: 1,
@@ -224,9 +225,9 @@ InputButton.propTypes = {
 
 export default React.memo(InputButton)
 
-function ButtonWithLabel ({label, className, type, ...props}) {
+function ViewWithLabel ({label, className, type, ...props}) {
   return (<>
     {label != null && <Label className='input__label'>{renderProp(label)}</Label>}
-    <Button className={cn(className, 'input--btn')} {...props} />
+    <View className={cn(className, 'input--btn')} {...props} />
   </>)
 }

@@ -20,17 +20,20 @@ import { resizeWidth, setFocus } from './utils/element.js'
 import { onEventStopPropagation } from './utils/interaction.js'
 
 /**
- * Dropdown List of Searchable Select Options and Nested Category Hierarchy
- * Use cases:
+ * Dropdown List of Searchable Select Options and Nested Category Hierarchy.
+ *
+ * Features:
  *    1. Select (with options like `<select/>` element)
  *    2. Multiple select
- *    3. Search Select (+ multiple)
- *    4. Group options by category
- *    5. Overlay options when inside overflow-hidden parent
- *    6. Keyboard friendly
- *    7. Copy/Paste selected options
- *    8. Nested option category (options grouped into categories)
- *    9. Text literal with variables suggestion (prefixed with `$`).
+ *    3. Search select (+ multiple)
+ *    4. Customisable fuzzy search with cached indexing for large collections
+ *    5. Infinite scroll with fast rendering using `<VirtualList/>`
+ *    6. Group options by category, or render any custom UI via `optionsProps`
+ *    7. Overlay options when inside overflow-hidden parent with `fixed={true}`
+ *    8. Editable selected options with custom `renderSelected` function using `<InputButton/>`
+ *    9. Supports all features of `<InputNative/>`
+ *    10. Keyboard friendly (arrows to move, `Enter` to select/open, `Escape` to close, `Tab` to blur)
+ *    11. todo: improvement - Copy/Paste selected options via keyboard, like native input.
  *
  * Usage:
  *    - To keep Select open while interacting with content inside dropdown:
@@ -52,14 +55,18 @@ import { onEventStopPropagation } from './utils/interaction.js'
  *      => What we need instead, is a serializer that
  *         converts form.values to individual input type value for each UI component.
  *         This way backend can store a different value format from UI internal state.
- *      @see https://www.django-rest-framework.org/api-guide/serializers/
+ *         @see https://www.django-rest-framework.org/api-guide/serializers/
  *
  * @example:
  *    // Format backend data to frontend value
+ *    <Select format={(v) => v.split(' ')} />
+ *    // which is equivalent to
  *    serialize('row reverse')
  *    >>> ['row', 'reverse']
  *
  *    // Parse frontend value to backend data
+ *    <Select parse={(v) => v.join(' ')} />
+ *    // which is equivalent to
  *    deserialize(['row', 'reverse'])
  *    >>> 'row reverse'
  */
@@ -74,7 +81,7 @@ export function Select (_props) {
     type, // not used
     float, error, label, loading, prefix, suffix, stickyPlaceholder,
     childBefore, childAfter, className, style, row,
-    _ref, inputRef, id = useId(), ...props
+    _ref, inputRef, id = useId(), renderSelected, ...props
   } = _props
   props = toReactProps(props)
   let {value = defaultValue} = props
@@ -130,44 +137,23 @@ export function Select (_props) {
   }
 
   // Event Handlers --------------------------------------------------------------------------------
-  if (!self.focus) {
-    self.focus = function (e) {
+  if (!self.onFocus) {
+    self.onFocus = function (e) {
       self.hasFocus = true
       self.openOptions.apply(this, arguments)
     }
-    self.focusOption = function (e, item) {
+    self.onFocusOption = function (e, item) {
       const {onSelect, name} = self.props
       self.hasFocus = true
       if (onSelect) onSelect.call(this, e, item, name, self) // pass selected item by reference
     }
-    self.blur = function (e) {
+    self.onBlur = function (e) {
       self.hasFocus = false
       if (self.open) setTimeout(() => self.closeOptions.call(this, e), 0)
     }
-    self.blurOption = function (e) {
+    self.onBlurOption = function (e) {
       self.hasFocus = false
       if (self.open) setTimeout(() => self.closeOptions.call(this, e), 0)
-    }
-    self.selectOption = function (e, item) { // options clicked
-      const {multiple, onChange, name, parse} = self.props
-      let {value = item, text = value} = isObject(item) ? item : {}
-      if (multiple) value = toUniqueListFast((self.state.value || []).concat(value))
-      if (onChange) onChange.call(this, e, parse ? parse(value, name, self, e) : value, name, self)
-      if (e.defaultPrevented) return
-      const options = getOptionsFiltered(self) // compute new options to get next focus index
-      self.setState({
-        value, query: multiple ? '' : String(text), options,
-        focusIndex: options.findIndex(i => i === item),
-      })
-      if (multiple && self.inputNode) self.inputNode.focus()
-      if (self.open && !(self.hasFocus = multiple)) setTimeout(() => self.closeOptions.call(this, e), 0)
-    }
-    self.deleteValue = function (e, val) {
-      const {onChange, name, parse} = self.props
-      const value = self.state.value.filter(v => v !== val)
-      if (onChange) onChange.call(this, e, parse ? parse(value, name, self, e) : value, name, self)
-      if (e.defaultPrevented) return
-      self.setState({value})
     }
     self.closeOptions = function (e) {
       if (self.willUnmount || self.hasFocus || !self.open) return
@@ -213,17 +199,53 @@ export function Select (_props) {
       self.subscribeToEvents()
       toggleOpen.apply(this, arguments)
     }
+
+    /**
+     * Change single Select value, or add option to multiple Select values when option is clicked
+     * @param {Event} e
+     * @param {any} item - option's value or `type.Option` object to set/add as selected value(s)
+     */
+    self.selectOption = function (e, item) {
+      const {multiple, onChange, name, parse} = self.props
+      let {value = item, text = value} = isObject(item) ? item : {}
+      if (multiple) value = toUniqueListFast((self.state.value || []).concat(value))
+      if (onChange) onChange.call(this, e, parse ? parse(value, name, self, e) : value, name, self)
+      if (e.defaultPrevented) return
+      const options = getOptionsFiltered(self) // compute new options to get next focus index
+      self.setState({
+        value, query: multiple ? '' : String(text), options,
+        focusIndex: options.findIndex(i => i === item),
+      })
+      if (multiple && self.inputNode) self.inputNode.focus()
+      if (self.open && !(self.hasFocus = multiple)) setTimeout(() => self.closeOptions.call(this, e), 0)
+    }
+
+    // Remove selected value from multiple Select
+    self.deleteValue = function (e, val) {
+      const value = self.state.value.filter(v => v !== val)
+      self.changeValue(e, value)
+    }
+
+    // Update selected value by index for multiple Select (for custom `renderSelected` editing)
+    self.updateValue = function (e, val, index) {
+      let value = [...self.state.value || []]
+      value[index] = val
+      value = toUniqueListFast(value) // filter duplicates after edit
+      self.changeValue(e, value)
+    }
+
+    // Change Select value(s)
+    self.changeValue = function (e, value) {
+      const {onChange, name, parse} = self.props
+      if (onChange) onChange.call(this, e, parse ? parse(value, name, self, e) : value, name, self)
+      if (e.defaultPrevented) return
+      self.setState({value}) // options get filtered by `useMemo` below when `state.value` changes
+    }
   }
 
   // Fuzzy Search ----------------------------------------------------------------------------------
   if (search) {
     if (!self.fuse) self.fuse = new Fuse([], {...fuzzyOpt, ...searchOptions})
-    if (!self.getOptions) self.getOptions = function (query) {
-      const {queryParser} = self.props
-      if (queryParser) query = queryParser(query)
-      if (!query) return getOptionsFiltered(self)
-      return self.fuse.search(query).map(v => v.item) // returns no result for empty string
-    }
     if (!self.searchQuery) self.searchQuery = function (e, query = e.target.value) {
       const {onSearch, name} = self.props
       if (onSearch) onSearch.call(this, e, query, name, self)
@@ -231,6 +253,12 @@ export function Select (_props) {
       self.setState({query, focusIndex: 0})
       if (!self.open) self.openOptions.apply(this, arguments) // reopen on search if it was closed
       self.updateOptionsDebounced(query)
+    }
+    if (!self.getOptions) self.getOptions = function (query) {
+      const {queryParser} = self.props
+      if (queryParser) query = queryParser(query)
+      if (!query) return getOptionsFiltered(self)
+      return self.fuse.search(query).map(v => v.item) // returns no result for empty string
     }
     if (!self.updateOptions) {
       self.updateOptions = (query) => {
@@ -398,6 +426,31 @@ export function Select (_props) {
   }
 
   // Render Props ----------------------------------------------------------------------------------
+  if (multiple && !self.renderSelected) self.renderSelected = function (v) {
+    if (self.props.renderSelected) return self.props.renderSelected.call(this, ...arguments, self)
+    const {onClickValue, options, name} = self.props
+
+    // Note: options can be large collections, so this operation can be expensive.
+    // We only need to find the option if it's an object with `text` different from `value`.
+    // Using `(o || {})` is a cheap way of finding objects, but not foolproof,
+    // because `new String(value)` may also have `.value` prop that accidentally matches `v`.
+    // => use custom `renderSelected` function for such cases to skip `options.find` call.
+    const {text = String(v), key = v} = (options.length && options.find(o => (o || {}).value === v)) || {}
+
+    // Use <a> tag, so it can link to another page as selected Tag
+    return (
+      <a className='select__value' key={key}
+         onClick={onClickValue && onEventStopPropagation(function (e) {
+           onClickValue.call(this, e, v, name, self)
+         })}>
+        <Text className='select__value__text'>{text}</Text>
+        <Icon className='select__value__delete' name='delete'
+              onClick={onEventStopPropagation(function (e) {
+                self.deleteValue.call(this, e, v)
+              })} tabIndex={-1} />
+      </a>
+    )
+  }
   compact = compact != null && compact !== false // convert to boolean for rendering
 
   // Input value should be:
@@ -418,17 +471,7 @@ export function Select (_props) {
       {icon}
 
       {/* Multiple selected items */}
-      {multiple && value && value.map(v => {
-        const {text = String(v), key = v} = getOptionByValue(v, self.props.options)
-        // Use <a> tag, so it can link to another page as selected Tag
-        return <a key={key} onClick={onClickValue && onEventStopPropagation(function (e) {
-          onClickValue.call(this, e, v, name, self)
-        })}>
-          <Text>{text}</Text><Icon name='delete' onClick={onEventStopPropagation(function (e) {
-          self.deleteValue.call(this, e, v)
-        })} tabIndex={-1} />
-        </a>
-      })}
+      {multiple && value && value.map(self.renderSelected)}
 
       {/* Prefix + Suffix */}
       {prefix != null &&
@@ -446,7 +489,7 @@ export function Select (_props) {
         className={cn('select__input', {'fill-width': !compact && (multiple || !hasValue), iconStart: icon, iconEnd})}
         style={self.styleInput}
         id={id} readOnly={!search} {...props} ref={self.inputRef}
-        value={query} onChange={self.searchQuery} onFocus={self.focus} onBlur={self.blur}
+        value={query} onChange={self.searchQuery} onFocus={self.onFocus} onBlur={self.onBlur}
         {...!self.open && {
           onClick: onEventStopPropagation(self.openOptions, props.onClick),
           onKeyUp: onEventStopPropagation(self.pressInput, props.onKeyUp),
@@ -554,6 +597,8 @@ Select.propTypes = {
   upward: type.Boolean,
   // Selected value(s) - if passed, becomes a controlled component
   value: type.Any,
+  // Function(value: any, index: number, array, self) => JSX - to render selected option
+  renderSelected: type.Function,
   // Message string to display when there are no options left for multiple select, or
   // Handler(self) => string - function to render message dynamically (example: using query)
   noOptionsMsg: type.NodeOrFunction,
@@ -637,11 +682,6 @@ function getValueText (value, options) {
   if (!options.length) return String(value)
   const o = options.find(o => o === value || (o && o.value === value))
   return String(o === void 0 ? value : (isObject(o) ? (o.text || o.value) : o))
-}
-
-function getOptionByValue (value, options) {
-  return (options.length && options.find(o => (o || {}).value === value)) ||
-    {value, key: value, text: String(value)}
 }
 
 // Options array without selected values for `multiple` Select or `excludeSelected`
