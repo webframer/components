@@ -11,13 +11,13 @@ import { onEventHandler } from './utils/interaction.js'
 import { View } from './View.jsx'
 
 /**
- * Input with dynamic types that switches between Button (`btnType`) and Input (`type`) Control
+ * Input with dynamic types that switches between View (`viewType`) and Input (`type`) Control
  * on single/double click, and back on Blur/Enter/Escape events:
  *
- *  - `btnType` and `type` can be native or any custom input `type` defined by `controls` prop.
- *  - Button state allows dragging to reorder, and single/double click to edit Input,
+ *  - `viewType` and `type` can be native or any custom input `type` defined by `controls` prop.
+ *  - View state allows dragging to reorder, and single/double click to edit Input,
  *    whereas dragging Input becomes text selection (ie. highlight text).
- *  - Button state can use any Component, not just Button, by setting `btnType`.
+ *  - View state can use any Component, not just View, by setting `viewType`.
  *    The same goes for Input, by setting `type`.
  *  - Drag events do not fire `onClick`.
  *
@@ -28,13 +28,13 @@ import { View } from './View.jsx'
  *     See `self.getStateValue` for reference.
  *
  * @example:
- * ┌──── <InputButton/> ─────┐  ┌───────── <Input/> ──────────┐
+ * ┌────── <InputView/> ─────┐  ┌───────── <Input/> ──────────┐
  * │                         │  │    (Universal Component)    │
- * │ Button state: btnType ─┐│  │                             │
+ * │ View state:  viewType ─┐│  │                             │
  * │           OR           ├───┼─────> controls[type]        │
  * │ Input state:    type  ─┘│  │      ┌──────┴──────┐        │
  * │           +             │  │      ↓             ↓        │
- * │     (value cache)       │  │  <Button/>   <InputNative/> │
+ * │     (value cache)       │  │  <View/>   <InputNative/>   │
  * │           ↑             │  │                    │        │
  * └───────────│─────────────┘  └────────────────────│────────┘
  *             └─────────────────────────────────────┘
@@ -59,12 +59,12 @@ import { View } from './View.jsx'
  *    - Inner `<input/>` Components can have their own logic to manage internal `state.value`
  *      using `format` functions. Thus, we must keep it dry and sync with that `state.value`,
  *      to avoid calling `format` functions twice.
- *    - Button state is designed for readonly UI, so it should derive value from inner `<input/>`
- *    - Cache inner `<input/>` state to render Button after edit, and when switching back to Input.
- *      Alternatively, render both Button and Input, then hide one of them - requires syncing.
+ *    - View state is designed for readonly UI, so it should derive value from inner `<input/>`
+ *    - Cache inner `<input/>` state to render View after edit, and when switching back to Input.
+ *      Alternatively, render both View and Input, then hide one of them - requires syncing.
  *      => Cache approach has simpler logic and is more performant with clean markup.
  */
-export function InputButton (_props) {
+export function InputView (_props) {
   const [self, {isInput}] = useInstance()
 
   // Compute value for Input Control component
@@ -96,7 +96,7 @@ export function InputButton (_props) {
     }
     self.onClickDelayed = debounce(self.onClick, TIME_DURATION_INSTANT)
 
-    // To differentiate `click` from `drag`, we monitor `pointermove` events on the Button
+    // To differentiate `click` from `drag`, we monitor `pointermove` events on the View
     self.onPointerDown = onEventHandler('onPointerDown', self, () => (self.isDrag = false))
     self.onPointerMove = onEventHandler('onPointerMove', self, () => (self.isDrag = true))
 
@@ -118,7 +118,7 @@ export function InputButton (_props) {
         case 'Enter': // fires `onChange` without loosing focus
           self.change.apply(this, arguments)
           break
-        case 'Escape': // switch back to Button without firing `onChange`
+        case 'Escape': // switch back to View without firing `onChange`
           self.blur.apply(this, arguments)
           break
       }
@@ -158,22 +158,22 @@ export function InputButton (_props) {
 
   // Render Props ----------------------------------------------------------------------------------
   let props
-  // Button props
+  // View props
   if (!isInput) {
-    let {btnType, inputClicks, onDoubleClick, inputOnlyAttrs, ...btnProps} = _props
-    inputOnlyAttrs.forEach(key => delete btnProps[key])
-    btnProps.onClick = (inputClicks > 1 || onDoubleClick) ? self.onClickDelayed : self.onClick
-    btnProps.onPointerDown = self.onPointerDown
-    btnProps.onPointerMove = self.onPointerMove
-    btnProps.type = btnType
-    btnProps.children = renderProp(self.state.value, self) // wrap with Text for styling cursor indicator
-    props = btnProps
+    let {viewType, inputClicks, onDoubleClick, inputOnlyAttrs, ...viewProps} = _props
+    inputOnlyAttrs.forEach(key => delete viewProps[key])
+    viewProps.onClick = (inputClicks > 1 || onDoubleClick) ? self.onClickDelayed : self.onClick
+    viewProps.onPointerDown = self.onPointerDown
+    viewProps.onPointerMove = self.onPointerMove
+    viewProps.type = viewType
+    viewProps.children = renderProp(self.state.value, self) // wrap with Text for styling cursor indicator
+    props = viewProps
   }
   // Input props
   else {
     let {
       // Removed props in Input state
-      onClick, onChange, btnType, format, // format is removed to avoid being called twice
+      onClick, onChange, viewType, format, // format is removed to avoid being called twice
       ...inputProps
     } = _props
     // todo: improvement 3 - set caret position on click
@@ -197,8 +197,8 @@ export function InputButton (_props) {
   return <Input {...props} />
 }
 
-InputButton.defaultProps = {
-  btnType: 'view', // Use View, because Button does not allow text selection, and has style conflicts
+InputView.defaultProps = {
+  viewType: 'view', // Use View, because View does not allow text selection, and has style conflicts
   controls: {
     'view': ViewWithLabel,
   },
@@ -211,23 +211,23 @@ InputButton.defaultProps = {
     'icon', 'iconEnd',
   ],
 }
-InputButton.propTypes = {
-  // Button Component `type` to use (as defined by Input `controls` prop)
-  btnType: type.String,
-  // Universal Input Component to use (must render inner `<input/>` by `type`, including `btnType`)
+InputView.propTypes = {
+  // View Component `type` to use (as defined by Input `controls` prop)
+  viewType: type.String,
+  // Universal Input Component to use (must render inner `<input/>` by `type`, including `viewType`)
   Input: type.JSXElementType,
   // Number of clicks to turn into Input, set as 2 for Double Click, default is single click
   inputClicks: type.Enum([1, 2]),
-  // List of props to remove when in Button state (ie. for Input state only)
+  // List of props to remove when in View state (ie. for Input state only)
   inputOnlyAttrs: type.ListOf(type.String),
-  // ...other props to pass to Button or Input
+  // ...other props to pass to View or Input
 }
 
-export default React.memo(InputButton)
+export default React.memo(InputView)
 
 function ViewWithLabel ({label, className, type, ...props}) {
   return (<>
     {label != null && <Label className='input__label'>{renderProp(label)}</Label>}
-    <View className={cn(className, 'input--btn')} {...props} />
+    <View className={cn(className, 'input--view')} {...props} />
   </>)
 }

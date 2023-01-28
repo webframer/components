@@ -30,7 +30,7 @@ import { onEventStopPropagation } from './utils/interaction.js'
  *    5. Infinite scroll with fast rendering using `<VirtualList/>`
  *    6. Group options by category, or render any custom UI via `optionsProps`
  *    7. Overlay options when inside overflow-hidden parent with `fixed={true}`
- *    8. Editable selected options with custom `renderSelected` function using `<InputButton/>`
+ *    8. Editable selected options with custom `renderSelected` function using `<InputView/>`
  *    9. Supports all features of `<InputNative/>`
  *    10. Keyboard friendly (arrows to move, `Enter` to select/open, `Escape` to close, `Tab` to blur)
  *    11. todo: improvement - Copy/Paste selected options via keyboard, like native input.
