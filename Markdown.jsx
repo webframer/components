@@ -2,7 +2,7 @@ import cn from 'classnames'
 import React from 'react'
 import ReactMarkdown from 'react-markdown'
 import { type } from './types.js'
-import { extractViewProps, View } from './View.jsx'
+import { extractProps, View } from './View.jsx'
 
 // todo: improvement 3 - 'react-markdown' causes React hydration error in Next.js production
 //      Can't resolve 'supports-color'?
@@ -13,7 +13,7 @@ function createMarkdown () {
    */
   function Markdown ({className, children, ...props}) {
     return ( // wrap with View to allow optional scroll, tooltip, and accessibility support
-      <View className={cn(className, 'markdown')} {...extractViewProps(props)}>
+      <View className={cn(className, 'markdown')} {...extractProps(props)}>
         <ReactMarkdown {...props}>{children}</ReactMarkdown>
       </View>
     )

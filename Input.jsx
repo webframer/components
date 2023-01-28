@@ -11,7 +11,7 @@ import { TextArea } from './TextArea.jsx'
 import { type } from './types.js'
 import { Upload } from './Upload.jsx'
 import { UploadGrid } from './UploadGrid.jsx'
-import { extractViewProps, View } from './View.jsx'
+import { extractProps, View } from './View.jsx'
 
 /**
  * Universal Input group that wraps the corresponding Input Control component based on given `type`.
@@ -28,7 +28,7 @@ export function Input ({
   className, style, reverse, _ref,
   controls, children, controlProps, ...props
 }) {
-  const viewProps = extractViewProps(props)
+  const viewProps = extractProps(props)
   if (props.type === 'hidden') return <input {...{id, className, style, ref: _ref, ...props}} />
 
   // Error Message ---------------------------------------------------------------------------------

@@ -331,11 +331,12 @@ export const [View, ViewRef] = createView()
 export default React.memo(View)
 
 /**
- * Extract View.jsx props from `props` object by mutation
+ * Extract key->value pairs from `props` object by mutation, returning new object of extracted keys
+ *
  * @example:
  *    function Component ({...props}) {
  *      return (
- *        <View {...extractViewProps(props)}>
+ *        <View {...extractProps(props)}>
  *          // The `props` now has View.jsx props removed
  *          <OtherComponent {...props}/>
  *        </View>
@@ -343,13 +344,18 @@ export default React.memo(View)
  *    }
  *
  * @param {object} props - original Component props
- * @returns {object} props - to use with View.jsx, with keys removed from the original `props`
+ * @param {object} [keys] - object keys config:
+ *    - keys with `false` values are skipped (left in `props`),
+ *    - keys with `null` values are deleted from `props` without inclusion in the `result` object,
+ *    - `undefined` keys or keys with `true` values are deleted from `props` and assigned to `result`
+ * @param {object} [propTypes] - Component.propTypes definition to extract props for
+ * @returns {object} result - props to use with Component.jsx, with keys removed from the original `props`
  */
-export function extractViewProps (props) {
+export function extractProps (props, keys = {}, propTypes = View.propTypes) {
   const viewProps = {}
-  for (const key in View.propTypes) {
-    if (!hasProp(props, key)) continue
-    viewProps[key] = props[key]
+  for (const key in propTypes) {
+    if (keys[key] === false || !hasProp(props, key)) continue
+    if (keys[key] !== null) viewProps[key] = props[key]
     delete props[key]
   }
   return viewProps

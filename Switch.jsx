@@ -9,7 +9,7 @@ import { renderProp } from './react/render.js'
 import { Row } from './Row.jsx'
 import Spacer from './Spacer.jsx'
 import { type } from './types.js'
-import { extractViewProps } from './View.jsx'
+import { extractProps } from './View.jsx'
 
 /**
  * Switch (Toggle) Input Component
@@ -18,7 +18,7 @@ export function Switch ({
   className, error, loading, label, checkedLabel, uncheckedLabel, title,
   ..._props
 }) {
-  const viewProps = extractViewProps(_props)
+  const viewProps = extractProps(_props)
   const {
     active, disabled, readonly, value,
     childBefore, childAfter, id, props, self,

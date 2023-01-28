@@ -160,13 +160,13 @@ export function InputView (_props) {
   let props
   // View props
   if (!isInput) {
-    let {viewType, inputClicks, onDoubleClick, inputOnlyAttrs, ...viewProps} = _props
-    inputOnlyAttrs.forEach(key => delete viewProps[key])
+    let {viewType, inputClicks, onDoubleClick, inputOnlyAttrs, viewProps, ...moreProps} = _props
+    inputOnlyAttrs.forEach(key => delete moreProps[key])
+    viewProps = Object.assign(moreProps, viewProps)
     viewProps.onClick = (inputClicks > 1 || onDoubleClick) ? self.onClickDelayed : self.onClick
     viewProps.onPointerDown = self.onPointerDown
     viewProps.onPointerMove = self.onPointerMove
     viewProps.type = viewType
-    viewProps.children = renderProp(self.state.value, self) // wrap with Text for styling cursor indicator
     props = viewProps
   }
   // Input props
@@ -174,8 +174,9 @@ export function InputView (_props) {
     let {
       // Removed props in Input state
       onClick, onChange, viewType, format, // format is removed to avoid being called twice
-      ...inputProps
+      inputProps, ...moreProps
     } = _props
+    inputProps = Object.assign(moreProps, inputProps)
     // todo: improvement 3 - set caret position on click
     // It's quite tricky to simulate click -> input does not get focused like when
     // the user clicks for real. The only way to focus on input programmatically, at the moment
@@ -186,12 +187,14 @@ export function InputView (_props) {
     if (inputProps.compact == null) inputProps.compact = 0
     inputProps.onKeyUp = self.onKeyUp
     inputProps.onBlur = self.onBlur
-    inputProps.value = self.state.value
     props = inputProps
   }
+  props.value = self.state.value
   delete props.Input
   delete props.inputClicks
   delete props.inputOnlyAttrs
+  delete props.inputProps
+  delete props.viewProps
   delete props.onDoubleClick // this is handled by self.onCLick
 
   return <Input {...props} />
@@ -207,7 +210,7 @@ InputView.defaultProps = {
   inputOnlyAttrs: [
     // 'controls', 'error', 'info', 'helpTransition', 'type',
     'compact', 'controlledValue', 'defaultValue', 'value', 'onRemove', 'format', 'parse',
-    'prefix', 'suffix', 'stickyPlaceholder', 'noSpellCheck', 'childBefore', 'childAfter',
+    'prefix', 'suffix', 'stickyPlaceholder', 'noSpellCheck', // 'childBefore', 'childAfter',
     'icon', 'iconEnd',
   ],
 }
@@ -220,14 +223,22 @@ InputView.propTypes = {
   inputClicks: type.Enum([1, 2]),
   // List of props to remove when in View state (ie. for Input state only)
   inputOnlyAttrs: type.ListOf(type.String),
+  // Props to use for Input state only
+  inputProps: type.Object,
+  // Props to use for View state only
+  viewProps: type.Object,
   // ...other props to pass to View or Input
 }
 
 export default React.memo(InputView)
 
-function ViewWithLabel ({label, className, type, ...props}) {
+function ViewWithLabel ({className, label, value, childBefore, childAfter, type, ...props}) {
   return (<>
     {label != null && <Label className='input__label'>{renderProp(label)}</Label>}
-    <View className={cn(className, 'input--view')} {...props} />
+    <View className={cn(className, 'input--view')} {...props}>
+      {renderProp(childBefore)}
+      {renderProp(value)}
+      {renderProp(childAfter)}
+    </View>
   </>)
 }

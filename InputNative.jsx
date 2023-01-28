@@ -9,7 +9,7 @@ import { renderProp } from './react/render.js'
 import { Row } from './Row.jsx'
 import Text from './Text.jsx'
 import { type } from './types.js'
-import { extractViewProps } from './View.jsx'
+import { extractProps } from './View.jsx'
 
 /**
  * Wrapper for Native HTML Input, such as: 'text', 'number', 'email', etc. where value is text.
@@ -27,7 +27,7 @@ import { extractViewProps } from './View.jsx'
  *  10. todo: improvement - Floating Label style
  */
 export function InputNative ({className, error, loading, ..._props}) {
-  const viewProps = extractViewProps(_props)
+  const viewProps = extractProps(_props, {childBefore: false, childAfter: false})
   let {
     active, compact, disabled, readonly,
     childBefore, childAfter, id, icon, iconEnd, label, prefix, suffix, props, self,
@@ -51,8 +51,7 @@ export function InputNative ({className, error, loading, ..._props}) {
 
   return (<>
     {label}
-    <Row className={cn(className, 'input', {active, compact, disabled, readonly, loading, error})}
-         {...viewProps}>
+    <Row className={cn(className, 'input', {active, compact, disabled, readonly, loading, error})} {...viewProps}>
       {childBefore}
       {icon}
       {prefix}

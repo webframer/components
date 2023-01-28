@@ -5,7 +5,7 @@ import { renderProp } from './react/render.js'
 import Spinner from './Spinner.jsx'
 import Text from './Text.jsx'
 import { type } from './types.js'
-import { extractViewProps, View } from './View.jsx'
+import { extractProps, View } from './View.jsx'
 
 /**
  * Loading Overlay - Pure Component
@@ -20,7 +20,7 @@ export function Loader ({
   ...props
 }) {
   return (loading &&
-    <View className={cn(className, 'loader', {transparent})} {...extractViewProps(props)}>
+    <View className={cn(className, 'loader', {transparent})} {...extractProps(props)}>
       <Spinner className={iconClass} size={size} {...props} />
       {children != null && (isString(children)
           ? <Text className='h4 padding padding-top-smaller animate-blink'>{children}</Text>
