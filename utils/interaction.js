@@ -1,13 +1,15 @@
 /**
  * Set Cursor to given type
  * @see: https://www.w3schools.com/cssref/tryit.asp?filename=trycss_cursor
- * @param {String} name - one of cursor strings
+ * @param {string|null} name - one of cursor strings, or `null`
+ * @returns {string|null|void} previous cursor - if it changed
  */
-
-export function cursorSet (name) {
+export function cursorSet (name = null) {
   if (typeof window !== 'undefined') {
+    const cursor = document.body.style.cursor || null
     document.body.style.cursor = null // Safari fix
     document.body.style.cursor = name
+    return cursor
   }
 }
 
