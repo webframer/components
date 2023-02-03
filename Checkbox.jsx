@@ -11,7 +11,7 @@ import View from './View.jsx'
  */
 export function Checkbox ({
   value, valueTrue, valueFalse, defaultValue,
-  label, labelTrue = (label != null ? label : 'ON'), labelFalse = (label != null ? label : 'OFF'),
+  label, labelTrue = (label != null ? label : valueTrue), labelFalse = (label != null ? label : valueFalse),
   id = useId(),
   onChange, type, title, readonly, danger, className,
   float: _0, // not used
@@ -27,7 +27,7 @@ export function Checkbox ({
     props.checked = !!value
   }
   if (!readonly) props.onChange = (event) => onChange(
-    event.target.checked ? valueTrue : valueFalse, props.name, event,
+    event, event.target.checked ? valueTrue : valueFalse, props.name,
   )
   const toggle = type === 'toggle'
   return (
