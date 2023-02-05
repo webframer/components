@@ -57,6 +57,9 @@ export function Expand ({
   props.children = renderProp(props.children, self.renderProps)
   if (asPanel) props.children = <ExpandPanel>{props.children}</ExpandPanel>
 
+  // Set CSS animation duration as local variable
+  props.style = {...props.style, '--expand-duration': duration + 'ms'}
+
   return (
     <ExpandInstance.Provider value={self}>
       <ExpandState.Provider value={self.state}>
@@ -87,6 +90,7 @@ Expand.propTypes = {
 }
 
 Expand.defaultProps = {
+  duration: 400,
   role: 'tablist',
   // 'aria-multiselectable': 'true',
 }

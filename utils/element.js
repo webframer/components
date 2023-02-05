@@ -26,6 +26,10 @@ export function collapseElement (node) {
   node.style.paddingBottom = '0'
   node.style.paddingLeft = '0'
   node.style.paddingRight = '0'
+  node.style.borderTopWidth = '0'
+  node.style.borderBottomWidth = '0'
+  node.style.borderLeftWidth = '0'
+  node.style.borderRightWidth = '0'
 }
 
 /**

@@ -30,8 +30,7 @@ const useAnimatedSize = {
  * Create a React Hook for useAnimatedHeight/Width.
  * All height change scenarios involve layout measurement both at the start and end of animation,
  * if the height is not a pixel number. Layout prediction is only required for the end transition.
- *  - When collapsing, margin/padding in the direction of collapse must be 0, and overflow: hidden
- *  - When expanding to auto, reset to initial style, other height values should have overflow: hidden
+ * @see `animateSize` function for documentation
  *
  * @param {'width'|'height'} side - one of ['width', 'height']
  * @returns {function} react hook
