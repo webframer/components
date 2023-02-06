@@ -16,7 +16,12 @@ const ExpandState = React.createContext({})
  *
  *     // Using render props
  *     <Expand onChange={warn}>
- *       <ExpandTab>{({open}) => open ? 'Collapse' : 'Expand'}</ExpandTab>
+ *       <ExpandTab row className='middle padding padding-v-smaller middle'>
+ *         {({open}) => (<>
+ *             <Icon className={open ? 'caret--expand' : 'caret--collapse'} name='wfs/triangle-right' />
+ *             <Text className='padding-h-smaller'>{slot}</Text>
+ *         </>)}
+ *       </ExpandTab>
  *       <ExpandPanel><Text>Expandable Panel</Text></ExpandPanel>
  *     </Expand>
  *
@@ -28,7 +33,7 @@ const ExpandState = React.createContext({})
  *
  *     // Without ExpandTab and controlled `open` state
  *     <Expand asPanel open={true}>
- *       This expanded content will be wrapped with <ExpandPanel> implicitly
+ *       This content will be wrapped with '<ExpandPanel>' implicitly
  *     </Expand>
  *
  * Unlike Tabs, Expand does not have controlled/uncontrolled state - it has a hybrid state.
@@ -63,7 +68,7 @@ export function Expand ({
   return (
     <ExpandInstance.Provider value={self}>
       <ExpandState.Provider value={self.state}>
-        <View className={cn(className, 'expand')} {...props} />
+        <View className={cn(className, 'expand', {open, animating})} {...props} />
       </ExpandState.Provider>
     </ExpandInstance.Provider>
   )
@@ -116,7 +121,7 @@ export function ExpandTab ({className, onClick, ...props}) {
   // Resolve children
   props.children = renderProp(props.children, self.renderProps)
 
-  return <View className={cn(className, 'expand__tab', {open})} {...props} />
+  return <View className={cn(className, 'expand__tab', {open, animating})} {...props} />
 }
 
 ExpandTab.propTypes = {
@@ -163,7 +168,7 @@ export function ExpandPanel ({className, forceRender, ...props}) {
   props.ref = ref
 
   // Do not use Scroll here so user can have a choice of explicitly passing `scroll` attribute
-  return <ViewRef className={cn(className, 'expand__panel')} {...props} />
+  return <ViewRef className={cn(className, 'expand__panel', {open, animating})} {...props} />
 }
 
 ExpandPanel.propTypes = {
