@@ -632,8 +632,8 @@ function getOptionsPosition (self = this) {
   let {top: topAvail, left, bottom: top, width, height} = self.node.getBoundingClientRect()
   const {height: actualHeight} = self.scrollNode.getBoundingClientRect()
   let maxHeight = +getComputedStyle(self.optNode).getPropertyValue('max-height').replace('px', '')
-  if (!maxHeight) throw Error(`Select options must have explicit max-height, got ${maxHeight}`)
-  maxHeight = Math.min(actualHeight, maxHeight)
+  if (Number.isNaN(maxHeight)) throw Error(`Select options must have explicit max-height, got ${maxHeight}`)
+  maxHeight = Math.min(actualHeight, maxHeight || Infinity) // maxHeight can be 0 sometimes
   const bottomAvail = window.innerHeight - topAvail - height
   let style = getComputedStyle(self.node)
   const bTop = +style.getPropertyValue('border-top-width').replace('px', '')
