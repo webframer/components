@@ -1,7 +1,11 @@
+import { KEY } from '@webframer/js'
+import keyboard from '@webframer/js/keyboard.js'
 import cn from 'classnames'
-import React from 'react'
+import React, { useEffect, useId, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
+import { assignRef } from './react.js'
 import { type } from './types.js'
+import { hasFocusWithinForKeyboard, selectTextFrom } from './utils/element.js'
 import { extractProps, View } from './View.jsx'
 
 // todo: improvement 3 - 'react-markdown' causes React hydration error in Next.js production
@@ -10,10 +14,30 @@ import { extractProps, View } from './View.jsx'
 function createMarkdown () {
   /**
    * Markdown View - Pure Component.
+   * Features:
+   *    - Ctrl + A will select only markdown content, not the entire viewport
    */
   function Markdown ({className, children, ...props}) {
+    const id = useId()
+    const self = useRef({}).current
+    if (!self.props) {
+      self.ref = function (node) {
+        self.node = node
+        assignRef.call(this, self.props._ref, node)
+      }
+      self.selectAll = function (e) {
+        if (!hasFocusWithinForKeyboard(e, self.node)) return
+        e.preventDefault()
+        selectTextFrom(self.node)
+      }
+    }
+    self.props = arguments[0]
+    useEffect(() => {
+      keyboard.addShortcut(self.selectAll, [KEY.Ctrl, KEY.a], id)
+      return () => {keyboard.removeShortcut(id)}
+    }, [])
     return ( // wrap with View to allow optional scroll, tooltip, and accessibility support
-      <View className={cn(className, 'markdown')} {...extractProps(props)}>
+      <View className={cn(className, 'markdown')} {...extractProps(props)} _ref={self.ref}>
         <ReactMarkdown {...props}>{children}</ReactMarkdown>
       </View>
     )

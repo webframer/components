@@ -54,6 +54,26 @@ export function indexOfElement (node) {
 }
 
 /**
+ * Check that if keyboard is pressed, given node must have focus (selection inside).
+ * Works for any Node element, not just input or textarea.
+ * @param {KeyboardEvent|Event|MouseEvent|any} event - to check
+ * @param {Element|HTMLElement} node - that should have focus
+ * @returns {boolean} true - if the `event` is not KeyboardEvent, or `node` has focus within
+ */
+export function hasFocusWithinForKeyboard (event, node) {
+  if (event instanceof KeyboardEvent) {
+    let target = window.getSelection().focusNode
+    if (target == null) return false
+    while (target.parentElement) {
+      if (target === node) return true
+      target = target._parentElement || target.parentElement
+    }
+    return false
+  }
+  return true
+}
+
+/**
  * Move focus in given `nodes` elements by given `count`, where 1 is next, -1 is previous node
  * (this loops back to the start or end of nodes collection when focus index is out of range).
  * @param {Element[]|Node[]} nodes - HTML Element collection (aka node.children)
@@ -130,6 +150,18 @@ export function resizeWidth (value, style, offset = 0) {
   style.boxSizing = 'content-box'
   if (!style.transition) style.transition = '500ms'
   return style
+}
+
+/**
+ * Select all text within Node element
+ * @param {Element|HTMLElement} node
+ */
+export function selectTextFrom (node) {
+  const range = document.createRange()
+  range.selectNodeContents(node)
+  const sel = window.getSelection()
+  sel.removeAllRanges()
+  sel.addRange(range)
 }
 
 /**

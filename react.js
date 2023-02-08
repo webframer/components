@@ -74,7 +74,7 @@ export function isRef (val) {
 
 // Set ref Function or object from React.useRef() with given node HTMLElement
 export function assignRef (ref, node) {
-  if (ref) (typeof ref === 'function' ? ref(node) : (ref.current = node))
+  if (ref) (typeof ref === 'function' ? ref.call(this, node) : (ref.current = node))
 }
 
 /**
