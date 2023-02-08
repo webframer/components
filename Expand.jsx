@@ -1,5 +1,5 @@
 import cn from 'classnames'
-import React, { useContext, useId, useRef } from 'react'
+import React, { useContext, useId, useMemo, useRef } from 'react'
 import { useExpandCollapse } from './react/hooks.js'
 import { renderProp } from './react/render.js'
 import { type } from './types.js'
@@ -43,23 +43,27 @@ const ExpandState = React.createContext({})
 export function Expand ({
   id = useId(), index, open: o, onChange, duration, forceRender, className, asPanel, ...props
 }) {
-  const {current: self} = useRef({})
+  const self = useRef({}).current
   const [{open, animating}, toggleOpen, ref] = useExpandCollapse(o, {duration})
 
   // Handle Expand change
-  self.onChange = onChange
-  if (!self.toggleOpen) self.toggleOpen = (event) => {
-    const open = !self.state.open
-    toggleOpen()
-    if (self.onChange) self.onChange(open, self.state.id, index, event)
+  if (!self.props) {
+    self.toggleOpen = function (e) {
+      const {onChange} = self.props
+      if (onChange) onChange.call(this, e, !self.state.open, self.state.id, index)
+      if (e.defaultPrevented) return
+      toggleOpen()
+    }
   }
+  self.props = arguments[0]
 
-  // Force state update on every render
-  self.state = {id, index, duration, forceRender, open, animating, ref}
-  self.renderProps = {...self, ...self.state}
+  // Force update when state changes
+  self.state = useMemo(() => ({id, index, duration, forceRender, open, animating, ref}),
+    [id, index, duration, forceRender, open, animating, ref])
 
   // Resolve children
-  props.children = renderProp(props.children, self.renderProps)
+  Object.assign(self, self.state)
+  props.children = renderProp(props.children, self)
   if (asPanel) props.children = <ExpandPanel>{props.children}</ExpandPanel>
 
   // Set CSS animation duration as local variable
@@ -83,7 +87,7 @@ Expand.propTypes = {
   id: type.String,
   // Optional index identifier, will be passed to `onChange` (used by Accordion)
   index: type.Number,
-  // Callback(open: boolean, id: string, index?: number, event: Event) when `open` state changes
+  // Callback(event: Event, open: boolean, id: string, index?: number) when `open` state changes
   onChange: type.Function,
   // Whether to expand ExpandPanel content
   open: type.Boolean,
@@ -104,22 +108,33 @@ Expand.defaultProps = {
  * Expand Tab Header -------------------------------------------------------------------------------
  */
 export function ExpandTab ({className, onClick, ...props}) {
-  const self = useContext(ExpandInstance)
+  const self = useRef({}).current
+  const expand = useContext(ExpandInstance)
   const {open, id, animating} = useContext(ExpandState)
+
+  // Event handlers
+  if (!self.props) {
+    self.onClick = function (e) {
+      const {open, id, index} = self.expand.state
+      const {onClick} = self.props
+      if (onClick) onClick.call(this, e, !open, id, index)
+      if (e.defaultPrevented) return
+      self.expand.toggleOpen.apply(this, arguments)
+    }
+  }
+  self.props = arguments[0]
+  self.expand = expand
 
   // Accessibility
   props.id = `tab_${id}`
   props['aria-controls'] = `panel_${id}`
   props['aria-selected'] = open ? 'true' : 'false'
 
-  // Expand Props
-  if (!animating) props.onClick = !onClick ? self.toggleOpen : (e) => {
-    self.toggleOpen(e)
-    onClick(e, id, self.state.open)
-  }
+  // Only enable `onClick` when not animating
+  if (!animating) props.onClick = self.onClick
 
   // Resolve children
-  props.children = renderProp(props.children, self.renderProps)
+  props.children = renderProp(props.children, expand)
 
   return <View className={cn(className, 'expand__tab', {open, animating})} {...props} />
 }
@@ -127,7 +142,7 @@ export function ExpandTab ({className, onClick, ...props}) {
 ExpandTab.propTypes = {
   // Expand header (see example)
   children: type.NodeOrFunction.isRequired,
-  // Callback(event: Event, id: string | number, open: boolean) when `open` state changes
+  // Callback(event: Event, open: boolean, id: string | number, index?: number) when `open` state changes
   onClick: type.Function,
 }
 
@@ -140,7 +155,7 @@ ExpandTab.defaultProps = {
  * Expand Panel Content ----------------------------------------------------------------------------
  */
 export function ExpandPanel ({className, forceRender, ...props}) {
-  const self = useContext(ExpandInstance)
+  const expand = useContext(ExpandInstance)
   const {open, animating, id, ref, forceRender: f} = useContext(ExpandState)
   const hidden = !open && !animating
 
@@ -164,7 +179,7 @@ export function ExpandPanel ({className, forceRender, ...props}) {
   }
 
   // Resolve children
-  props.children = renderProp(props.children, self.renderProps)
+  props.children = renderProp(props.children, expand)
   props.ref = ref
 
   // Do not use Scroll here so user can have a choice of explicitly passing `scroll` attribute

@@ -37,18 +37,21 @@ export function Accordion ({
   if (opened != null && open != null && opened !== open) state.openAll = open // update prop changes
 
   // Handle Accordion change
-  self.multiple = multiple
-  self.onChange = onChange
-  if (!self.toggleOpen) self.toggleOpen = (open, id, index, event) => {
-    const {openById} = self.state
-    self.setState({openAll: false, openById: {...self.multiple && openById, [index]: open}})
-    if (self.onChange) self.onChange(open, id, index, event)
+  if (!self.props) {
+    self.toggleOpen = function (e, open, id, index) {
+      const {openById} = self.state
+      const {multiple, onChange} = self.props
+      if (onChange) onChange.apply(this, arguments)
+      if (e.defaultPrevented) return
+      self.setState({openAll: false, openById: {...multiple && openById, [index]: open}})
+    }
   }
+  self.props = arguments[0]
 
   // Resolve direct children with Accordion props
   const {openAll, openById} = state
-  self.renderProps = {...self, duration, forceRender, multiple, onChange, open: openAll}
-  props.children = renderProp(props.children, self.renderProps)
+  Object.assign(self, state)
+  props.children = renderProp(props.children, self)
   props.children = React.Children.map(props.children, (child, index) => {
     // Checking isValidElement is the safe way and avoids a typescript error.
     if (React.isValidElement(child)) {
@@ -70,7 +73,7 @@ Accordion.propTypes = {
   duration: type.Millisecond,
   // Whether to allow opening multiple Expand components at once
   multiple: type.Boolean,
-  // Callback(open: boolean, id: string, index?: number, event: Event) when `open` state changes
+  // Callback(event: Event, open: boolean, id: string, index?: number) when `open` state changes
   onChange: type.Function,
   // Whether to expand all ExpandPanel content
   open: type.Boolean,
