@@ -1,4 +1,4 @@
-import { isCollection, isFunction } from '@webframer/js'
+import { isFunction, isPrimitive } from '@webframer/js'
 import React from 'react'
 // IMPORTANT! do not import any UI Component here to avoid circular import
 
@@ -15,12 +15,14 @@ import React from 'react'
 export function renderProp (children, instance, {textWrap = true, preserveSpace} = {}) {
   if (children == null) return children
   if (isFunction(children)) return children(instance)
-  if (!isCollection(children)) { // React element is also an object[]
+  if (isPrimitive(children)) {
     // wrap primitives inside Text for editing and React Native,
     // end preserve `space` character when rendering
     return textWrap ? <span className='text'>{
       preserveSpace ? String(children).replace(/ /g, '\u00a0') : children
     }</span> : children
   }
+
+  // React element is also an object[]
   return children
 }

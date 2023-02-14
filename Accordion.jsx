@@ -6,7 +6,7 @@ import { type } from './types.js'
 import { View } from './View.jsx'
 
 /**
- * Accordion of Expandable/Collapsible content sections
+ * List of Expandable/Collapsible content sections
  * @see: Expand docs for documentation.
  * @example:
  *    import { Accordion, Expand, ExpandPanel, ExpandTab } from '@webframer/ui'
