@@ -64,8 +64,8 @@ export function DropdownMenu (_props) {
 }
 
 DropdownMenu.defaultProps = {
-  iconClose: 'wfl/cross-sm',
-  iconOpen: 'wfs/more',
+  iconClose: 'cross-sm',
+  iconOpen: 'more',
 }
 
 const {children, ...btnPropTypes} = Button.propTypes
