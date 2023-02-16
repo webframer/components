@@ -1,6 +1,6 @@
 import { isObject } from '@webframer/js'
 import cn from 'classnames'
-import React, { useContext, useEffect, useId } from 'react'
+import React, { useCallback, useContext, useEffect, useId } from 'react'
 import Icon from './Icon.jsx'
 import { useInstance } from './react/hooks.js'
 import { renderProp } from './react/render.js'
@@ -32,7 +32,7 @@ export const [
  *    </Tabs>
  *
  *    // Controlled state (TabList is optional, this example omits it)
- *    <Tabs activeId='b' onChange={(activeId: string) => any}>
+ *    <Tabs activeId='b' onChange={(e, activeId: string) => any}>
  *      <Tab id='a'>Tab A</Tab>
  *      <Tab id='b'>Tab B</Tab>
  *
@@ -66,14 +66,17 @@ export function Tabs ({
 }) {
   const tabsId = useId()
   const [self, state] = useInstance({tabsId})
-
-  // Handle Tab change
-  self.onChange = onChange
-  if (!self.setTab) self.setTab = (activeId, event) => {
-    let lastId = self.tabState.activeId
-    self.setState({activeId})
-    if (self.onChange) self.onChange(activeId, lastId, event)
+  if (!self.props) {
+    // Handle Tab change
+    self.setTab = function (e, activeId) {
+      const {onChange} = self.props
+      let lastId = self.tabState.activeId
+      if (onChange) onChange.call(this, e, activeId, lastId)
+      if (e.defaultPrevented) return
+      self.setState({activeId})
+    }
   }
+  self.props = arguments[0]
 
   // Controlled state
   if (activeId != null) state.activeId = String(activeId)
@@ -85,7 +88,8 @@ export function Tabs ({
     state.activeId = notDefined ? null : String(sanitizeId(activeId != null ? activeId : defaultId))
   }
 
-  // HMR for some reason remounts TabPanel with new id, so flush ids on every render to fix it
+  // HMR for some reason remounts TabPanel with new id, so flush ids on every render to fix it.
+  // Tab state needs to change anyway, so it's ok to create a new object each time.
   self.tabState = {panelIds: [], tabIds: [], vertical, forceRender, ...state}
 
   return ( // Tailwind has 'tabs' class styled, so avoid that
@@ -110,7 +114,7 @@ Tabs.propTypes = {
   defaultId: type.OneOf([type.String, type.Number]),
   // Tab content (see example)
   children: type.NodeOrFunction,
-  // Callback(activeId: string, lastId: string, event) whenever tab changes, where ids could be indices
+  // Callback(event, activeId: string, lastId: string) whenever tab changes, where ids could be indices
   onChange: type.Function,
   // Whether to use Right-to-Left direction
   rtl: type.Boolean,
@@ -186,6 +190,11 @@ export function Tab ({id, className, onClick, ...props}) {
   let index = tabIds.indexOf(tabId)
   if (index === -1) index = tabIds.push(tabId) - 1
   if (id == null) id = String(index) // if `id` is undefined, fallback to using index
+  const onClickTab = useCallback(function (e) {
+    if (onClick) onClick.call(this, e, id)
+    if (e.defaultPrevented) return
+    self.setTab.call(this, e, id)
+  }, [id, onClick, self])
 
   // Set defaultId to the first Tab when none set because `id` could be key string
   if (activeId == null) self.tabState.activeId = activeId = id
@@ -200,10 +209,7 @@ export function Tab ({id, className, onClick, ...props}) {
   if (active) {
     props.disabled = true
   } else {
-    props.onClick = (event) => {
-      self.setTab(id, event)
-      if (onClick) onClick(event, id)
-    }
+    props.onClick = onClickTab
   }
   return <View className={cn(className, 'tabs__tab', {active})} {...props} />
 }
