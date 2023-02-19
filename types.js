@@ -465,9 +465,9 @@ type.FileInput = type.Obj({
   })),
 })
 
-// FIELD.FOR.TAG for example
+// Example: FIELD.FOR.TAG definitions
 type.FieldForList = type.ListOf(type.Obj({
-  id: type.String.isRequired,
+  ID: type.String.isRequired,
 }))
 
 // Tag entry object
