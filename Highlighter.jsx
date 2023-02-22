@@ -22,7 +22,7 @@ export function Highlighter (props) {
  * @param {object} [style] - SyntaxHighlighter theme
  * @returns {object} `components` prop
  */
-export function createMarkdownComponentsProp (language, style = theme) {
+export function createMarkdownComponentsProp (language, style = highlightCodeTheme) {
   return {
     code ({node, inline, className, children, ...props}) {
       const match = /language-(\w+)/.exec(className || '')
@@ -61,7 +61,7 @@ Highlighter.propTypes = {
 const HighlightCode = React.memo(Highlighter)
 export default HighlightCode
 
-export const theme = {
+export const highlightCodeTheme = {
   'code[class*="language-"]': {
     'color': '#EEFFFF',
     // 'background': 'none',
