@@ -332,6 +332,7 @@ export default React.memo(View)
 
 /**
  * Extract key->value pairs from `props` object by mutation, returning new object of extracted keys
+ * as defined in `propTypes`.
  *
  * @example:
  *    function Component ({...props}) {

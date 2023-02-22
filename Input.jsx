@@ -1,17 +1,22 @@
-import { isObject } from '@webframer/js'
+import { dynamicImport, isObject } from '@webframer/js'
 import cn from 'classnames'
-import React, { useId } from 'react'
+import React, { useId, useState } from 'react'
 import { InputNative } from './InputNative.jsx'
 import Label from './Label.jsx'
 import { useExpandCollapse, usePreviousProp } from './react.js'
 import { renderProp } from './react/render.js'
-import { Select } from './Select.jsx'
-import { Switch } from './Switch.jsx'
-import { TextArea } from './TextArea.jsx'
 import { type } from './types.js'
-import { Upload } from './Upload.jsx'
-import { UploadGrid } from './UploadGrid.jsx'
 import { extractProps, View } from './View.jsx'
+
+// Default Input `controls` map of Components by input `type` string
+export const inputControls = dynamicImport({
+  'checkbox': () => import(`./Checkbox.jsx`).then(({Checkbox}) => Checkbox),
+  'file': () => import(`./UploadGrid.jsx`).then(({UploadGrid}) => UploadGrid),
+  'select': () => import(`./Select.jsx`).then(({Select}) => Select),
+  'switch': () => import(`./Switch.jsx`).then(({Switch}) => Switch),
+  'textarea': () => import(`./TextArea.jsx`).then(({TextArea}) => TextArea),
+  'upload': () => import(`./Upload.jsx`).then(({Upload}) => Upload),
+})
 
 /**
  * Universal Input group that wraps the corresponding Input Control component based on given `type`.
@@ -28,6 +33,7 @@ export function Input ({
   className, style, reverse, _ref,
   controls, children, controlProps, ...props
 }) {
+  const [, forceUpdate] = useState(0)
   const viewProps = extractProps(props)
   if (props.type === 'hidden') return <input {...{id, className, style, ref: _ref, ...props}} />
 
@@ -52,20 +58,15 @@ export function Input ({
   compact = compact != null && compact !== false
   const {required} = props
   const Control = (controls && controls[props.type]) || (() => {
-    switch (props.type) {
-      case 'select':
-        return Select
-      case 'switch':
-        return Switch
-      case 'upload':
-        return Upload
-      case 'file':
-        return UploadGrid
-      case 'textarea':
-        return TextArea
-      default:
-        return InputNative
+    // Replace default browser inputs with more intuitive components,
+    // Users can always reset them to native inputs via `controls` prop
+    let {[props.type]: Component = InputNative} = inputControls
+    if (Component instanceof Promise) { // only frontend will have Promise
+      Component.then(() => forceUpdate(Date.now()))
+      Component = null // match backend return value
     }
+    if (Component === null) return () => <InputNative /> // simulate Input to minimize layout shift
+    return Component
   })()
 
   return (
@@ -96,7 +97,7 @@ Input.propTypes = {
   // Tooltip props or value to display as tooltip
   tooltip: type.Tooltip,
   // Map of Input Control components by their `type` string to use for rendering
-  controls: type.ObjectOf(type.JSXElementType),
+  controls: type.ObjectOf(type.OneOf([type.JSXElementType, type.Promise])),
   // Props to pass to Input Control component
   controlProps: type.Object,
   // ...other native HTML `<input/>` props

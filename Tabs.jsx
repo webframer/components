@@ -215,9 +215,9 @@ export function Tab ({id, className, onClick, ...props}) {
 }
 
 Tab.propTypes = {
-  // Tab key string to pair with TabPanel, defaults to using Tab index
+  // Tab key string to pair with TabPanel, defaults to using Tab index as string
   id: type.String,
-  // Callback(event, id)
+  // Callback(event, activeId: string)
   onClick: type.Function,
 }
 
