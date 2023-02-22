@@ -465,10 +465,18 @@ type.FileInput = type.Obj({
   })),
 })
 
-// Example: FIELD.FOR.TAG definitions
-type.FieldForList = type.ListOf(type.Obj({
-  ID: type.String.isRequired,
-}))
+// FIELD definition object - see `@webframer/kit/variables/fields.js`
+type.Field = type.Obj({
+  // FIELD.ID base definition identifier
+  ID: type.String,
+  // FIELD.VIEW identifier
+  VIEW: type.String,
+  // Nested FIELD definitions
+  FIELDS: type.ListOf(type.Object),
+})
+
+// Example: FIELD.FOR.CONTACT definitions
+type.FieldForList = type.ListOf(type.Field)
 
 // Tag entry object
 type.Tag = type.Obj({
