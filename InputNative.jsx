@@ -140,7 +140,7 @@ export function useInputSetup ({
     const {onRemove, name} = self.props
     if (onRemove) onRemove.call(this, e, self.getParsedValue.call(this, e), name, self)
     if (e.defaultPrevented) return
-    self.onChange(e, null)
+    self.onChange.call(this, e, null)
   }
   if (!self.getParsedValue) self.getParsedValue = function (e, value = self.state.value) {
     const {parse, name} = self.props
