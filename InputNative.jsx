@@ -1,4 +1,4 @@
-import { __CLIENT__, isObject, isString, numericPattern, parseNumberLocale } from '@webframer/js'
+import { __CLIENT__, isEqual, isObject, isString, numericPattern, parseNumberLocale } from '@webframer/js'
 import cn from 'classnames'
 import React, { useId, useState } from 'react'
 import Icon from './Icon.jsx'
@@ -96,7 +96,7 @@ export function renderInputIcon ({icon, id}, self) {
  */
 export function useInputSetup ({
   type, id = useId(),
-  compact, controlledValue, float, format = formatByType[type], parse = parseByType[type],
+  compact, controlledValue, float, format = formatByType[type], parse = parseByType[type], normalize,
   icon, iconEnd, label, prefix, suffix, onRemove, noSpellCheck = type === 'password', stickyPlaceholder,
   childBefore, childAfter, inputRef, ...props // `props` should only contain `input` props
 }, enabled = inputEnabledOptions) {
@@ -119,7 +119,20 @@ export function useInputSetup ({
     return assignRef.call(this, inputRef, ...arguments)
   }
   if (!self.onChange) self.onChange = function (e, value = e.target.value) {
-    const {onChange, name} = self.props
+    const {normalize, onChange, name} = self.props
+    if (normalize) {
+      const rawValue = value
+      value = normalize.call(this, value, name, self, e)
+      if (e.defaultPrevented) return
+      if (isEqual(value, self.state.value)) {
+        const {target} = e // prevent cursor jump to the end
+        if (target?.setSelectionRange) {
+          const cursorPos = target.selectionStart - (rawValue?.length - value?.length)
+          if (cursorPos >= 0) setTimeout(() => target.setSelectionRange(cursorPos, cursorPos), 0)
+        }
+        return
+      }
+    }
     if (onChange) onChange.call(this, e, self.getParsedValue.call(this, e, value), name, self)
     if (e.defaultPrevented) return
     self.setState({value})
@@ -294,10 +307,12 @@ InputNative.propTypes = {
   label: type.NodeOrFunction,
   // Whether input is loading
   loading: type.Boolean,
-  // Function(value, name?, event?, self) => string - Input value formatter for UI display
+  // Function(value, name?, event?, self) => string - internal value formatter for native input (UI display)
   format: type.Function,
   // Function(value, name?, event, self) => any - value parser for onChange/onBlur/onFocus handlers
   parse: type.Function,
+  // Function(value, name?, event, self) => string - internal value normalizer to sanitize user input
+  normalize: type.Function,
   // Prefix to show before the Input value text
   prefix: type.NodeOrFunction,
   // Suffix to show after the Input value text (value must be non-empty)

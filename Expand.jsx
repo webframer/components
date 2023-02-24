@@ -99,7 +99,7 @@ Expand.propTypes = {
 }
 
 Expand.defaultProps = {
-  duration: 400,
+  duration: 300,
   role: 'tablist',
   // 'aria-multiselectable': 'true',
 }

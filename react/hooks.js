@@ -47,7 +47,7 @@ function hookAnimatedSize (side = 'height') {
    * @param {{self?: object, duration?: number, forwards?: boolean}} - component instance to animate
    * @returns [ref: (node: HTMLElement) => void, animating: boolean, resetStyles: function]
    */
-  function useAnimatedSize (size, {self, duration = 400, forwards} = {}) {
+  function useAnimatedSize (size, {self, duration = 300, forwards} = {}) {
     const instance = useRef({[side]: size, timerById: {}})
     if (!self) {
       self = instance.current
