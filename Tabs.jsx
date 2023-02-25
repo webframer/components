@@ -288,7 +288,7 @@ TabPanel.defaultProps = {
 function renderTab ({id, tab}, i) {
   let child = tab, props
   // React rendered node can also be an object
-  if (isObject(tab) && (tab.icon || tab.text)) {
+  if (isObject(tab) && (tab.icon || tab.text || tab.children != null)) {
     const {icon, text, children = text, ...rest} = tab
     child = children
     props = rest
