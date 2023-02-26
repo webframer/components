@@ -26,18 +26,18 @@ import { extractProps } from './View.jsx'
  *  9. Sticky placeholder that persists as user enters text
  *  10. todo: improvement - Floating Label style
  */
-export function InputNative ({className, error, loading, ..._props}) {
-  const viewProps = extractProps(_props, {childBefore: false, childAfter: false})
+export function InputNative ({className, error, loading, ...props}) {
+  const viewProps = extractProps(props, {childBefore: false, childAfter: false})
   let {
     active, compact, disabled, readonly,
-    childBefore, childAfter, id, icon, iconEnd, label, prefix, suffix, props, self,
-  } = useInputSetup(_props)
+    childBefore, childAfter, id, icon, iconEnd, label, prefix, suffix, input, self,
+  } = useInputSetup(props)
 
   // Password visibility toggle --------------------------------------------------------------------
-  if (_props.type === 'password') {
+  if (props.type === 'password') {
     const {visible} = self.state
-    if (visible) props.type = 'text'
-    if (_props.iconEnd == null && _props.onRemove == null) {
+    if (visible) input.type = 'text'
+    if (props.iconEnd == null && props.onRemove == null) {
       if (!self.toggleVisibility) self.toggleVisibility = function () {
         self.setState({visible: !self.state.visible})
       }
@@ -57,7 +57,7 @@ export function InputNative ({className, error, loading, ..._props}) {
       {prefix}
       {suffix}
       <input className={cn('input__field', {iconStart: icon, iconEnd})}
-             {...props} ref={self.ref} />
+             {...input} ref={self.ref} />
       {iconEnd}
       {childAfter}
     </Row>
@@ -66,15 +66,15 @@ export function InputNative ({className, error, loading, ..._props}) {
 
 /**
  * Icon Before and After Input Renderer
- * @param {object}
- *   {string|object|function} icon - name string, props object, or render function
- *   {string} id - input id
+ * @param {string|object|function} icon - name string, props object, or render function
  * @param {object} self - function Component instance
+ * @param {object} [props]:
+ *   {string} id - input id
  * @returns {JSX.Element}
  */
-export function renderInputIcon ({icon, id}, self) {
+export function renderInputIcon (icon, self, {id} = {}) {
   return (
-    <Label className='input__icon' htmlFor={id}>{(isString(icon)
+    <Label className='input__icon' {...id != null && {htmlFor: id}}>{(isString(icon)
         ? <Icon name={icon} />
         : (isObject(icon) ? <Icon {...icon} /> : renderProp(icon, self))
     )}</Label>
@@ -82,14 +82,26 @@ export function renderInputIcon ({icon, id}, self) {
 }
 
 /**
+ * Input Label
+ * @param {string|function} label - string, or render function
+ * @param {object} self - function Component instance
+ * @param {object} [props]:
+ *   {boolean} [required] - whether input is required
+ * @returns {JSX.Element}
+ */
+export function renderInputLabel (label, self, {required} = {}) {
+  return <Label className={cn('input__label', {required})}>{renderProp(label, self)}</Label>
+}
+
+/**
  * Common Input Behaviors Setup for all native `<input>` elements
  * @example:
- *  function MyComponent ({className, float, error, loading, ..._props}) {
- *    const viewProps = extractViewProps(_props)
+ *  function MyComponent ({className, float, error, loading, ...props}) {
+ *    const viewProps = extractViewProps(props)
  *    let {
  *      active, compact, disabled, readonly,
- *      childBefore, childAfter, id, icon, iconEnd, label, prefix, suffix, props, self,
- *    } = useInputSetup(_props)
+ *      childBefore, childAfter, id, icon, iconEnd, label, prefix, suffix, input, self,
+ *    } = useInputSetup(props)
  *  }
  * @param {object} component props to process
  * @param {object} [enabled] - optional props config to optimize for performance
@@ -98,86 +110,85 @@ export function useInputSetup ({
   type, id = useId(),
   compact, controlledValue, float, format = formatByType[type], parse = parseByType[type], normalize,
   icon, iconEnd, label, prefix, suffix, onRemove, noSpellCheck = type === 'password', stickyPlaceholder,
-  childBefore, childAfter, inputRef, ...props // `props` should only contain `input` props
+  childBefore, childAfter, inputRef, ...input // rest props should only contain `input` props
 }, enabled = inputEnabledOptions) {
-  props.id = id
-  props.type = type
-  props = toReactProps(props)
+  input.id = id
+  input.type = type
+  input = toReactProps(input)
   const [self] = useInstance()
-  const [value] = useInputValue(props, {controlledValue, format}, self)
-  const [active, setFocus] = useState(props.autoFocus)
+  const [value] = useInputValue(input, {controlledValue, format}, self)
+  const [active, setFocus] = useState(input.autoFocus)
   const hasValue = value != null && value !== ''
-  self.props = {
-    compact, controlledValue, float, format, parse,
-    icon, iconEnd, label, prefix, suffix, onRemove, noSpellCheck, stickyPlaceholder,
-    childBefore, childAfter, inputRef, ...props,
-  }
 
   // Standard Input Event Handlers -----------------------------------------------------------------
-  if (!self.ref) self.ref = function (node) {
-    self.inputNode = node
-    return assignRef.call(this, inputRef, ...arguments)
-  }
-  if (!self.onChange) self.onChange = function (e, value = e.target.value) {
-    const {normalize, onChange, name} = self.props
-    if (normalize) {
-      const rawValue = value
-      value = normalize.call(this, value, name, self, e)
-      if (e.defaultPrevented) return
-      if (isEqual(value, self.state.value)) {
-        const {target} = e // prevent cursor jump to the end
-        if (target?.setSelectionRange) {
-          const cursorPos = target.selectionStart - (rawValue?.length - value?.length)
-          if (cursorPos >= 0) setTimeout(() => target.setSelectionRange(cursorPos, cursorPos), 0)
-        }
-        return
-      }
+  if (!self.props) {
+    self.ref = function (node) {
+      self.inputNode = node
+      return assignRef.call(this, inputRef, ...arguments)
     }
-    if (onChange) onChange.call(this, e, self.getParsedValue.call(this, e, value), name, self)
-    if (e.defaultPrevented) return
-    self.setState({value})
-  }
-  if (!self.onBlur) self.onBlur = function (e) {
-    const {onBlur, name} = self.props
-    if (onBlur) onBlur.call(this, e, self.getParsedValue.call(this, e), name, self)
-    if (e.defaultPrevented) return
-    setFocus(false)
-  }
-  if (!self.onFocus) self.onFocus = function (e) {
-    const {onFocus, name} = self.props
-    if (onFocus) onFocus.call(this, e, self.getParsedValue.call(this, e), name, self)
-    if (e.defaultPrevented) return
-    setFocus(true)
-  }
-  if (!self.onRemove) self.onRemove = function (e) {
-    const {onRemove, name} = self.props
-    if (onRemove) onRemove.call(this, e, self.getParsedValue.call(this, e), name, self)
-    if (e.defaultPrevented) return
-    self.onChange.call(this, e, null)
-  }
-  if (!self.getParsedValue) self.getParsedValue = function (e, value = self.state.value) {
-    const {parse, name} = self.props
-    if (parse) value = parse.call(this, value, name, self, e)
-    return value
-  }
-  // Fix for Safari/Firefox bug returning empty input value when typing invalid characters
-  // Must use `onKeyPress` or equivalent that does not capture modifier keys, like `Escape`.
-  // `onKeyUp` will capture `Escape`, `Shift`, and common shortcuts, which is not correct behavior.
-  if (type === 'number' && __CLIENT__ && !self.onKeyPress) self.onKeyPress = function (e) {
-    const {onKeyPress} = self.props
-    if (onKeyPress) onKeyPress.apply(this, arguments)
-    if (e.defaultPrevented) return
-    // Prevent Safari from sending empty value when there is invalid character
-    if (!numericPattern().test(e.key)) e.preventDefault()
-  }
-  if (self.onKeyPress) props.onKeyPress = self.onKeyPress
+    self.onChange = function (e, value = e.target.value) {
+      const {normalize, onChange, name} = self.props
+      if (normalize) {
+        const rawValue = value
+        value = normalize.call(this, value, name, self, e)
+        if (e.defaultPrevented) return
+        if (isEqual(value, self.state.value)) {
+          const {target} = e // prevent cursor jump to the end
+          if (target?.setSelectionRange) {
+            const cursorPos = target.selectionStart - (rawValue?.length - value?.length)
+            if (cursorPos >= 0) setTimeout(() => target.setSelectionRange(cursorPos, cursorPos), 0)
+          }
+          return
+        }
+      }
+      if (onChange) onChange.call(this, e, self.getParsedValue.call(this, e, value), name, self)
+      if (e.defaultPrevented) return
+      self.setState({value})
+    }
+    self.onBlur = function (e) {
+      const {onBlur, name} = self.props
+      if (onBlur) onBlur.call(this, e, self.getParsedValue.call(this, e), name, self)
+      if (e.defaultPrevented) return
+      setFocus(false)
+    }
+    self.onFocus = function (e) {
+      const {onFocus, name} = self.props
+      if (onFocus) onFocus.call(this, e, self.getParsedValue.call(this, e), name, self)
+      if (e.defaultPrevented) return
+      setFocus(true)
+    }
+    self.onRemove = function (e) {
+      const {onRemove, name} = self.props
+      if (onRemove) onRemove.call(this, e, self.getParsedValue.call(this, e), name, self)
+      if (e.defaultPrevented) return
+      self.onChange.call(this, e, null)
+    }
+    self.getParsedValue = function (e, value = self.state.value) {
+      const {parse, name} = self.props
+      if (parse) value = parse.call(this, value, name, self, e)
+      return value
+    }
 
-  props.onChange = self.onChange
-  props.onBlur = self.onBlur
-  props.onFocus = self.onFocus
+    // Fix for Safari/Firefox bug returning empty input value when typing invalid characters
+    // Must use `onKeyPress` or equivalent that does not capture modifier keys, like `Escape`.
+    // `onKeyUp` will capture `Escape`, `Shift`, and common shortcuts, which is not correct behavior.
+    if (type === 'number' && __CLIENT__) self.onKeyPress = function (e) {
+      const {onKeyPress} = self.props
+      if (onKeyPress) onKeyPress.apply(this, arguments)
+      if (e.defaultPrevented) return
+      // Prevent Safari from sending empty value when there is invalid character
+      if (!numericPattern().test(e.key)) e.preventDefault()
+    }
+    if (self.onKeyPress) input.onKeyPress = self.onKeyPress
+  }
+  self.props = arguments[0]
+
+  input.onChange = self.onChange
+  input.onBlur = self.onBlur
+  input.onFocus = self.onFocus
 
   // Compact Input ---------------------------------------------------------------------------------
-  if (enabled.compact) compact = useCompactStyle(compact, value, props).compact
+  if (enabled.compact) compact = useCompactStyle(compact, value, input).compact
 
   // Remove handler --------------------------------------------------------------------------------
   if (onRemove) iconEnd = {name: 'delete', onClick: self.onRemove}
@@ -187,18 +198,17 @@ export function useInputSetup ({
   if (enabled.childAfter && childAfter != null) childAfter = renderProp(childAfter, self)
 
   // Label -----------------------------------------------------------------------------------------
-  if (enabled.label && label != null)
-    label = <Label className='input__label'>{renderProp(label, self)}</Label>
+  if (enabled.label && label != null) label = renderInputLabel(label, self, input)
 
   // Icon ------------------------------------------------------------------------------------------
   if (enabled.icon) {
-    if (icon) icon = renderInputIcon({icon, id}, self)
-    if (iconEnd) iconEnd = renderInputIcon({icon: iconEnd, id}, self)
+    if (icon) icon = renderInputIcon(icon, self, {id})
+    if (iconEnd) iconEnd = renderInputIcon(iconEnd, self, {id})
   }
 
   // Sticky Placeholder ----------------------------------------------------------------------------
   if (stickyPlaceholder) {
-    const {placeholder} = props
+    const {placeholder} = input
     stickyPlaceholder = placeholder && placeholder.substring(String(value).length)
   }
 
@@ -216,13 +226,13 @@ export function useInputSetup ({
     )
 
   // Render Props ----------------------------------------------------------------------------------
-  const {disabled, readOnly: readonly} = props
-  if (noSpellCheck) Object.assign(props, noSpellCheckProps)
+  const {disabled, readOnly: readonly} = input
+  if (noSpellCheck) Object.assign(input, noSpellCheckProps)
 
   return {
     active, compact, disabled, readonly, hasValue, value,
     childBefore, childAfter, id, icon, iconEnd, label,
-    prefix, suffix, props, stickyPlaceholder, self,
+    prefix, suffix, stickyPlaceholder, input, self,
   }
 }
 
@@ -236,7 +246,7 @@ export const formatByType = {
   //   // with leading zeros after the decimal, such as 1.000
   //   return inputCache.value === value ? inputCache.valueString : value
   // },
-  // Unused - this logic moved to useInputSetup() for guaranteed output and better performance
+  // Unused - this logic moved to `useInputSetup` for guaranteed output and better performance
   // [undefined]: (value) => {
   //   // The default behavior is to convert `undefined` to '',
   //   // to prevent React error related to Controlled state.

@@ -16,24 +16,24 @@ import { extractProps } from './View.jsx'
  */
 export function Switch ({
   className, error, loading, label, checkedLabel, uncheckedLabel, title,
-  ..._props
+  ...props
 }) {
-  const viewProps = extractProps(_props)
+  const viewProps = extractProps(props)
   const {
     active, disabled, readonly, value,
-    childBefore, childAfter, id, props, self,
-  } = useInputSetup(_props, switchEnabledOptions)
+    childBefore, childAfter, id, input, self,
+  } = useInputSetup(props, switchEnabledOptions)
 
   // Event Handler ---------------------------------------------------------------------------------
   if (!self.changeChecked) self.changeChecked = function (e) {
     return self.onChange.call(this, e, e.target.checked) // extend the base pattern
   }
-  props.onChange = self.changeChecked
+  input.onChange = self.changeChecked
 
   // Render Prop -----------------------------------------------------------------------------------
-  const checked = props.checked = value
-  props.type = 'checkbox'
-  delete props.value
+  const checked = input.checked = value
+  input.type = 'checkbox'
+  delete input.value
 
   return (
     <Row className={cn(className, 'switch', {active, disabled, readonly, loading, error, checked})}
@@ -43,7 +43,7 @@ export function Switch ({
         <Spacer />
       </>}
       {childBefore}
-      <input className='sr-only' {...props} />
+      <input className='sr-only' {...input} />
       <Label className='switch__toggle' title={title} {...!disabled && !readonly && {htmlFor: id}}>
         <SwitchLabels {...{checked, checkedLabel, uncheckedLabel, self}} />
       </Label>

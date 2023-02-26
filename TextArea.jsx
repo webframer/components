@@ -21,9 +21,9 @@ import { toTextHeight, toTextHeightDebounce } from './utils/element.js'
 export function TextArea ({
   float, error, label, loading, resize,
   childBefore, childAfter, className, style, reverse,
-  _ref, ..._props
+  _ref, ...props
 }) {
-  const {active, compact, disabled, readonly, icon, iconEnd, props, self} = useInputSetup(_props)
+  const {active, compact, disabled, readonly, icon, iconEnd, input, self} = useInputSetup(props)
 
   // Autoresize height to fit content length -------------------------------------------------------
   if (!self.onKeyUp) self.onKeyUp = function (e) {
@@ -33,7 +33,7 @@ export function TextArea ({
     if (e.defaultPrevented) return
     ((e.key === 'Enter') ? toTextHeight : toTextHeightDebounce)(e) // resize instantly for Enter
   }
-  if (resize) props.onKeyUp = self.onKeyUp
+  if (resize) input.onKeyUp = self.onKeyUp
 
   return (<>
     {label != null &&
@@ -42,7 +42,7 @@ export function TextArea ({
          {...{_ref, reverse, style}}>
       {childBefore != null && renderProp(childBefore, self)}
       {icon}
-      <textarea className={cn('textarea__field', {iconStart: icon, iconEnd})} {...props} ref={self.ref} />
+      <textarea className={cn('textarea__field', {iconStart: icon, iconEnd})} {...input} ref={self.ref} />
       {iconEnd}
       {childAfter != null && renderProp(childAfter, self)}
     </Row>

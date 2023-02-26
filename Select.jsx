@@ -8,7 +8,7 @@ import cn from 'classnames'
 import Fuse from 'fuse.js'
 import React, { useEffect, useId, useMemo } from 'react'
 import Icon from './Icon.jsx'
-import { renderInputIcon } from './InputNative.jsx'
+import { renderInputIcon, renderInputLabel } from './InputNative.jsx'
 import Label from './Label.jsx'
 import { assignRef, toReactProps, useExpandCollapse, useInstance, useSyncedState } from './react.js'
 import { renderProp } from './react/render.js'
@@ -416,18 +416,19 @@ export function Select ({
   }, [hasValue, query, compact, multiple, open, options, placeholder])
 
   // Icon ------------------------------------------------------------------------------------------
-  if (icon) icon = renderInputIcon({icon, id}, self)
-  if (iconEnd) iconEnd = renderInputIcon({icon: iconEnd, id}, self)
+  if (icon) icon = renderInputIcon(icon, self, {id})
+  if (iconEnd) iconEnd = renderInputIcon(iconEnd, self, {id})
   let iconDefault = icon == null && iconEnd == null && renderInputIcon({
-    icon: {
-      className: 'fade',
-      name: search ? 'search' : 'dropdown',
-    }, id,
-  }, self)
+    className: 'fade',
+    name: search ? 'search' : 'dropdown',
+  }, self, {id})
   if (iconDefault) {
     if (search) icon = iconDefault
     else iconEnd = iconDefault
   }
+
+  // Label -----------------------------------------------------------------------------------------
+  if (label != null) label = renderInputLabel(label, self, input)
 
   // Sticky Placeholder ----------------------------------------------------------------------------
   if (stickyPlaceholder) {
@@ -471,8 +472,7 @@ export function Select ({
 
   // When Select is open, assign 'active' CSS class to be consistent with other Input types
   return (<>
-    {label != null &&
-      <Label className='input__label'>{renderProp(label, self)}</Label>}
+    {label}
     <Row className={cn(className, `select`, {
       active: open, done: hasValue, multiple, search, upward, query,
       compact, disabled, readonly, loading, error,
