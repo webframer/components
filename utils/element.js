@@ -148,7 +148,7 @@ export function resizeWidth (value, style, offset = 0) {
   // boolean `offset` evaluates to 1 by default.
   style.width = value.length + Number(offset) + 'ch'
   style.boxSizing = 'content-box'
-  if (!style.transition) style.transition = '500ms'
+  if (!style.transition) style.transition = '300ms'
   return style
 }
 

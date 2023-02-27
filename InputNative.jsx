@@ -87,10 +87,11 @@ export function renderInputIcon (icon, self, {id} = {}) {
  * @param {object} self - function Component instance
  * @param {object} [props]:
  *   {boolean} [required] - whether input is required
+ *   {string} [className]
  * @returns {JSX.Element}
  */
-export function renderInputLabel (label, self, {required} = {}) {
-  return <Label className={cn('input__label', {required})}>{renderProp(label, self)}</Label>
+export function renderInputLabel (label, self, {required, className = 'input__label'} = {}) {
+  return <Label className={cn(className, {required})}>{renderProp(label, self)}</Label>
 }
 
 /**

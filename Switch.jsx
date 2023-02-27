@@ -2,7 +2,7 @@ import cn from 'classnames'
 import React from 'react'
 import checkbox from './Checkbox.jsx'
 import Icon from './Icon.jsx'
-import { useInputSetup } from './InputNative.jsx'
+import { renderInputLabel, useInputSetup } from './InputNative.jsx'
 import Label from './Label.jsx'
 import { useExpandCollapse } from './react.js'
 import { renderProp } from './react/render.js'
@@ -38,10 +38,7 @@ export function Switch ({
   return (
     <Row className={cn(className, 'switch', {active, disabled, readonly, loading, error, checked})}
          {...viewProps}>
-      {label != null && <>
-        <Label className='switch__label'>{renderProp(label, self)}</Label>
-        <Spacer />
-      </>}
+      {label != null && renderInputLabel(label, self, {...input, className: 'switch__label'})}
       {childBefore}
       <input className='sr-only' {...input} />
       <Label className='switch__toggle' title={title} {...!disabled && !readonly && {htmlFor: id}}>

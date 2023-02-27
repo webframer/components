@@ -542,9 +542,10 @@ export function useSyncedProp (prop, stateValue = prop) {
 /**
  * Update Component state when props change, similar to class.componentWillReceiveProps
  * @example:
- *    const {current: self} = useRef({})
- *    const [state, justChanged] = useSyncedState({value}, self.state)[0]
- *    >>> state.value // syncs with the latest `value` prop
+ *    const [self] = useInstance()
+ *    const [state, justChanged] = useSyncedState({value}, self.state)
+ *    self.state = state
+ *    >>> state.value // syncs with `value` prop changes, but `self.setState` can update it
  *
  * @param {object} props - initial or new props to sync state with
  * @param {object} [state] - the current state

@@ -1,7 +1,6 @@
 import cn from 'classnames'
 import React from 'react'
 import { useInputSetup } from './InputNative.jsx'
-import Label from './Label.jsx'
 import { renderProp } from './react/render.js'
 import { Row } from './Row.jsx'
 import { type } from './types.js'
@@ -19,11 +18,11 @@ import { toTextHeight, toTextHeightDebounce } from './utils/element.js'
  *  - onRemove handler for removing the input field
  */
 export function TextArea ({
-  float, error, label, loading, resize,
+  float, error, loading, resize,
   childBefore, childAfter, className, style, reverse,
   _ref, ...props
 }) {
-  const {active, compact, disabled, readonly, icon, iconEnd, input, self} = useInputSetup(props)
+  const {active, compact, disabled, readonly, icon, iconEnd, input, label, self} = useInputSetup(props)
 
   // Autoresize height to fit content length -------------------------------------------------------
   if (!self.onKeyUp) self.onKeyUp = function (e) {
@@ -36,8 +35,7 @@ export function TextArea ({
   if (resize) input.onKeyUp = self.onKeyUp
 
   return (<>
-    {label != null &&
-      <Label className='input__label'>{renderProp(label, self)}</Label>}
+    {label}
     <Row className={cn(className, 'textarea', {active, compact, disabled, readonly, loading, error, resize})}
          {...{_ref, reverse, style}}>
       {childBefore != null && renderProp(childBefore, self)}
