@@ -111,7 +111,8 @@ export function useInputSetup ({
   type, id = useId(),
   compact, controlledValue, float, format = formatByType[type], parse = parseByType[type], normalize,
   icon, iconEnd, label, prefix, suffix, onRemove, noSpellCheck = type === 'password', stickyPlaceholder,
-  childBefore, childAfter, inputRef, ...input // rest props should only contain `input` props
+  childBefore, childAfter, inputRef, initialValues: _1,
+  ...input // rest props should only contain `input` props
 }, enabled = inputEnabledOptions) {
   input.id = id
   input.type = type

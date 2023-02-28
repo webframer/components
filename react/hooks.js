@@ -292,7 +292,7 @@ export function useInputValue (props, {controlledValue, format} = {}, self = use
   }
 
   // Sync controlled state
-  else if (props.value !== void 0 && (controlledValue || justSynced)) {
+  else if (controlledValue || justSynced) {
     self.state.value = format ? format(props.value, name, self) : props.value
   }
 
@@ -433,12 +433,12 @@ export function useModalRoute (
 /**
  * Get previous prop of the Component, similar to class.componentWillReceiveProps
  * @param {any} value - to get from previous Component props
- * @param {boolean} [shallow] - whether to use shallow isEqual() comparison
+ * @param {boolean} [deep] - whether to use lodash isEqual() comparison
  * @returns [prevProp: any, justChanged: boolean]
  *    previous prop - undefined initially on the very first render;
  *    justChanged - whether the prop just changed value in this render cycle, true initially
  */
-export function usePreviousProp (value, shallow) {
+export function usePreviousProp (value, deep) {
   const self = useRef({}).current
   // Lodash isEqual() allows deep nesting of array/objects, and considers them to be equal
   // @example:
@@ -447,7 +447,7 @@ export function usePreviousProp (value, shallow) {
   //    >>> true
   //    isEqual({a: [a]}, {a: [new File([], 'test')]}))
   //    >>> false
-  self.justChanged = shallow ? !isEqual(value, self.lastValue) : value !== self.lastValue
+  self.justChanged = deep ? !isEqual(value, self.lastValue) : value !== self.lastValue
 
   // Set initial value once
   useEffect(() => {self.lastValue = value}, [])
