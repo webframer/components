@@ -30,12 +30,10 @@ export const inputControls = dynamicImport({
  */
 export function Input ({
   compact, error, info, id = useId(), idHelp = `${id}-help`, helpTransition,
-  className, style, reverse, _ref,
-  controls, children, controlProps, ...props
+  className, controls, controlProps, ...props
 }) {
   const [, forceUpdate] = useState(0)
-  const viewProps = extractProps(props)
-  if (props.type === 'hidden') return <input {...{id, className, style, ref: _ref, ...props}} />
+  const viewProps = extractProps(props, {children: false, reverse: false})
 
   // Error Message ---------------------------------------------------------------------------------
   if (helpTransition) {
@@ -65,14 +63,12 @@ export function Input ({
   props.id = id
   props.compact = compact
   props.error = error
-  props.reverse = reverse
   props['aria-describedby'] = idHelp
-  if (children != null) props.children = children
   compact = compact != null && compact !== false
   const {required} = props
 
   return (
-    <View className={cn(className, 'input-group', {compact, error, required})} style={style} {...viewProps}>
+    <View className={cn(className, 'input-group', {compact, error, required})} {...viewProps}>
       <Control {...props} {...controlProps} />
       <View id={idHelp} className='input__help' {...helpTransition}>
         {error != null && <Label className='input__error'>{renderProp(error)}</Label>}
