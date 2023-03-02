@@ -1,10 +1,10 @@
 import cn from 'classnames'
 import React from 'react'
 import { useInputSetup } from './InputNative.jsx'
-import { renderProp } from './react/render.js'
 import { Row } from './Row.jsx'
 import { type } from './types.js'
 import { toTextHeight, toTextHeightDebounce } from './utils/element.js'
+import { extractProps } from './View.jsx'
 
 /**
  * Wrapper for Native HTML `<textarea>`.
@@ -17,12 +17,12 @@ import { toTextHeight, toTextHeightDebounce } from './utils/element.js'
  *  - Resize textarea with automatic height adjustment
  *  - onRemove handler for removing the input field
  */
-export function TextArea ({
-  float, error, loading, resize,
-  childBefore, childAfter, className, style, reverse,
-  _ref, ...props
-}) {
-  const {active, compact, disabled, readonly, icon, iconEnd, input, label, self} = useInputSetup(props)
+export function TextArea ({className, error, loading, resize, ...props}) {
+  const viewProps = extractProps(props, {childBefore: false, childAfter: false})
+  const {
+    active, compact, disabled, readonly,
+    childBefore, childAfter, icon, iconEnd, input, label, self,
+  } = useInputSetup(props)
 
   // Autoresize height to fit content length -------------------------------------------------------
   if (!self.onKeyUp) self.onKeyUp = function (e) {
@@ -37,12 +37,12 @@ export function TextArea ({
   return (<>
     {label}
     <Row className={cn(className, 'textarea', {active, compact, disabled, readonly, loading, error, resize})}
-         {...{_ref, reverse, style}}>
-      {childBefore != null && renderProp(childBefore, self)}
+         {...viewProps}>
+      {childBefore}
       {icon}
       <textarea className={cn('textarea__field', {iconStart: icon, iconEnd})} {...input} ref={self.ref} />
       {iconEnd}
-      {childAfter != null && renderProp(childAfter, self)}
+      {childAfter}
     </Row>
   </>)
 }

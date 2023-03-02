@@ -48,6 +48,19 @@ export function Input ({
     helpTransition = {_ref: ref}
   }
 
+  // Load Input Control component ------------------------------------------------------------------
+  let Control = (controls && controls[props.type]) || (() => {
+    // Replace default browser inputs with more intuitive components,
+    // Users can always reset them to native inputs via `controls` prop
+    const {[props.type]: Component = InputNative} = inputControls
+    return Component
+  })()
+  if (Control instanceof Promise) { // only frontend will have Promise
+    Control.then(() => forceUpdate(Date.now()))
+    Control = null // match backend return value
+  }
+  if (Control === null) Control = function Loading () {return <InputNative />} // use Input to minimize layout shift
+
   // Render Prop -----------------------------------------------------------------------------------
   props.id = id
   props.compact = compact
@@ -57,17 +70,6 @@ export function Input ({
   if (children != null) props.children = children
   compact = compact != null && compact !== false
   const {required} = props
-  const Control = (controls && controls[props.type]) || (() => {
-    // Replace default browser inputs with more intuitive components,
-    // Users can always reset them to native inputs via `controls` prop
-    let {[props.type]: Component = InputNative} = inputControls
-    if (Component instanceof Promise) { // only frontend will have Promise
-      Component.then(() => forceUpdate(Date.now()))
-      Component = null // match backend return value
-    }
-    if (Component === null) return () => <InputNative /> // simulate Input to minimize layout shift
-    return Component
-  })()
 
   return (
     <View className={cn(className, 'input-group', {compact, error, required})} style={style} {...viewProps}>

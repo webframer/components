@@ -1,9 +1,10 @@
 // noinspection JSValidateTypes,JSCheckFunctionSignatures
 // noinspection JSCheckFunctionSignatures
-import { _, debounce, isFunction, isObject, subscribeTo, translate, trimSpaces, unsubscribeFrom } from '@webframer/js'
+import { _, debounce, isFunction, subscribeTo, translate, trimSpaces, unsubscribeFrom } from '@webframer/js'
 import { hasListValue, last, toUniqueListFast } from '@webframer/js/array.js'
 import { KEY, l, TIME_DURATION_INSTANT } from '@webframer/js/constants.js'
 import { isPureKeyPress } from '@webframer/js/keyboard.js'
+import { isEqual, isObject } from '@webframer/js/object.js'
 import cn from 'classnames'
 import Fuse from 'fuse.js'
 import React, { useEffect, useId, useMemo } from 'react'
@@ -76,11 +77,11 @@ export function Select ({
   onChange, onFocus, onBlur, onRemove, onSearch, onSelect, onClickValue, onMount, queryParser,
   icon, iconEnd,
   addOption, addOptionMsg, noOptionsMsg, optionProps, optionsProps, virtualOptionsMinimum,
-  format, parse, // these are serializer and deserializer
+  format, parse, normalize, // these are serializer and deserializer
   type, // not used
   float, error, label, loading, prefix, suffix, stickyPlaceholder,
   childBefore, childAfter, className, style, row,
-  _ref, inputRef, id = useId(), renderSelected, ...input
+  _ref, inputRef, id = useId(), renderSelected, initialValues: _1, ...input
 }) {
   input = toReactProps(input)
   let {value = defaultValue} = input
@@ -257,7 +258,20 @@ export function Select ({
   if (search) {
     if (!self.fuse) self.fuse = new Fuse([], {...fuzzyOpt, ...searchOptions})
     if (!self.searchQuery) self.searchQuery = function (e, query = e.target.value) {
-      const {onSearch, name} = self.props
+      const {onSearch, name, normalize} = self.props
+      if (normalize) {
+        const rawValue = query
+        query = normalize.call(this, query, name, self, e)
+        if (e.defaultPrevented) return
+        if (isEqual(query, self.state.query)) {
+          const {target} = e // prevent cursor jump to the end
+          if (target?.setSelectionRange) {
+            const cursorPos = target.selectionStart - (rawValue?.length - query?.length)
+            if (cursorPos >= 0) setTimeout(() => target.setSelectionRange(cursorPos, cursorPos), 0)
+          }
+          return
+        }
+      }
       if (onSearch) onSearch.call(this, e, query, name, self)
       if (e.defaultPrevented) return
       self.setState({query, focusIndex: 0})
@@ -575,6 +589,8 @@ Select.propTypes = {
   // Function(value, name?, self, event) => any - Deserializer for onChange/onBlur/onFocus value
   // Select always stores the `value` or `value[]` internally for its logic, like fuzzy search
   parse: type.Function,
+  // Function(query, name?, event, self) => string - search query normalizer to sanitize user input
+  normalize: type.Function,
   // Whether to always render options, even when closed
   forceRender: type.Boolean,
   // Custom Icon name or props to render before input node.

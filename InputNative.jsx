@@ -30,7 +30,7 @@ export function InputNative ({className, error, loading, ...props}) {
   const viewProps = extractProps(props, {childBefore: false, childAfter: false})
   let {
     active, compact, disabled, readonly,
-    childBefore, childAfter, id, icon, iconEnd, label, prefix, suffix, input, self,
+    childBefore, childAfter, id, icon, iconEnd, input, label, prefix, suffix, self,
   } = useInputSetup(props)
 
   // Password visibility toggle --------------------------------------------------------------------
@@ -83,7 +83,7 @@ export function renderInputIcon (icon, self, {id} = {}) {
 
 /**
  * Input Label
- * @param {string|function} label - string, or render function
+ * @param {string|function|object} label - string, render function, or JSX
  * @param {object} self - function Component instance
  * @param {object} [props]:
  *   {boolean} [required] - whether input is required
