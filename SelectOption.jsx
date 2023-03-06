@@ -73,8 +73,12 @@ SelectOption.propTypes = {
 export default React.memo(SelectOption)
 
 // Tooltip Props for Select Option
-export const optionTooltipProps = { // offset dropdown scrollbar to avoid loosing focus
-  className: 'max-width-600', position: 'right', on: 'hover', style: {marginInlineStart: '-0.5em'},
+export const optionTooltipProps = {
+  // max width is required for proper calculation of the Tooltip position
+  className: 'max-width-600', position: 'right', on: 'hover',
+  // offset dropdown scrollbar to avoid loosing focus
+  style: {marginInlineStart: '-0.5em'},
+  // prevent clicks inside the Tooltip from firing onClick on the parent container
   onClick: onEventStopPropagation(), tabIndex: -1, delay: TIME_DURATION_INSTANT,
 }
 

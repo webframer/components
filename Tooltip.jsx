@@ -50,7 +50,10 @@ export function Tooltip (_props) {
 
   // Event Handlers --------------------------------------------------------------------------------
   if (!self.ref) {
-    self.ref = (node) => self.node = node // Tooltip node
+    self.ref = (node) => {
+      // tooltip node
+      self.node = node
+    }
     self.open = () => {
       if (self.canceled || self.state.open || self.willUnmount) return
       self.setState({prerender: true, style: {bottom: 0, right: 0}})
@@ -94,8 +97,27 @@ export function Tooltip (_props) {
         self.close()
       }
     }
-    self.enterTooltip = () => self.hasTooltipHover = true
-    self.leaveTooltip = debounce(() => {
+    self.enterTooltip = () => {
+      self.hasTooltipHover = true
+    }
+    /**
+     * Note:
+     *  - when the cursor hovers over a scrollbar, it will cause `mouseleave` event on the Tooltip,
+     *    no matter which z-index the Tooltip has, or if it's rendered directly inside the `<body>`
+     *  - The fix is to check if the cursor is over the Tooltip node on `mouseleave`
+     *  - However, this may cause the Tooltip to never receive `mouseleave` event, if the cursor
+     *    enters scrollbar while inside Tooltip, and leaves Tooltip while in scrollbar area.
+     *    => this is not a big problem most of the time, because users can click or hover again.
+     */
+    self.leaveTooltip = debounce(({clientX, clientY}) => {
+      if (self.node) {
+        // Using `hitNodeFrom` is not reliable over scrollbar, use coordinates instead
+        const {top, left, right, bottom} = self.node.getBoundingClientRect()
+        if ( // clientX and clientY are rounded, while rect sizes are not
+          Math.round(left) < clientX && clientX < Math.round(right) &&
+          Math.round(top) < clientY && clientY < Math.round(bottom)
+        ) return
+      }
       self.hasTooltipHover = false
       if (!self.hasHover) self.close()
     }, 16)

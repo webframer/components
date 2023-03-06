@@ -1,3 +1,4 @@
+import { TIME_DURATION_INSTANT } from '@webframer/js'
 import cn from 'classnames'
 import React, { useEffect } from 'react'
 import { Button } from './Button.jsx'
@@ -59,7 +60,7 @@ export function DropdownMenu ({
         )
       }
       <Tooltip
-        embedded position='bottom' on='click' align='start' offset={0}
+        embedded position='bottom' on='click' align='start' offset={0} delay={TIME_DURATION_INSTANT}
         className='p-0 after:hidden'
         tooltipClass='!p-0'
         {...tooltipProps}
@@ -78,6 +79,7 @@ DropdownMenu.defaultProps = {
 
 const {children, ...btnPropTypes} = Button.propTypes
 const {name, ...iconPropTypes} = Icon.propTypes
+const {children: _1, ...tooltipPropTypes} = tooltipProptypes
 DropdownMenu.propTypes = {
   // Dropdown Menu content to render when open
   children: type.NodeOrFunction.isRequired,
@@ -92,7 +94,7 @@ DropdownMenu.propTypes = {
   // Function({open: boolean, initialOpen: boolean, props, state}) => JSX - custom Menu renderer
   menu: type.NodeOrFunction,
   // Dropdown Tooltip props
-  tooltipProps: type.Obj(tooltipProptypes),
+  tooltipProps: type.Obj(tooltipPropTypes),
   // Handler(self: object) when this component has mounted
   onMount: type.Function,
   className: type.ClassName,
