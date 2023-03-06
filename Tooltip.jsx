@@ -144,9 +144,13 @@ export function Tooltip (_props) {
   // Render Props ----------------------------------------------------------------------------------
   const shouldRender = self.mounted && (prerender || state.open)
   if (state.style) style = style ? {...style, ...state.style} : state.style
+  const styleWrap = useMemo(() => ({
+    ...(shouldRender && embedded) ? collapsed : hidden,
+    '--tooltip-offset': offset + 'px',
+  }), [shouldRender, embedded, offset])
 
   return (
-    <span className='tooltip-wrap' style={(shouldRender && embedded) ? collapsed : hidden} ref={ref}>
+    <span className='tooltip-wrap' style={styleWrap} ref={ref}>
       {shouldRender && (embedded
         ? <TooltipRender {...props} {...state} on={on} style={style} self={self} />
         : createPortal(
@@ -198,7 +202,7 @@ Tooltip.defaultProps = {
   animation: 'fade-in',
   delay: 1000,
   on: ['hover', 'click'],
-  offset: 15,
+  offset: 16,
   position: 'top',
   theme: 'dark',
   role: 'tooltip',
@@ -210,7 +214,7 @@ export default ToolTip = React.memo(Tooltip)
 function TooltipRender ({
   open, position, prerender, self, // props from state
   animation, on, theme, align = (position === 'left' || position === 'right') ? 'middle' : 'center',
-  className, style, row, col = !(row), fill, reverse, rtl,
+  className, style, tooltipClass, row, col = !(row), fill, reverse, rtl,
   left, right, top, bottom, center, middle,
   children, ...props
 }) {
@@ -234,7 +238,7 @@ function TooltipRender ({
   }, [on])
 
   return (
-    <div className={cn('tooltip col position-fixed', `theme-${theme}`,
+    <div className={cn(tooltipClass, 'tooltip col position-fixed', `theme-${theme}`,
       !prerender && `t-pos-${position} t-align-${align}`,
       open ? 'pointer-events-auto z-10' : 'pointer-events-none', {
         'invisible': prerender, // tailwind only recognizes text literal

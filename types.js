@@ -511,7 +511,7 @@ export const tooltipProptypes = {
   delay: type.Millisecond,
   // Whether to render Tooltip as child element of the parent Node, by default it renders as Portal
   embedded: type.Boolean,
-  // Tooltip pointer offset from the parent element, default is `15`
+  // Tooltip pointer offset from the parent element, default is `16`
   offset: type.Px,
   // Whether to show Tooltip by default
   open: type.Boolean,
@@ -519,6 +519,8 @@ export const tooltipProptypes = {
   onMount: type.Function,
   // Name of the theme style to apply - must be one of the available themes
   theme: type.String,
+  // Class name for the Tooltip container
+  tooltipClass: type.ClassName,
 }
 // Tooltip prop(s)
 type.Tooltip = type.OneOf([type.NodeOrFunction, type.Obj(tooltipProptypes)])
