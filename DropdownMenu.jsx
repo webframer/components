@@ -3,8 +3,9 @@ import React, { useEffect } from 'react'
 import { Button } from './Button.jsx'
 import { Icon } from './Icon.jsx'
 import { useInstance } from './react/hooks.js'
+import { renderProp } from './react/render.js'
 import Tooltip from './Tooltip.jsx'
-import { type } from './types.js'
+import { tooltipProptypes, type } from './types.js'
 import { View } from './View.jsx'
 
 /**
@@ -13,11 +14,13 @@ import { View } from './View.jsx'
  *    - Clicking the Icon toggles Dropdown Menu open state
  *    - Uses Tooltip to render the menu.
  */
-export function DropdownMenu (_props) {
-  const [self, state] = useInstance({open: _props.open})
+export function DropdownMenu ({
+  className, children, btnProps, iconProps, iconOpen, iconClose, menu, open, onMount, tooltipProps, ...props
+}) {
+  const [self, state] = useInstance({open})
   if (!self.props) {
     // noinspection JSValidateTypes
-    self.open = !!_props.open // initial open state
+    self.initialOpen = !!open // initial open state
     self.toggleMenu = () => self.setState({open: !self.state.open})
     self.onMountTooltip = (tooltip) => {
       const {open: setOpen, close: setClose} = tooltip
@@ -38,25 +41,30 @@ export function DropdownMenu (_props) {
       }
     }
   }
-  self.props = _props
+  self.props = arguments[0]
+  self.open = self.state.open // for render pops
   useEffect(() => {
     const {onMount} = self.props
     if (onMount) onMount(self)
   }, [])
 
-  // Render Props ----------------------------------------------------------------------------------
-  const {
-    className, children, btnProps, iconProps, iconOpen, iconClose, open: _1, onMount: _2, ...props
-  } = _props
   return (
     <View className={cn(className, 'dropdown-menu')} {...props}>
-      <Button {...btnProps}>
-        <Icon {...iconProps} name={state.open ? iconClose : iconOpen} />
-      </Button>
+      {menu
+        ? renderProp(menu, self)
+        : (
+          <Button {...btnProps}>
+            <Icon {...iconProps} name={state.open ? iconClose : iconOpen} />
+          </Button>
+        )
+      }
       <Tooltip
         embedded position='bottom' on='click' align='start' offset={0}
+        className='p-0 after:hidden'
+        tooltipClass='!p-0'
+        {...tooltipProps}
         onMount={self.onMountTooltip}
-        open={self.open}
+        open={self.initialOpen}
         children={children}
       />
     </View>
@@ -81,10 +89,14 @@ DropdownMenu.propTypes = {
   iconProps: type.Obj(iconPropTypes),
   iconOpen: type.Icon,
   iconClose: type.Icon,
-  className: type.ClassName,
-  style: type.Style,
+  // Function({open: boolean, initialOpen: boolean, props, state}) => JSX - custom Menu renderer
+  menu: type.NodeOrFunction,
+  // Dropdown Tooltip props
+  tooltipProps: type.Obj(tooltipProptypes),
   // Handler(self: object) when this component has mounted
   onMount: type.Function,
+  className: type.ClassName,
+  style: type.Style,
 }
 
 export default React.memo(DropdownMenu)
