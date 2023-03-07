@@ -18,7 +18,7 @@ const ExpandState = React.createContext({})
  *     <Expand onChange={warn}>
  *       <ExpandTab row className='middle padding padding-v-smaller middle'>
  *         {({open}) => (<>
- *             <Icon className={open ? 'caret--expand' : 'caret--collapse'} name='wf/triangle-right' />
+ *             <Icon className={open ? 'caret--expanded' : 'caret--collapsed'} name='caret' />
  *             <Text className='padding-h-smaller'>{slot}</Text>
  *         </>)}
  *       </ExpandTab>

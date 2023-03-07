@@ -77,7 +77,7 @@ export const optionTooltipProps = {
   // max width is required for proper calculation of the Tooltip position
   className: 'max-width-600', position: 'right', on: 'hover',
   // offset dropdown scrollbar to avoid loosing focus
-  style: {marginInlineStart: '-0.5em'},
+  style: {marginInlineStart: '-0.5em', marginInlineEnd: '-0.5em'},
   // prevent clicks inside the Tooltip from firing onClick on the parent container
   onClick: onEventStopPropagation(), tabIndex: -1, delay: TIME_DURATION_INSTANT,
 }

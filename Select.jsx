@@ -87,6 +87,7 @@ export function Select ({
   let {value = defaultValue} = input
   const [self, state] = useInstance({options, query, value, focusIndex})
   let [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
+  self.toggleOpen = toggleOpen
   self.open = open // for internal logic
   self.animating = animating // to prevent multiple opening when toggling Label -> input to close
   open = open || animating // for rendering and styling
