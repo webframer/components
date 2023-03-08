@@ -1,4 +1,4 @@
-import { Active, isFunction, SOUND } from '@webframer/js'
+import { Current, isFunction, SOUND } from '@webframer/js'
 import React from 'react'
 
 /**
@@ -20,7 +20,7 @@ export const UIContext = React.createContext({})
  * @param {Object|HTMLAudioElement} [sound] - new Audio(URL) file
  * @returns {Object} props - mutated with necessary accessibility attributes
  */
-export function accessibilitySupport (props, sound = Active.SETTINGS.HAS_SOUND && SOUND.FILE.TOUCH) {
+export function accessibilitySupport (props, sound = Current.SETTINGS.HAS_SOUND && SOUND.FILE.TOUCH) {
   /* Remove key press and click event if necessary */
   // comment out to allow click without tabbing (ex. decorative Icon inside input)
   // if (props.tabIndex === -1) {

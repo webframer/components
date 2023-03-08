@@ -1,4 +1,4 @@
-import { Active } from '@webframer/js/_envs.js'
+import { Current } from '@webframer/js/_envs.js'
 import PropTypes from 'prop-types'
 
 /**
@@ -16,7 +16,7 @@ import PropTypes from 'prop-types'
 export const type = {}
 
 // Define this custom type generators on initialisation to override `type` behaviors
-const {defineCreator, defineBase, defineCommon, defineExtended, defineComponent} = Active.type || {}
+const {defineCreator, defineBase, defineCommon, defineExtended, defineComponent} = Current.type || {}
 
 /**
  * Type Creators -----------------------------------------------------------------------------------
