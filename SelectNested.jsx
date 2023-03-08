@@ -1,4 +1,4 @@
-import { get, isCollection, isEmpty, subscribeTo, unsubscribeFrom } from '@webframer/js'
+import { get, isCollection, isEmpty, subscribeTo, toList, unsubscribeFrom } from '@webframer/js'
 import cn from 'classnames'
 import React, { useEffect, useMemo } from 'react'
 import { DropdownMenu } from './DropdownMenu.jsx'
@@ -25,8 +25,8 @@ import { View } from './View.jsx'
  *    => This is the desired UX because typically multilevel dropdowns would close everything,
  *       forcing the user to do it all over again, which is bad user experience.
  *  - todo: onChange, onBlur, onFocus, format, parse, normalize handlers
- *  - todo: keyboard enter press on select option
- *  - todo: Dropdown open on click for selected keys + disable onChange event
+ *  - todo: keyboard accessibility - arrow up/down to navigate Dropdown options, Escape to exit, Enter to select
+ *  - todo: selected keys to disable onClick and enable tooltip onClick
  */
 export function SelectNested ({
   className, options, filterValue, formatKey, nestedIcon, nestedProps,
@@ -37,12 +37,16 @@ export function SelectNested ({
 
   // Event Handlers --------------------------------------------------------------------------------
   if (!self.props) {
+    // Internal cache of selected keys' DropdownMenu instances by their `id` to close dropdowns
+    self.selectedDropdownMenu = {}
+
     /**
      * Internal onChange handler for SelectNested value
      * @param {Event} e
-     * @param {string[]} keyPath - array of all selected keys/indices
+     * @param {string|string[]} keyPath - array of all selected keys/indices
      */
     self.changeValue = (e, keyPath) => {
+      keyPath = toList(keyPath)
       self.setState({value: keyPath})
 
       // Garbage clean DropdownMenu instances
@@ -58,22 +62,16 @@ export function SelectNested ({
       }
     }
 
-    // Click on nested Dropdown panel
+    // Click on nested Dropdown panel or Select.onChange fired via keyboard
     self.selectOption = function (e, keyPath) {
       self.changeValue.apply(this, arguments)
       self.closeDropdowns.call(this, e)
       if (self.select?.open) self.select.toggleOpen.call(this, e) // close Select
     }
 
-    // Selected keys inside Select component
-    self.renderSelectedKey = function (key, index, arr) {
-      const keyPath = index ? self.state.value.slice(0, index + 1) : [key]
-      const value = get(self.props.options, keyPath)
-      const id = String(keyPath) // `key` can have duplicates (ex. key `form` in keyPath `form.name.form`)
-      const open = index === arr.length - 1 // only open the last key by default after selection
-      keyPath.pop() // pop for nested dropdowns
-      return <NestedDropdown options={{[key]: value}}
-                             {...{key: id, self, parentPath: keyPath, id, isSelected: true, open}} />
+    // Handler Select keyboard events (`onClick` disabled via `optionProps.onClick`)
+    self.onChangeSelect = function (e, keys) {
+      self.selectOption.call(this, e, [keys.pop()])
     }
 
     self.onMountSelect = (instance) => self.select = instance
@@ -98,8 +96,16 @@ export function SelectNested ({
         .forEach(instance => instance.tooltip?.close.apply(this, arguments))
     }
 
-    // Internal cache of selected keys' DropdownMenu instances by their `id` to close dropdowns
-    self.selectedDropdownMenu = {}
+    // Selected keys inside Select component
+    self.renderSelectedKey = function (key, index, arr) {
+      const keyPath = index ? self.state.value.slice(0, index + 1) : [key]
+      const value = get(self.props.options, keyPath)
+      const id = String(keyPath) // `key` can have duplicates (ex. key `form` in keyPath `form.name.form`)
+      const open = index === arr.length - 1 // only open the last key by default after selection
+      keyPath.pop() // pop for nested dropdowns
+      return <NestedDropdown options={{[key]: value}}
+                             {...{key: id, self, parentPath: keyPath, id, isSelected: true, open}} />
+    }
   }
   self.props = arguments[0]
   useEffect(() => {
@@ -121,7 +127,7 @@ export function SelectNested ({
       multiple controlledValue
       value={value}
       options={selectOptions}
-      // onChange={self.selectKeys}
+      onChange={self.onChangeSelect}
       onMount={self.onMountSelect}
       renderSelected={self.renderSelectedKey}
     />
@@ -129,7 +135,19 @@ export function SelectNested ({
 }
 
 SelectNested.defaultProps = {
-  optionProps: {className: 'no-padding !no-border'},
+  optionProps: {
+    className: 'no-padding !no-border',
+    /**
+     * Override SelectOption `onClick` for keyboard accessibility.
+     * This will prevent Select from firing `onChange` event on click,
+     * because `selectOption()` is not fired.
+     * However, if the user presses Enter, `selectOption()` is fired internally without click,
+     * and will call Select.onChange event.
+     * So handle Select.onChange for accessibility, and leave this function empty
+     * to prevent firing Select.onChange twice.
+     */
+    onClick () {},
+  },
   // Chevron-right for LTR direction
   nestedIcon: 'caret',
   nestedProps: {

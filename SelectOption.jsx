@@ -15,6 +15,8 @@ export function SelectOption ({
   // Event Handlers --------------------------------------------------------------------------------
   props.onClick = useCallback(function (e) {
     e.stopPropagation()
+    // the `onClick` by default is selectOption,
+    // but can be overridden by `optionProps.onClick` for custom behavior
     onClick.call(this, e, option)
   }, [option, onClick])
   props.onBlur = useCallback(function (e) {onBlur.call(this, e, option)}, [option, onBlur])
