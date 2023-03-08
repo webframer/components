@@ -1,6 +1,6 @@
 import { isFileSrc, isFunction, toCamelCase, toCapCase } from '@webframer/js'
 
-export const cssVendorPrefixPattern = /^(-webkit-|-moz|-o-|-ms-).+$/
+export const cssVendorPrefixPattern = /^(-webkit-|-moz-|-o-|-ms-).+$/
 export const FONT = {
   FAMILY: { // Font family that has fallback in common operating systems for all glyphs
     UI: 'ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,' +
@@ -77,7 +77,7 @@ export function styleObjFrom (string) {
 export function toCamelCaseKeys (css) {
   const style = {}
   for (const key in css) {
-    if (key.indexOf('--') === 0) style[key] = css[key] // variables
+    if (key.startsWith('--')) style[key] = css[key] // variables
     else if (cssVendorPrefixPattern.test(key)) style[toCapCase(key)] = css[key] // vendor prefix
     else style[toCamelCase(key)] = css[key] // other attributes
   }
