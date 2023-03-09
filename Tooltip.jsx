@@ -16,13 +16,29 @@ import { renderProp } from './react/render.js'
 import { tooltipProptypes } from './types.js'
 
 /**
- * todo: component improvement 3 - option to toggle tooltip with click, or disable on click
- * todo: component improvement 3 - RTL position/align support
  * Tooltip Component
+ * todo: component improvement 3 - RTL position/align support
  *
  * Logic:
- *  - `on='click'` toggles Tooltip on parent element click, and closes it when clicking outside
- *  - `embedded={true}` renders Tooltip inside the parent element (document.body by default)
+ *  - `on='click'` toggles Tooltip when clicking inside the parent element,
+ *    but not inside the Tooltip itself; and closes it when clicking outside,
+ *    independent of the `focus` or `hover` states. By default, on `click` toggle is disabled,
+ *    and closes the Tooltip when clicking anywhere, except inside the Tooltip.
+ *
+ *  - `on='focus`` opens Tooltip with specified delay when the parent element receives focus
+ *    (except when focus is the result of the `click` event),
+ *    and closes it on blur (unless the parent element is hovered and has on `hover` enabled).
+ *    todo: improvement3 - complex logic for on blur events checks if the focused element is inside
+ *          Tooltip and keeps it open. Then it subscribes to the focused element for on blur events
+ *          to know when to close the Tooltip. If after blur of that element the parent did not get
+ *          focus, then close the Tooltip.
+ *
+ *  - `on='hover` opens Tooltip with specified delay when the pointer enters the parent element,
+ *    and closes it on pointer leave (unless the pointer enters the Tooltip itself,
+ *    or the parent element has focus and on `focus` is enabled).
+ *
+ *  - `embedded={true}` renders Tooltip inside the parent element. By default, Tooltip renders
+ *    inside a Portal, as direct child of document.body to ensure position-fixed works as expected.
  *
  * Notes:
  *  - Offset position should use margin to allow hovering over Tooltip, without loosing mouse hover
@@ -38,78 +54,125 @@ import { tooltipProptypes } from './types.js'
  *    This was not due to CSS margin or gaps, because it did not work even with overlapping padding.
  *    => Need to capture mouse enter event on the tooltip itself with debounce to check open state.
  */
-export function Tooltip (_props) {
-  let {
-    position, on: onEvent, offset, open, onMount, delay, embedded, style, ...props
-  } = _props
+export function Tooltip ({
+  position, on: onEvent, offset, open, onOpen, onClose, onMount, delay, embedded, style, ...props
+}) {
   const ref = useRef(null) // empty span container embedded inside the parent element
   const [self, state] = useInstance({position}) // initially always closed to prerender
   const prerender = state.prerender
-  self.props = _props
-  const on = useMemo(() => toUniqueListFast(toList(onEvent)), [onEvent])
+  const on = useMemo(() => toUniqueListFast(['click', ...toList(onEvent)]), [onEvent])
 
   // Event Handlers --------------------------------------------------------------------------------
-  if (!self.ref) {
-    self.ref = (node) => {
-      // tooltip node
-      self.node = node
-    }
-    self.open = () => {
-      if (self.canceled || self.state.open || self.willUnmount) return
+  if (!self.props) {
+    // Timestamp of cancel event to prevent Tooltip from opening (ie. after delay)
+    self.canceledOpen = 0
+
+    // Tooltip node
+    self.ref = (node) => {self.node = node}
+
+    // Open Tooltip
+    self.open = function (e) {
+      if (self.state.open || self.willUnmount) return
+      const {delay, onOpen} = self.props
+      if (Date.now() - self.canceledOpen < delay) return
+      if (onOpen) onOpen.call(this, e, self)
+      if (e.defaultPrevented) return
       self.setState({prerender: true, style: {bottom: 0, right: 0}})
       // ^ first prerender to compute dimensions for positioning
       // (must have bottom + right positions set to work within scroll).
       // The actual opening is called within useLayoutEffect to ensure the prerender has finished.
     }
-    self.close = () => {
-      if (self.willUnmount) return
-      if (self.state.open) self.setState({open: false, prerender: false, style: null})
+
+    // Close Tooltip
+    self.close = function (e) {
+      if (!self.state.open || self.willUnmount) return
+      const {onClose} = self.props
+      if (onClose) onClose.call(this, e, self)
+      if (e.defaultPrevented) return
+      self.setState({open: false, prerender: false, style: null})
     }
-    self.openDelayed = debounce(self.open, delay)
-    self.onHoverEnter = () => {
-      self.hasHover = true
-      self.canceled = false
-      self.openDelayed()
-    }
-    self.onHoverLeave = debounce(() => {
-      self.hasHover = false
-      if (self.hasTooltipHover) return
-      self.canceled = true
-      self.close()
-    }, 16) // debounce to capture cursor transition to tooltip
-    self.toggleOpenOnClick = (event) => {
+
+    // Handle click events
+    self.onClickAnywhere = function (e) {
       // For Button with Icon and Tooltip, the target is the Icon -> consider it as target as well.
       // If needed, create `directClickOnly` prop to only consider direct target element
-      let isTarget = event.target === self.parent
-      if (!isTarget) {
-        let target = event.target
+      let isInsideParent = e.target === self.parent
+
+      // Ignore clicks inside the Tooltip itself
+      if (!isInsideParent) {
+        let target = e.target
         while (target.parentElement) {
-          if (target === self.node) return // ignore clicks from the tooltip itself
-          if ((isTarget = target === self.parent)) break
+          if (target === self.node) return
+          if ((isInsideParent = target === self.parent)) break
           target = target._parentElement || target.parentElement
         }
         target = null
       }
-      if (isTarget) { // toggle state when clicking on the parent node
-        if (self.state.open) self.close()
-        else self.open()
-      } else if (self.state.open) { // close tooltip if clicking anywhere outside the parent node
-        self.close()
+
+      // Toggle state when clicking inside the parent element and on `click` enabled
+      if (isInsideParent && toList(self.props.on).includes('click')) {
+        if (self.state.open) {
+          self.close.apply(this, arguments)
+          self.canceledOpen = Date.now() // prevent focus/hover from reopening after delay
+        } else {
+          self.canceledOpen = 0 // force open regardless on focus/hover states
+          self.open.apply(this, arguments)
+        }
+      }
+
+      // Close and prevent opening Tooltip if clicking anywhere outside or when on `click` is disabled
+      else {
+        if (self.state.open) self.close.apply(this, arguments)
+        self.canceledOpen = Date.now() // prevent focus/hover from reopening after delay
       }
     }
-    self.enterTooltip = () => {
+
+    // Handle focus events on the parent element
+    self.onFocusEnter = function (e) {
+      self.hasFocus = true
+      self.openDelayed.apply(this, arguments)
+    }
+
+    // Handle blur events on the parent element
+    self.onFocusLeave = function (e) {
+      self.hasFocus = false
+      if (self.hasHover) return
+      self.canceledOpen = Date.now()
+      self.close.apply(this, arguments)
+    }
+
+    // Handle pointer enter events on the parent element
+    self.onHoverEnter = function (e) {
+      self.hasHover = true
+      self.openDelayed.apply(this, arguments)
+    }
+
+    // Handle pointer leave events on the parent element
+    self.onHoverLeave = debounce(function (e) {
+      self.hasHover = false
+      if (self.hasFocus || self.hasTooltipHover) return
+      self.canceledOpen = Date.now()
+      self.close.apply(this, arguments)
+    }, 16) // debounce to capture cursor transition to tooltip
+
+    // Handle pointer enter events on the Tooltip
+    self.enterTooltip = function (e) {
       self.hasTooltipHover = true
     }
+
     /**
+     * Handle pointer leave events on the Tooltip
      * Note:
-     *  - when the cursor hovers over a scrollbar, it will cause `mouseleave` event on the Tooltip,
+     *  - when the cursor hovers over a scrollbar, it will cause `pointerleave` event on the Tooltip,
      *    no matter which z-index the Tooltip has, or if it's rendered directly inside the `<body>`
-     *  - The fix is to check if the cursor is over the Tooltip node on `mouseleave`
-     *  - However, this may cause the Tooltip to never receive `mouseleave` event, if the cursor
+     *  - The fix is to check if the cursor is over the Tooltip node on `pointerleave`
+     *  - However, this may cause the Tooltip to never receive `pointerleave` event, if the cursor
      *    enters scrollbar while inside Tooltip, and leaves Tooltip while in scrollbar area.
      *    => this is not a big problem most of the time, because users can click or hover again.
+     *    => it is also the desired UX for multilevel nested dropdowns that open on `hover`,
+     *       where pointer leaving the nested dropdown should keep parent dropdowns open.
      */
-    self.leaveTooltip = debounce(({clientX, clientY}) => {
+    self.leaveTooltip = debounce(function ({clientX, clientY}) {
       if (self.node) {
         // Using `hitNodeFrom` is not reliable over scrollbar, use coordinates instead
         const {top, left, right, bottom} = self.node.getBoundingClientRect()
@@ -119,33 +182,48 @@ export function Tooltip (_props) {
         ) return
       }
       self.hasTooltipHover = false
-      if (!self.hasHover) self.close()
+      if (!self.hasFocus && !self.hasHover) self.close.apply(this, arguments)
     }, 16)
   }
+  self.openDelayed = useMemo(() => debounce(self.open, delay), [delay])
+  self.props = arguments[0]
 
   // Register Event Handlers -----------------------------------------------------------------------
   useEffect(() => {
     if (!ref.current) return
     self.parent = ref.current.parentElement
-    let eventArgs = [void 0, self.parent]
-    let events = on.map((event) => {
+    delete self.hasFocus // ensure proper reset when `on` event subscription changes
+    delete self.hasHover
+    const eventArgs = [void 0, self.parent]
+    const events = on.map((event) => {
       switch (event) {
         // clicking anywhere outside should close the popup (i.e. toggle state on click)
         case 'click':
-          subscribeTo('click', self.toggleOpenOnClick)
-          return () => unsubscribeFrom('click', self.toggleOpenOnClick)
+          subscribeTo('click', self.onClickAnywhere)
+          return () => unsubscribeFrom('click', self.onClickAnywhere)
 
-        // https://www.w3schools.com/jsref/event_onmouseenter.asp
-        case 'hover':
+        case 'focus':
           // noinspection JSCheckFunctionSignatures
-          subscribeTo('mouseenter', self.onHoverEnter, ...eventArgs)
+          subscribeTo('focus', self.onFocusEnter, ...eventArgs)
           // noinspection JSCheckFunctionSignatures
-          subscribeTo('mouseleave', self.onHoverLeave, ...eventArgs)
+          subscribeTo('blur', self.onFocusLeave, ...eventArgs)
           return () => {
             // noinspection JSCheckFunctionSignatures
-            unsubscribeFrom('mouseenter', self.onHoverEnter, ...eventArgs)
+            unsubscribeFrom('focus', self.onFocusEnter, ...eventArgs)
             // noinspection JSCheckFunctionSignatures
-            unsubscribeFrom('mouseleave', self.onHoverLeave, ...eventArgs)
+            unsubscribeFrom('blur', self.onFocusLeave, ...eventArgs)
+          }
+
+        case 'hover':
+          // noinspection JSCheckFunctionSignatures
+          subscribeTo('pointerenter', self.onHoverEnter, ...eventArgs)
+          // noinspection JSCheckFunctionSignatures
+          subscribeTo('pointerleave', self.onHoverLeave, ...eventArgs)
+          return () => {
+            // noinspection JSCheckFunctionSignatures
+            unsubscribeFrom('pointerenter', self.onHoverEnter, ...eventArgs)
+            // noinspection JSCheckFunctionSignatures
+            unsubscribeFrom('pointerleave', self.onHoverLeave, ...eventArgs)
           }
       }
     })
@@ -155,8 +233,8 @@ export function Tooltip (_props) {
     self.mounted = true
     const {onMount, open} = self.props
     if (onMount) onMount(self)
-    if (open) self.open() // Show Tooltip on mount
-    return () => self.willUnmount = true
+    if (open) self.open(new Event('mount')) // Show Tooltip on mount
+    return () => {self.willUnmount = true}
   }, [])
   useIsomorphicLayoutEffect(() => {
     if (!prerender || !self.parent || !self.node) return
@@ -223,7 +301,7 @@ Tooltip.propTypes = tooltipProptypes
 Tooltip.defaultProps = {
   animation: 'fade-in',
   delay: 1000,
-  on: ['hover', 'click'],
+  on: ['focus', 'hover'],
   offset: 16,
   position: 'top',
   theme: 'dark',
@@ -243,20 +321,18 @@ function TooltipRender ({
 
   useEffect(() => {
     if (!self.node) return
-    let eventArgs = [void 0, self.node]
-    let events = on.filter(e => e === 'hover').map(() => {
+    if (!on.find(e => e === 'hover')) return
+    const eventArgs = [void 0, self.node]
+    // noinspection JSCheckFunctionSignatures
+    subscribeTo('pointerenter', self.enterTooltip, ...eventArgs)
+    // noinspection JSCheckFunctionSignatures
+    subscribeTo('pointerleave', self.leaveTooltip, ...eventArgs)
+    return () => {
       // noinspection JSCheckFunctionSignatures
-      subscribeTo('mouseenter', self.enterTooltip, ...eventArgs)
+      unsubscribeFrom('pointerenter', self.enterTooltip, ...eventArgs)
       // noinspection JSCheckFunctionSignatures
-      subscribeTo('mouseleave', self.leaveTooltip, ...eventArgs)
-      return () => {
-        // noinspection JSCheckFunctionSignatures
-        unsubscribeFrom('mouseenter', self.enterTooltip, ...eventArgs)
-        // noinspection JSCheckFunctionSignatures
-        unsubscribeFrom('mouseleave', self.leaveTooltip, ...eventArgs)
-      }
-    })
-    return () => events.forEach(unsubscribe => unsubscribe())
+      unsubscribeFrom('pointerleave', self.leaveTooltip, ...eventArgs)
+    }
   }, [on])
 
   return (

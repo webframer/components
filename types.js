@@ -489,8 +489,8 @@ type.TagIds = type.ListOf(type.Id.isRequired)
 type.TagById = type.ObjectOf(type.Tag.isRequired)
 type.TagOptions = type.Options
 
-// Tooltip on events
-const tooltipOnEnum = type.Enum(['hover', 'click'])
+// Tooltip open/close on events
+const tooltipOnEnum = type.Enum(['click', 'focus', 'hover'])
 // Tooltip props object
 export const tooltipProptypes = {
   // Tooltip content
@@ -515,6 +515,10 @@ export const tooltipProptypes = {
   offset: type.Px,
   // Whether to show Tooltip by default
   open: type.Boolean,
+  // Handler(event, self: object) => void - before Tooltip opens
+  onOpen: type.Function,
+  // Handler(event, self: object) => void - before Tooltip closes
+  onClose: type.Function,
   // Callback(self: object) => void - when Tooltip container has mounted
   onMount: type.Function,
   // Name of the theme style to apply - must be one of the available themes

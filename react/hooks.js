@@ -242,8 +242,8 @@ export function useMountCycle (self = useRef({}).current) {
  */
 export function useHovered (ref = useRef(null)) {
   const [isHovered, setValue] = useState(false)
-  useEventListener('mouseenter', () => setValue(true), ref)
-  useEventListener('mouseleave', () => setValue(false), ref)
+  useEventListener('pointerenter', () => setValue(true), ref)
+  useEventListener('pointerleave', () => setValue(false), ref)
   return [isHovered, ref]
 }
 
