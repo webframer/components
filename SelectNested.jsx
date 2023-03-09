@@ -1,15 +1,13 @@
-import { get, isCollection, isEmpty, subscribeTo, toList, unsubscribeFrom } from '@webframer/js'
+import { get, isCollection, isEmpty, toList } from '@webframer/js'
 import cn from 'classnames'
-import React, { useEffect, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { DropdownMenu } from './DropdownMenu.jsx'
 import Icon from './Icon.jsx'
 import { useInstance } from './react.js'
-import { Row } from './Row.jsx'
 import { Select } from './Select.jsx'
 import { optionTooltipProps } from './SelectOption.jsx'
 import Text from './Text.jsx'
 import { type } from './types.js'
-import { View } from './View.jsx'
 
 /**
  * Nested Dropdown Selection, where `options` is a deeply nested collection (object or array),
@@ -18,15 +16,14 @@ import { View } from './View.jsx'
  * Logic:
  *  - Value is the entire selected path
  *  - The first selection level uses multiple Select, then NestedDropdown for the rest
- *  - When nested option is click, set it as multiple value inside Select
+ *  - When nested option is clicked, set it as multiple value inside Select
  *  - Each selected sub-path can have its own nested dropdowns
- *  - onClick outside, close all dropdowns, because Tooltip only closes on hover;
+ *  - on select option, close all dropdowns, because Tooltip does not close when clicking inside itself
  *  - on='hover' Tooltip works well because loosing hover state only closes the last dropdown.
  *    => This is the desired UX because typically multilevel dropdowns would close everything,
  *       forcing the user to do it all over again, which is bad user experience.
- *  - todo: onChange, onBlur, onFocus, format, parse, normalize handlers
- *  - todo: keyboard accessibility - arrow up/down to navigate Dropdown options, Escape to exit, Enter to select
- *  - todo: selected keys to disable onClick and enable tooltip onClick
+ *  - todo: component onChange, onBlur, onFocus, format, parse, normalize handlers
+ *  - todo: component keyboard accessibility - arrow up/down to navigate Dropdown options, Escape to exit, Enter to select
  */
 export function SelectNested ({
   className, options, filterValue, formatKey, nestedIcon, nestedProps,
@@ -69,26 +66,12 @@ export function SelectNested ({
       if (self.select?.open) self.select.toggleOpen.call(this, e) // close Select
     }
 
-    // Handler Select keyboard events (`onClick` disabled via `optionProps.onClick`)
+    // Handle Select keyboard events (`onClick` disabled via `optionProps.onClick`)
     self.onChangeSelect = function (e, keys) {
       self.selectOption.call(this, e, [keys.pop()])
     }
 
     self.onMountSelect = (instance) => self.select = instance
-
-    self.onClickAnywhere = function (e) {
-      if (e.defaultPrevented) return
-      if (!self.select?.node) return
-      let target = e.target
-      if (target) {
-        while (target.parentElement) {
-          if (target === self.select.node) return // ignore clicks from nested dropdowns
-          target = target._parentElement || target.parentElement
-        }
-        target = null
-      }
-      self.closeDropdowns.apply(this, arguments)
-    }
 
     // Close all dropdowns
     self.closeDropdowns = function () {
@@ -108,10 +91,6 @@ export function SelectNested ({
     }
   }
   self.props = arguments[0]
-  useEffect(() => {
-    subscribeTo('click', self.onClickAnywhere)
-    return () => unsubscribeFrom('click', self.onClickAnywhere)
-  }, [])
 
   // Render props ------------------------------------------------------------------
   const selectOptions = useMemo(() => itemsFrom(options, self).map(({key, value}) => ({
@@ -179,7 +158,7 @@ function NestedDropdown_ ({
   parentPath = [], // parent key path
   id, isSelected, // whether this is the first level key selected inside Select component
   open, // whether nested DropdownMenu should open initially
-  ...props
+  className, ...props
 }) {
   // Render props ----------------------------------------------------------------------------------
   const {nestedIcon, nestedProps} = self.props
@@ -187,34 +166,37 @@ function NestedDropdown_ ({
   if (!items.length) return null
 
   // Reduce padding for selected keys inside Select component
-  const selectedClass = {[selectedPanelClass]: isSelected}
+  const selectedClass = {[selectedOptionClass]: isSelected}
   const selectedClassNested = {...selectedClass, 'padding-end-smallest': isSelected}
-  return (
-    <View scroll={items.length > 1} scrollAlongDirectionOnly {...props}>
-      {
-        items.map(({key, value, text}) => {
-          const keyPath = parentPath.concat([key])
-          const isNested = isCollection(value) && !isEmpty(itemsFrom(value, self, keyPath))
-          const onClick = (e) => self.selectOption(e, keyPath)
-          if (isNested) return (
-            <DropdownMenu key={key} open={open} menu={(
-              <Row className={cn(rowClass, selectedClassNested)} onClick={onClick}>
-                <Text className='margin-end-smaller'>{text}</Text>
-                <Icon className='caret--collapsed' name={nestedIcon} />
-              </Row>
-            )} {...{
-              tooltipProps: selectNestedTooltipProps,
-              // Selected key inside Select component ony has a single key
-              onMount: id ? ((instance) => self.selectedDropdownMenu[id] = instance) : void 0,
-            }}>
-              {() => <NestedDropdown options={value} self={self} {...nestedProps} parentPath={keyPath} />}
-            </DropdownMenu>
-          )
-          return <Text key={key} className={cn(panelClass, selectedClass)} onClick={onClick}>{text}</Text>
-        })
-      }
-    </View>
-  )
+
+  return (<>
+    {
+      items.map(({key, value, text}) => {
+        const keyPath = parentPath.concat([key])
+        const isNested = isCollection(value) && !isEmpty(itemsFrom(value, self, keyPath))
+        const onClick = isSelected ? undefined : ((e) => self.selectOption(e, keyPath))
+        if (isNested) return (
+          <DropdownMenu row className={cn('select-nested__option', className, optionClassNested, selectedClassNested)}
+                        key={key} open={open} onClick={onClick} menu={(<>
+            <Text className='margin-end-smaller'>{text}</Text>
+            <Icon className='caret--collapsed' name={nestedIcon} />
+          </>)} {...{
+            ...props,
+            tooltipProps: selectNestedTooltipProps,
+            // Selected key inside Select component ony has a single key
+            onMount: id ? ((instance) => self.selectedDropdownMenu[id] = instance) : void 0,
+          }}>
+            {() => <NestedDropdown options={value} self={self} {...nestedProps} parentPath={keyPath} />}
+          </DropdownMenu>
+        )
+        return (
+          <Text className={cn('select-nested__option', className, optionClass, selectedClass)}
+                {...props} key={key} onClick={onClick} children={text}
+          />
+        )
+      })
+    }
+  </>)
 }
 
 const NestedDropdown = React.memo(NestedDropdown_)
@@ -224,14 +206,15 @@ const list = []
 // These props can be mutated during the implementation
 export const selectNestedTooltipProps = {
   ...optionTooltipProps,
-  className: 'max-width-320 p-0 after:hidden divide-h--wrap',
+  className: 'max-width-320 p-0 after:hidden divide-h--wrap scrollable',
   embedded: false,
-  position: 'right', on: 'hover',
+  position: 'right', on: ['click', 'focus', 'hover'],
 }
 
-const panelClass = 'divide-v--wrap padding-v-smaller padding-h hover:bg-shadow-lightest hover:text-dark'
-const rowClass = 'justify middle ' + panelClass
-const selectedPanelClass = 'padding-h-small !no-border'
+// todo: component style - move custom styling to CSS, or provide default
+const optionClass = 'divide-v--wrap padding-v-smaller padding-h'
+const optionClassNested = 'justify middle ' + optionClass
+const selectedOptionClass = 'padding-h-small !no-border'
 
 // Helpers -----------------------------------------------------------------------------------------
 

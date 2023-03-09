@@ -22,40 +22,24 @@ export function DropdownMenu ({
   if (!self.props) {
     // noinspection JSValidateTypes
     self.initialOpen = !!open // initial open state
-    self.toggleMenu = () => self.setState({open: !self.state.open})
-    self.onMountTooltip = (tooltip) => {
-      const {open: setOpen, close: setClose} = tooltip
-      self.tooltip = tooltip
-
-      // Sync Tooltip state with Icon
-      tooltip.open = function () {
-        setOpen.apply(this, arguments)
-        let {prerender, open} = tooltip.state
-        open = !!(prerender || open)
-        if (open === self.state.open) self.toggleMenu()
-      }
-      tooltip.close = function () {
-        setClose.apply(this, arguments)
-        let {prerender, open} = tooltip.state
-        open = !!(prerender || open)
-        if (open === self.state.open) self.toggleMenu()
-      }
-    }
+    self.onMountTooltip = (tooltip) => self.tooltip = tooltip
+    self.onOpenTooltip = () => self.setState({open: true})
+    self.onCloseTooltip = () => self.setState({open: false})
   }
   self.props = arguments[0]
-  self.open = self.state.open // for render pops
+  self.open = open = state.open // for render pops
   useEffect(() => {
     const {onMount} = self.props
     if (onMount) onMount(self)
   }, [])
 
   return (
-    <View className={cn(className, 'dropdown-menu')} {...props}>
+    <View className={cn(className, 'dropdown-menu', {open})} {...props}>
       {menu
         ? renderProp(menu, self)
         : (
           <Button {...btnProps}>
-            <Icon {...iconProps} name={state.open ? iconClose : iconOpen} />
+            <Icon {...iconProps} name={open ? iconClose : iconOpen} />
           </Button>
         )
       }
@@ -66,6 +50,8 @@ export function DropdownMenu ({
         {...tooltipProps}
         onMount={self.onMountTooltip}
         open={self.initialOpen}
+        onOpen={self.onOpenTooltip}
+        onClose={self.onCloseTooltip}
         children={children}
       />
     </View>

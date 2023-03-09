@@ -1,13 +1,5 @@
-import {
-  debounce,
-  isFunction,
-  isObject,
-  subscribeTo,
-  toList,
-  toUniqueListFast,
-  trimSpaces,
-  unsubscribeFrom,
-} from '@webframer/js'
+import { debounce, isFunction, isObject, subscribeTo, trimSpaces, unsubscribeFrom } from '@webframer/js'
+import { toList, toUniqueListFast } from '@webframer/js/array.js'
 import cn from 'classnames'
 import React, { useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
@@ -28,10 +20,10 @@ import { tooltipProptypes } from './types.js'
  *  - `on='focus`` opens Tooltip with specified delay when the parent element receives focus
  *    (except when focus is the result of the `click` event),
  *    and closes it on blur (unless the parent element is hovered and has on `hover` enabled).
- *    todo: improvement3 - complex logic for on blur events checks if the focused element is inside
- *          Tooltip and keeps it open. Then it subscribes to the focused element for on blur events
- *          to know when to close the Tooltip. If after blur of that element the parent did not get
- *          focus, then close the Tooltip.
+ *    todo: component improvement 3 - complex logic for on blur events checks if the focused element
+ *          is inside Tooltip and keeps it open. Then it subscribes to the focused element for
+ *          on blur events to know when to close the Tooltip. If after blur of that element
+ *          the parent did not get focus, then close the Tooltip.
  *
  *  - `on='hover` opens Tooltip with specified delay when the pointer enters the parent element,
  *    and closes it on pointer leave (unless the pointer enters the Tooltip itself,
@@ -48,7 +40,7 @@ import { tooltipProptypes } from './types.js'
  *
  * Side notes;
  *    - Portal elements do not keep hover state on the parent element
- *    when transitioning the cursor from parent to the tooltip.
+ *    when transitioning the cursor from parent to the Tooltip.
  *    A test was done to check for the hitNodeFrom event coordinates, but it had flaky results.
  *    The Tooltip from the bottom would not capture the cursor sometimes.
  *    This was not due to CSS margin or gaps, because it did not work even with overlapping padding.
@@ -72,6 +64,7 @@ export function Tooltip ({
 
     // Open Tooltip
     self.open = function (e) {
+      if (e.defaultPrevented) return // alert may prevent opening
       if (self.state.open || self.willUnmount) return
       const {delay, onOpen} = self.props
       if (Date.now() - self.canceledOpen < delay) return
@@ -85,6 +78,7 @@ export function Tooltip ({
 
     // Close Tooltip
     self.close = function (e) {
+      if (e.defaultPrevented) return // alert may prevent closing
       if (!self.state.open || self.willUnmount) return
       const {onClose} = self.props
       if (onClose) onClose.call(this, e, self)
