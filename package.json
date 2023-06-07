@@ -1,14 +1,14 @@
 {
   "name": "@webframer/ui",
-  "version": "0.0.1",
+  "version": "0.12.0",
   "description": "Components library for no-code development platform",
   "license": "MIT",
   "type": "module",
-  "homepage": "https://github.com/webframer/views",
+  "homepage": "https://github.com/webframer/ui",
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/webframer/views.git"
+    "url": "https://github.com/webframer/ui.git"
   },
   "engines": {
     "node": ">=12.0.0"
@@ -23,7 +23,7 @@
     "push": "npm publish --access public"
   },
   "dependencies": {
-    "@webframer/js": "workspace:*",
+    "@webframer/js": "^0.12.0",
     "classnames": "^2.3.1",
     "fuse.js": "^6.6.2",
     "prop-types": "^15.8.1",
@@ -33,7 +33,6 @@
     "react-use": "^17.4.0"
   },
   "peerDependencies": {
-    "react": "*",
-    "svelte": "*"
+    "react": "*"
   }
 }

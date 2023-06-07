@@ -141,7 +141,15 @@ export function ExpandTab ({className, onClick, ...props}) {
 
 ExpandTab.propTypes = {
   // Expand header (see example)
-  children: type.NodeOrFunction.isRequired,
+  children: type.OneOf([
+    // type.Func([
+    //   type.Obj({
+    //     // Whether the corresponding ExpandPanel is expanded
+    //     open: type.Boolean,
+    //   }),
+    // ], type.Node),
+    type.Node,
+  ]).isRequired,
   // Callback(event: Event, open: boolean, id: string | number, index?: number) when `open` state changes
   onClick: type.Function,
 }
