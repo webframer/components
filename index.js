@@ -1,4 +1,4 @@
-/* ! Copyright 2022 https://webframe.app | All Rights Reserved */
+/* ! Copyright (c) webframe.app by Ecoinomist (https://github.com/ecoinomist) | MIT License */
 export * from './Accordion.jsx'
 export * from './Badge.jsx'
 export * from './Breadcrumb.jsx'
