@@ -70,6 +70,65 @@ import { onEventStopPropagation } from './utils/interaction.js'
  *    // which is equivalent to
  *    deserialize(['row', 'reverse'])
  *    >>> 'row reverse'
+ *
+ * @param {object} o - props
+ * @param {string[] | number[] | any[] | {value: any, text?: string, [p: string]: any}[]} o.options
+ * @param [o.defaultValue]
+ * @param [o.name]
+ * @param [o.defaultOpen]
+ * @param [o.searchOptions]
+ * @param [o.searchNonce]
+ * @param [o.focusIndex]
+ * @param [o.multiple]
+ * @param [o.query]
+ * @param [o.search]
+ * @param [o.compact]
+ * @param [o.controlledValue]
+ * @param [o.excludeSelected]
+ * @param [o.forceRender]
+ * @param [o.fixed]
+ * @param [o.upward]
+ * @param [o.onChange]
+ * @param [o.onFocus]
+ * @param [o.onBlur]
+ * @param [o.onRemove]
+ * @param [o.onSearch]
+ * @param [o.onSelect]
+ * @param [o.onClickValue]
+ * @param [o.onMount]
+ * @param [o.queryParser]
+ * @param [o.icon]
+ * @param [o.iconEnd]
+ * @param [o.addOption]
+ * @param [o.addOptionMsg]
+ * @param [o.noOptionsMsg]
+ * @param [o.optionProps]
+ * @param [o.optionsProps]
+ * @param [o.virtualOptionsMinimum]
+ * @param [o.format]
+ * @param [o.parse]
+ * @param [o.normalize]
+ * @param [o.type]
+ * @param [o.float]
+ * @param [o.error]
+ * @param [o.label]
+ * @param [o.loading]
+ * @param [o.prefix]
+ * @param [o.suffix]
+ * @param [o.stickyPlaceholder]
+ * @param [o.childBefore]
+ * @param [o.childAfter]
+ * @param {string} [o.className]
+ * @param [o.style]
+ * @param [o.row]
+ * @param [o._ref]
+ * @param [o.inputRef]
+ * @param [o.id]
+ * @param [o.renderSelected]
+ * @param [o.initialValues]
+ * @param [o[input: string]] - other input props to pass over
+ * @returns {JSX.Element}
+ * @constructor
  */
 export function Select ({
   options, defaultValue, name, defaultOpen, searchOptions, searchNonce, focusIndex,
@@ -178,7 +237,7 @@ export function Select ({
         if (query !== self.state.query) self.state.options = self.getOptions(self.state.query)
       }
       toggleOpen.apply(this, arguments)
-      self.unsubscribeEvents()
+      if (e.keyCode !== KEY.Enter) self.unsubscribeEvents()
     }
     self.openOptions = function (e) {
       // When clicking on Label, if already focused, the input first gets `blur` event
@@ -197,7 +256,7 @@ export function Select ({
 
     /**
      * Change single Select value, or add option to multiple Select values when option is clicked
-     * @param {Event} e
+     * @param {Event|KeyboardEvent} e
      * @param {any} item - option's value or `type.Option` object to set/add as selected value(s)
      */
     self.selectOption = function (e, item) {
@@ -212,7 +271,8 @@ export function Select ({
         focusIndex: options.findIndex(i => i === item),
       })
       if (multiple && self.inputNode) self.inputNode.focus()
-      if (self.open && !(self.hasFocus = multiple)) setTimeout(() => self.closeOptions.call(this, e), 0)
+      if (self.open && !(self.hasFocus = multiple && e.keyCode !== KEY.Enter))
+        setTimeout(() => self.closeOptions.call(this, e), 0)
     }
 
     // Remove selected value from multiple Select

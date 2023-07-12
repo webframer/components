@@ -14,6 +14,7 @@ import { View } from './View.js'
  * Logic:
  *    - Clicking the Icon toggles Dropdown Menu open state
  *    - Uses Tooltip to render the menu.
+ *    - To close the Dropdown, call self.tooltip.close() method directly
  */
 export function DropdownMenu ({
   className, children, btnProps, iconProps, iconOpen, iconClose, menu, open, onMount, tooltipProps, ...props
