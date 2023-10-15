@@ -262,9 +262,12 @@ export function createView (defaultProp) {
 
   const ViewRef = React.forwardRef(View)
 
-  if (defaultProp) View.defaultProps = ViewRef.defaultProps = {[defaultProp]: true}
+  if (defaultProp) {
+    View.defaultProps = {[defaultProp]: true}
+    ViewRef.defaultProps = View.defaultProps
+  }
 
-  View.propTypes = ViewRef.propTypes = {
+  View.propTypes = {
     // CSS class names separated by space
     className: type.ClassName,
     // CSS style object with camelCase attribute keys
@@ -351,6 +354,8 @@ export function createView (defaultProp) {
     // Tooltip props or value to display as tooltip on hover
     tooltip: type.Tooltip,
   }
+
+  ViewRef.propTypes = View.propTypes
 
   return [View, ViewRef]
 }

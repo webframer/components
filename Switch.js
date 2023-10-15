@@ -50,8 +50,8 @@ export function Switch ({
 }
 
 function ToggleLabels ({checked, checkedLabel, uncheckedLabel, self}) {
-  const [{open: oOn, animating: aOn}, _on, on] = useExpandCollapse(checked, {side: 'width'})
-  const [{open: oOff, animating: aOff}, _off, off] = useExpandCollapse(!checked, {side: 'width'})
+  const [{open: oOn, animating: aOn}, _on, on] = useExpandCollapse(checked, {direction: 'width'})
+  const [{open: oOff, animating: aOff}, _off, off] = useExpandCollapse(!checked, {direction: 'width'})
   return <>
     <div className={cn('switch__on', {open: oOn || aOn})} ref={on}
          children={(oOn || aOn) && (checkedLabel == null

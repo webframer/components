@@ -111,11 +111,11 @@ function hookAnimatedSize (side = 'height') {
  * @param {boolean|null} [isOpen] - whether expanded initially, will update state if changes
  * @param {object} [options]:
  *  - {number} [duration] animation duration in milliseconds
- *  - {string} [side] expand/collapse direction enum ('height' or 'width')
+ *  - {string} [direction] expand/collapse direction enum ('height' or 'width')
  *  - {number | string} [size] CSS style for open state, default is 'auto'
  * @returns [{open: boolean, animating: boolean}, toggleOpen: function, setRef: (node: HTMLElement) => void]
  */
-export function useExpandCollapse (isOpen, {side = 'height', size = 'auto', duration} = {}) {
+export function useExpandCollapse (isOpen, {direction = 'height', size = 'auto', duration} = {}) {
   const [opened] = usePreviousProp(isOpen)
   const [self, state] = useInstance({open: isOpen})
   if (opened != null && isOpen != null && opened !== isOpen) state.open = isOpen // update prop changes
@@ -128,7 +128,7 @@ export function useExpandCollapse (isOpen, {side = 'height', size = 'auto', dura
   // Use cached open state while animating, to achieve the effect similar to throttle,
   // when `isOpen` prop changes too fast, so that it will always animate to the last prop
   const open = self.animating ? self.open : state.open
-  const [setRef, animating, resetStyles] = useAnimatedSize[side](open ? size : 0, {self, duration, forwards: true})
+  const [setRef, animating, resetStyles] = useAnimatedSize[direction](open ? size : 0, {self, duration, forwards: true})
   useIsomorphicLayoutEffect(() => {
     // Started/in animation
     if (animating) {

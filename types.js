@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 /**
  * PROPTYPES PROXY =================================================================================
  *
- * A type system for clear semantic meaning without documentation and cross-platform unified API.
+ * A PropType system for clear semantic meaning without documentation and cross-platform unified API.
  * All types should follow CapCase convention for readability and consistency.
  *
  * **Important**:
@@ -139,7 +139,7 @@ type.Node = PropTypes.node
 // Number value (Integer or Float)
 type.Number = PropTypes.number
 
-// Object value
+// Object value (eg. `{}`)
 type.Object = PropTypes.object
 
 // A single type from React Component.propTypes object (eg. `type.Number`)
@@ -491,8 +491,14 @@ type.TagOptions = type.Options
 
 // Tooltip open/close on events
 const tooltipOnEnum = type.Enum(['click', 'focus', 'hover'])
-// Tooltip props object
-export const tooltipProptypes = {
+
+/**
+ * Tooltip propTypes declaration.
+ * For the compiler to parse this automatically,
+ * the declared variable name must be: `Component.name` + 'PropTypes'.
+ * The same applies to defaultProps: `Component.name` + 'DefaultProps'.
+ */
+export const TooltipPropTypes = {
   // Tooltip content
   children: type.NodeOrFunction.isRequired,
   // One of, or any combination of: 'hover', 'click'
@@ -527,7 +533,7 @@ export const tooltipProptypes = {
   tooltipClass: type.ClassName,
 }
 // Tooltip prop(s)
-type.Tooltip = type.OneOf([type.NodeOrFunction, type.Obj(tooltipProptypes)])
+type.Tooltip = type.OneOf([type.NodeOrFunction, type.Obj(TooltipPropTypes)])
 
 // Generic Component props
 type.Props = type.Obj({

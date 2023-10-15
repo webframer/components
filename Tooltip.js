@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useInstance, useIsomorphicLayoutEffect } from './react/hooks.js'
 import { renderProp } from './react/render.js'
-import { tooltipProptypes } from './types.js'
+import { TooltipPropTypes } from './types.js'
 
 /**
  * Tooltip Component
@@ -290,7 +290,7 @@ export function Tooltip ({
   // )
 }
 
-Tooltip.propTypes = tooltipProptypes
+Tooltip.propTypes = TooltipPropTypes
 
 Tooltip.defaultProps = {
   animation: 'fade-in',

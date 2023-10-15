@@ -6,7 +6,7 @@ import { Icon } from './Icon.js'
 import { useInstance } from './react/hooks.js'
 import { renderProp } from './react/render.js'
 import Tooltip from './Tooltip.js'
-import { tooltipProptypes, type } from './types.js'
+import { TooltipPropTypes, type } from './types.js'
 import { View } from './View.js'
 
 /**
@@ -66,7 +66,7 @@ DropdownMenu.defaultProps = {
 
 const {children, ...btnPropTypes} = Button.propTypes
 const {name, ...iconPropTypes} = Icon.propTypes
-const {children: _1, ...tooltipPropTypes} = tooltipProptypes
+const {children: _1, ...tooltipPropTypes} = TooltipPropTypes
 DropdownMenu.propTypes = {
   // Dropdown Menu content to render when open
   children: type.NodeOrFunction.isRequired,

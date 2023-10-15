@@ -99,6 +99,7 @@ Expand.propTypes = {
 }
 
 Expand.defaultProps = {
+  // Test default help message
   duration: 300,
   role: 'tablist',
   // 'aria-multiselectable': 'true',
