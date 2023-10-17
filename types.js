@@ -115,7 +115,16 @@ type.Boolean = PropTypes.bool
 // Floating point number
 type.Float = PropTypes.number
 
-// Function or class method
+/**
+ * Function or Class method
+ * @example:
+ *  type.Function([
+ *    type.Obj({
+ *      // Whether the corresponding ExpandPanel is expanded
+ *      open: type.Boolean,
+ *    }),
+ *  ], type.Node),
+ */
 type.Function = PropTypes.func
 
 // React JSX element (eg. `<View/>`)

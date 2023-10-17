@@ -43,6 +43,7 @@ function createButton () {
   }
 
   Button.propTypes = {
+    // Button content
     children: type.NodeOrFunction.isRequired,
     className: type.ClassName,
     style: type.Style,
@@ -50,9 +51,9 @@ function createButton () {
     active: type.Boolean,
     // Whether the button is disabled
     disabled: type.Boolean,
-    // Whether to show loading spinner
+    // Whether to show loading state
     loading: type.Boolean,
-    // Button type eg. button, submit
+    // Button type
     type: type.Enum(['button', 'submit']),
     tooltip: type.Tooltip,
     _ref: type.Ref,

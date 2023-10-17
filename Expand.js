@@ -16,19 +16,19 @@ const ExpandState = React.createContext({})
  *
  *     // Using render props
  *     <Expand onChange={warn}>
- *       <ExpandTab row className='middle padding padding-v-smaller middle'>
+ *       <ExpandTab row className='middle padding padding-v-smaller'>
  *         {({open}) => (<>
  *             <Icon className={open ? 'caret--expanded' : 'caret--collapsed'} name='caret' />
  *             <Text className='padding-h-smaller'>{slot}</Text>
  *         </>)}
  *       </ExpandTab>
- *       <ExpandPanel><Text>Expandable Panel</Text></ExpandPanel>
+ *       <ExpandPanel><Text>Expand Panel</Text></ExpandPanel>
  *     </Expand>
  *
  *     // Always render ExpandPanel content
  *     <Expand forceRender id='optional_id'>
  *       <ExpandTab>Toggle Expand/Collapse</ExpandTab>
- *       <ExpandPanel>{() => <Text>Expandable Function</Text>}</ExpandPanel>
+ *       <ExpandPanel>{() => <Text>Render Function</Text>}</ExpandPanel>
  *     </Expand>
  *
  *     // Without ExpandTab and controlled `open` state
@@ -41,10 +41,12 @@ const ExpandState = React.createContext({})
  * When `open` prop changes, it will update accordingly.
  */
 export function Expand ({
-  id = useId(), index, open: o, onChange, duration, forceRender, className, asPanel, ...props
+  id = useId(), index, open: o, onChange, direction, duration, forceRender, className, asPanel,
+  ...props
 }) {
   const self = useRef({}).current
-  const [{open, animating}, toggleOpen, ref] = useExpandCollapse(o, {duration})
+  const [{open, animating}, toggleOpen, ref] = useExpandCollapse(o, {direction, duration})
+  props.id = id
 
   // Handle Expand change
   if (!self.props) {
@@ -79,27 +81,28 @@ export function Expand ({
 }
 
 Expand.propTypes = {
-  // Expand content (see example)
+  // Expand content (see [examples](#examples))
   children: type.NodeOrFunction.isRequired,
-  // Expand/Collapse animation duration in milliseconds
+  // Expand/collapse direction
+  direction: type.Enum(['width', 'height']),
+  // Animation duration in milliseconds
   duration: type.Millisecond,
+  // Whether to always render <ExpandPanel> content
+  forceRender: type.Boolean,
   // Optional unique identifier, will be passed to `onChange`, default is React.useId() string
   id: type.String,
   // Optional index identifier, will be passed to `onChange` (used by Accordion)
   index: type.Number,
   // Callback(event: Event, open: boolean, id: string, index?: number) when `open` state changes
   onChange: type.Function,
-  // Whether to expand ExpandPanel content
+  // Whether to expand content
   open: type.Boolean,
-  // Whether to always render ExpandPanel content (useful for SEO indexing)
-  // @see https://www.semrush.com/blog/html-hide-element/
-  forceRender: type.Boolean,
-  // Whether to wrap given `children` prop with <ExpandPanel> component (for use without ExpandTab)
+  // Whether to wrap `children` prop with <ExpandPanel> component (for use without <ExpandTab>)
   asPanel: type.Boolean,
 }
 
 Expand.defaultProps = {
-  // Test default help message
+  direction: 'height',
   duration: 300,
   role: 'tablist',
   // 'aria-multiselectable': 'true',
@@ -141,16 +144,8 @@ export function ExpandTab ({className, onClick, ...props}) {
 }
 
 ExpandTab.propTypes = {
-  // Expand header (see example)
-  children: type.OneOf([
-    // type.Func([
-    //   type.Obj({
-    //     // Whether the corresponding ExpandPanel is expanded
-    //     open: type.Boolean,
-    //   }),
-    // ], type.Node),
-    type.Node,
-  ]).isRequired,
+  // Expansion trigger element (see [examples](#examples))
+  children: type.NodeOrFunction.isRequired,
   // Callback(event: Event, open: boolean, id: string | number, index?: number) when `open` state changes
   onClick: type.Function,
 }
@@ -196,10 +191,9 @@ export function ExpandPanel ({className, forceRender, ...props}) {
 }
 
 ExpandPanel.propTypes = {
-  // Expand content (see example)
+  // Expandable content (see [examples](#examples))
   children: type.NodeOrFunction.isRequired,
-  // Whether to always render ExpandPanel content (useful for SEO indexing)
-  // @see https://www.semrush.com/blog/html-hide-element/
+  // Whether to always render content (for [SEO indexing](https://www.semrush.com/blog/html-hide-element/))
   forceRender: type.Boolean,
 }
 
