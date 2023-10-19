@@ -1,12 +1,12 @@
 import { _, extractPrivateProps, hasListValue, isFunction, l, startCase, toJSON, translate } from '@webframer/js'
 import React, { Fragment, useMemo } from 'react'
+import Text from '../components/Text.js'
 import { cn, extractProps, Markdown, mdJSX, Row, Tooltip, type, View } from '../index.js'
 import proptypes from '../propTypes.json'
-import Text from '../Text.js'
 import TypeHelpTooltip from './TypeHelpTooltip.js'
 
 /**
- * Component Props Table View
+ * Component Props Table View.
  * @example:
  *  <PropsTable component={Button} />
  *  ┌────────────────┬───────────────────────┬──────────────┬──────────────────┐

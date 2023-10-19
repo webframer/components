@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { Markdown, mdJSX, Tooltip, View } from '../index.js'
-import Text from '../Text.js'
+import Text from '../components/Text.js'
 
 /**
  * Help description popover explaining the control type

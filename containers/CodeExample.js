@@ -1,8 +1,8 @@
 import { _, l, translate } from '@webframer/js'
 import React, { useMemo, useState } from 'react'
-import Icon from '../Icon.js'
+import Icon from '../components/Icon.js'
+import Text from '../components/Text.js'
 import { Button, cn, Expand, extractProps, Markdown, mdJSX, Row, type, View } from '../index.js'
-import Text from '../Text.js'
 
 /**
  * Renders `children` along with its source code representation
