@@ -29,11 +29,11 @@ export function CodeExample ({children, className, source = '', desc, ...view}) 
       <Row className={cn('reverse fill padding-h padding-bottom wrap', {gap: open})}>
         <Expand asPanel direction='width' duration={700} open={open}>
           {() => (
-            <Markdown className={cn('fill debossed rounded')}
+            <Markdown className={cn('CodeExample__source fill')}
                       components={mdJSX} children={`~~~jsx\n${sourceCode}\n~~~`} />
           )}
         </Expand>
-        <View className='debossed fill middle center padding-largest rounded'>
+        <View className='CodeExample__preview fill middle center padding-largest'>
           {children}
         </View>
       </Row>

@@ -11,7 +11,7 @@ The `Expand` component can be used with, or without:
 - `ExpandTab` - the always visible element that triggers expansion/collapsing
 - `ExpandPanel` - the expanded or collapsed content
 
-## PropTypes
+## Prop Types
 
 ### Expand Props
 <PropsTable component={Expand} />
@@ -33,7 +33,7 @@ The `Expand` component can be used with, or without:
         <Text>Expand Tab</Text>
       </>)}
     </ExpandTab>
-    <ExpandPanel className='padding bg-shadow-lightest'>Expand Panel</ExpandPanel>
+    <ExpandPanel className='padding bg-shade-softest'>Expand Panel</ExpandPanel>
   </Expand>
 </CodeExample>
 
@@ -41,7 +41,7 @@ The `Expand` component can be used with, or without:
 <CodeExample desc='Along the width'>
   <Expand row direction='width'>
     <ExpandTab className='padding border-h'>Toggle</ExpandTab>
-    <ExpandPanel className='fill-height padding bg-shadow-lightest'>
+    <ExpandPanel className='fill-height padding bg-shade-softest'>
       <Text className='no-wrap'>Expanded Content</Text>
     </ExpandPanel>
   </Expand>

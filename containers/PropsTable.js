@@ -1,4 +1,4 @@
-import { _, extractPrivateProps, hasListValue, isFunction, l, startCase, toJSON, translate } from '@webframer/js'
+import { _, extractPrivateProps, isFunction, l, startCase, toJSON, translate } from '@webframer/js'
 import React, { Fragment, useMemo } from 'react'
 import Text from '../components/Text.js'
 import { cn, extractProps, Markdown, mdJSX, Row, Tooltip, type, View } from '../index.js'
@@ -31,9 +31,9 @@ export function PropsTable ({component, manifest = proptypes, ...view}) {
       result.push({
         key,
         controls: propType.controls,
-        defaultValue: toJSON(defaultProps[key]?.value || '', null, 2),
-        defaultHelp: formatComments(defaultProps[key]?.comments),
-        description: formatComments(p[key]?.comments), // todo: turn @example: into code blocks
+        defaultValue: toJSON(defaultProps[key]?.v || '', null, 2),
+        defaultHelp: defaultProps[key]?.c,
+        description: p[key]?.c, // todo: turn @example: into code blocks
         required: propType.required,
       })
     }
@@ -129,14 +129,6 @@ PropsTable.propTypes = {
 export default React.memo(PropsTable)
 
 // Helpers -----------------------------------------------------------------------------------------
-
-function formatComments (comments) {
-  if (!hasListValue(comments)) return
-
-  return comments
-    .map(({value}) => value.split('\n').map(s => s.trim()).join('\n').trim())
-    .join('\n\n') // double newline required to work with markdown for separate comments
-}
 
 translate({
   DEFAULT: {

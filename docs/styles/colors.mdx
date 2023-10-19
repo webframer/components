@@ -1,0 +1,196 @@
+import { cn, Icon, Row, View } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
+import CopyToClipboard from 'view/components/CopyToClipboard.jsx'
+
+export const colors = <Icon name='colors' />
+export const light = <Icon name='md/light-mode' />
+export const dark = <Icon name='hi2/moon' />
+export function ColorSample ({className, color, property = 'background'}) {
+  const style = {color: 'inherit'}
+  style[property] = `var(${color})`
+  return (
+    <CopyToClipboard
+      className={cn('btn-transparent padding w-full no-border no-radius', className)}
+      style={style} text={color} icon={false}
+      children={color}
+    />
+  )
+}
+
+# Color Variables
+
+You can customize any CSS Color variable in {colors} Theme Styles.
+
+Webframe colors look great in both `Light` and `Dark` modes because, by default, colors invert in `Dark` mode:
+
+| Variable      | {light} Light mode | {dark} Dark mode | Description        |
+|---------------|--------------------|------------------|--------------------|
+| `--...-dark`  | darker tones       | lighter tones    | luminance modifier |
+| `--...-light` | lighter tones      | darker tones     | luminance modifier |
+| `--...-hard`  | more opaque        | more opaque      | opacity modifier   |
+| `--...-soft`  | less opaque        | less opaque      | opacity modifier   |
+| `--shade`     | darkens color      | lightens color   | for overlay effect |
+| `--tint`      | lightens color     | darkens color    | for overlay effect |
+
+Inverted colors result in similar level of contrast in both modes. Style in your favorite theme mode, meet the accessibility standards, and it will automatically work for the other modes.
+
+This documentation is built using the same principle.
+Try it for yourself - toggle between {light} Light and {dark} Dark modes.
+
+### Theme Colors
+
+<CodeExample>
+  <Row className='center gap-smaller wrap no-wrap-text' style={{color: 'white'}}>
+    <View>
+      <ColorSample color='--primary-darkest' />
+      <ColorSample color='--primary-darker' />
+      <ColorSample color='--primary-dark' />
+      <ColorSample color='--primary' />
+      <ColorSample color='--primary-light' />
+      <ColorSample color='--primary-lighter' />
+      <ColorSample color='--primary-lightest' />
+    </View>
+    <View>
+      <ColorSample color='--secondary-darkest' />
+      <ColorSample color='--secondary-darker' />
+      <ColorSample color='--secondary-dark' />
+      <ColorSample color='--secondary' />
+      <ColorSample color='--secondary-light' />
+      <ColorSample color='--secondary-lighter' />
+      <ColorSample color='--secondary-lightest' />
+    </View>
+    <View>
+      <ColorSample color='--accent-darkest' />
+      <ColorSample color='--accent-darker' />
+      <ColorSample color='--accent-dark' />
+      <ColorSample color='--accent' />
+      <ColorSample color='--accent-light' />
+      <ColorSample color='--accent-lighter' />
+      <ColorSample color='--accent-lightest' />
+    </View>
+    <View>
+      <ColorSample color='--neutral-hardest' />
+      <ColorSample color='--neutral-harder' />
+      <ColorSample color='--neutral-hard' />
+      <ColorSample color='--neutral' />
+      <ColorSample color='--neutral-soft' />
+      <ColorSample color='--neutral-softer' />
+      <ColorSample color='--neutral-softest' />
+    </View>
+  </Row>
+</CodeExample>
+
+### Alert & Notification Colors
+
+<CodeExample>
+  <Row className='center gap wrap no-wrap-text' style={{color: 'white'}}>
+    <View>
+      <ColorSample color='--info-darkest' />
+      <ColorSample color='--info-darker' />
+      <ColorSample color='--info-dark' />
+      <ColorSample color='--info' />
+      <ColorSample color='--info-light' />
+      <ColorSample color='--info-lighter' />
+      <ColorSample color='--info-lightest' />
+    </View>
+    <View>
+      <ColorSample color='--success-darkest' />
+      <ColorSample color='--success-darker' />
+      <ColorSample color='--success-dark' />
+      <ColorSample color='--success' />
+      <ColorSample color='--success-light' />
+      <ColorSample color='--success-lighter' />
+      <ColorSample color='--success-lightest' />
+    </View>
+    <View>
+      <ColorSample color='--warning-darkest' />
+      <ColorSample color='--warning-darker' />
+      <ColorSample color='--warning-dark' />
+      <ColorSample color='--warning' />
+      <ColorSample color='--warning-light' />
+      <ColorSample color='--warning-lighter' />
+      <ColorSample color='--warning-lightest' />
+    </View>
+    <View>
+      <ColorSample color='--error-darkest' />
+      <ColorSample color='--error-darker' />
+      <ColorSample color='--error-dark' />
+      <ColorSample color='--error' />
+      <ColorSample color='--error-light' />
+      <ColorSample color='--error-lighter' />
+      <ColorSample color='--error-lightest' />
+    </View>
+  </Row>
+</CodeExample>
+
+### Shades, Tones & Tints
+
+<CodeExample>
+  <Row className='center gap wrap no-wrap-text'>
+    <View style={{color: 'white'}}>
+      <ColorSample color='--shade-hardest-2x' />
+      <ColorSample color='--shade-hardest' />
+      <ColorSample color='--shade-harder' />
+      <ColorSample color='--shade-hard' />
+      <ColorSample color='--shade' />
+      <ColorSample color='--shade-soft' />
+      <ColorSample color='--shade-softer' />
+      <ColorSample color='--shade-softest' />
+      <ColorSample color='--shade-softest-2x' />
+    </View>
+    <View style={{color: 'white'}}>
+      <ColorSample color='--tone-hardest-2x' />
+      <ColorSample color='--tone-hardest' />
+      <ColorSample color='--tone-harder' />
+      <ColorSample color='--tone-hard' />
+      <ColorSample color='--tone' />
+      <ColorSample color='--tone-soft' />
+      <ColorSample color='--tone-softer' />
+      <ColorSample color='--tone-softest' />
+      <ColorSample color='--tone-softest-2x' />
+    </View>
+    <View>
+      <ColorSample color='--tint-hardest-2x' />
+      <ColorSample color='--tint-hardest' />
+      <ColorSample color='--tint-harder' />
+      <ColorSample color='--tint-hard' />
+      <ColorSample color='--tint' />
+      <ColorSample color='--tint-soft' />
+      <ColorSample color='--tint-softer' />
+      <ColorSample color='--tint-softest' />
+      <ColorSample color='--tint-softest-2x' />
+    </View>
+  </Row>
+</CodeExample>
+
+### Foreground Colors
+
+<CodeExample>
+  <Row className='center bold wrap no-wrap-text'>
+    <View style={{background: 'var(--neutral)'}}>
+      <ColorSample property='color' color='--text' />
+      <ColorSample property='color' color='--text-inverted' />
+      <ColorSample property='color' color='--border' />
+    </View>
+    <View className='border'>
+      <ColorSample property='color' color='--link' />
+      <ColorSample property='color' color='--link-focus' />
+      <ColorSample property='color' color='--link-active' />
+    </View>
+    <View className='border'>
+      <ColorSample property='color' color='--dark' />
+      <ColorSample property='color' color='--grey' />
+      <ColorSample property='color' color='--light' />
+    </View>
+  </Row>
+</CodeExample>
+
+### Other Colors
+
+<CodeExample>
+  <Row className='center gap-smaller wrap no-wrap-text'>
+    <View>
+      <ColorSample className='border' color='--bg' />
+    </View>
+  </Row>
+</CodeExample>
