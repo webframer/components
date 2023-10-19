@@ -1,0 +1,40 @@
+import { Button, Row } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
+import PropsTable from '@webframer/ui/containers/PropsTable.js'
+
+# Button
+
+## PropTypes
+
+<PropsTable component={Button} />
+
+## Examples
+
+### Button Colors
+
+<CodeExample>
+  <Row className='gap spread wrap'>
+    <Button>Default</Button>
+    <Button className='btn-primary'>Primary</Button>
+    <Button className='btn-secondary'>Secondary</Button>
+    <Button className='btn-accent'>Accent</Button>
+  </Row>
+</CodeExample>
+
+<CodeExample desc='Informational'>
+  <Row className='gap spread wrap'>
+    <Button className='btn-info'>Info</Button>
+    <Button className='btn-success'>Success</Button>
+    <Button className='btn-warning'>Warning</Button>
+    <Button className='btn-error'>Error</Button>
+  </Row>
+</CodeExample>
+
+<CodeExample desc='Greyscale'>
+  <Row className='gap spread wrap'>
+    <Button className='btn-dark'>Dark</Button>
+    <Button className='btn-grey'>Grey</Button>
+    <Button className='btn-light'>Light</Button>
+    <Button className='btn-neutral'>Neutral</Button>
+  </Row>
+</CodeExample>

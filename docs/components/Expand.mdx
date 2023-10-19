@@ -1,0 +1,75 @@
+import { Expand, ExpandPanel, ExpandTab, Icon, Text } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
+import PropsTable from '@webframer/ui/containers/PropsTable.js'
+
+# Expand
+
+A component to expand and collapse content along the width or the height.
+It has customisable animation duration, and is SEO friendly (search engines can index collapsed content when `forceRender` is `true`).
+
+The `Expand` component can be used with, or without:
+- `ExpandTab` - the always visible element that triggers expansion/collapsing
+- `ExpandPanel` - the expanded or collapsed content
+
+## PropTypes
+
+### Expand Props
+<PropsTable component={Expand} />
+
+### ExpandTab Props
+<PropsTable component={ExpandTab} />
+
+### ExpandPanel Props
+<PropsTable component={ExpandPanel} />
+
+## Examples
+
+### Vertical Expansion
+<CodeExample desc='Along the height'>
+  <Expand>
+    <ExpandTab row className='middle gap-smaller padding padding-v-smaller border-v'>
+      {({open}) => (<>
+        <Icon className={open ? 'caret--expanded' : 'caret--collapsed'} name='caret' />
+        <Text>Expand Tab</Text>
+      </>)}
+    </ExpandTab>
+    <ExpandPanel className='padding bg-shadow-lightest'>Expand Panel</ExpandPanel>
+  </Expand>
+</CodeExample>
+
+### Horizontal Expansion
+<CodeExample desc='Along the width'>
+  <Expand row direction='width'>
+    <ExpandTab className='padding border-h'>Toggle</ExpandTab>
+    <ExpandPanel className='fill-height padding bg-shadow-lightest'>
+      <Text className='no-wrap'>Expanded Content</Text>
+    </ExpandPanel>
+  </Expand>
+</CodeExample>
+
+### Dynamic Render Function
+<CodeExample desc='Expand, ExpandTab and ExpandPanel have identical function signature'>
+  <Expand>
+    {({open, animating}) => (<>
+      <ExpandTab className='btn'>
+        {animating ? 'Animating...' : (open ? 'Hide Content' : 'Show Content')}
+      </ExpandTab>
+      <ExpandPanel>{'Render Function'}</ExpandPanel>
+    </>)}
+  </Expand>
+</CodeExample>
+
+### Forced Rendering
+<CodeExample desc='Inspect element to see hidden HTML'>
+  <Expand forceRender className='padding border'>
+    <ExpandTab>Force rendering collapsed content</ExpandTab>
+    <ExpandPanel>This is always rendered for search engine indexing</ExpandPanel>
+  </Expand>
+</CodeExample>
+
+### Controlled State
+<CodeExample desc='Example below is expanded with `open` state'>
+  <Expand asPanel open={true} className='padding border-2 border-dashed'>
+    This content is wrapped with {`<ExpandPanel>`} implicitly
+  </Expand>
+</CodeExample>
