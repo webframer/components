@@ -242,7 +242,11 @@ Upload.propTypes = {
   onRemove: type.Function,
 }
 
-export default React.memo(Upload)
+const UploadMemo = React.memo(Upload)
+UploadMemo.name = Upload.name
+UploadMemo.propTypes = Upload.propTypes
+UploadMemo.defaultProps = Upload.defaultProps
+export default UploadMemo
 
 function hasDragFiles (event) {
   return !!event.dataTransfer && event.dataTransfer.files.length > 0

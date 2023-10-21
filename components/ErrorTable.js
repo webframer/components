@@ -57,7 +57,11 @@ ErrorTable.propTypes = {
   ])).isRequired,
 }
 
-export default React.memo(ErrorTable)
+const ErrorTableMemo = React.memo(ErrorTable)
+ErrorTableMemo.name = ErrorTable.name
+ErrorTableMemo.propTypes = ErrorTable.propTypes
+ErrorTableMemo.defaultProps = ErrorTable.defaultProps
+export default ErrorTableMemo
 
 const styleMsg = {wordBreak: 'break-word'}
 

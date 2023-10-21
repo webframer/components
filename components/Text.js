@@ -47,4 +47,7 @@ function createText () {
 }
 
 export const [Text] = createText()
-export default React.memo(Text)
+const TextMemo = React.memo(Text)
+TextMemo.name = Text.name
+TextMemo.propTypes = Text.propTypes
+export default TextMemo

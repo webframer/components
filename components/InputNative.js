@@ -343,3 +343,9 @@ InputNative.propTypes = {
   iconEnd: type.OneOf([type.String, type.Object, type.Boolean, type.NodeOrFunction]),
   // ...other native HTML `<input/>` props
 }
+
+const InputNativeMemo = React.memo(InputNative)
+InputNativeMemo.name = InputNative.name
+InputNativeMemo.propTypes = InputNative.propTypes
+InputNativeMemo.defaultProps = InputNative.defaultProps
+export default InputNativeMemo

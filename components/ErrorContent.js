@@ -38,4 +38,8 @@ ErrorContent.propTypes = {
   items: ErrorTable.propTypes.items,
 }
 
-export default React.memo(ErrorContent)
+const ErrorContentMemo = React.memo(ErrorContent)
+ErrorContentMemo.name = ErrorContent.name
+ErrorContentMemo.propTypes = ErrorContent.propTypes
+ErrorContentMemo.defaultProps = ErrorContent.defaultProps
+export default ErrorContentMemo

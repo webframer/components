@@ -40,4 +40,7 @@ Loader.propTypes = {
   // ...other props to pass to Spinner
 }
 
-export default React.memo(Loader)
+const LoaderMemo = React.memo(Loader)
+LoaderMemo.name = Loader.name
+LoaderMemo.propTypes = Loader.propTypes
+export default LoaderMemo

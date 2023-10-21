@@ -49,12 +49,15 @@ export function SelectValue ({value, index, self, ...props}) {
   )
 }
 
-const SelectedValue = React.memo(SelectValue)
-export default SelectedValue
+const SelectValueMemo = React.memo(SelectValue)
+SelectValueMemo.name = SelectValue.name
+SelectValueMemo.propTypes = SelectValue.propTypes
+SelectValueMemo.defaultProps = SelectValue.defaultProps
+export default SelectValueMemo
 
 /**
  * Selected Option Renderer for Select Component
  */
 export function renderSelected (value, index, array, self) {
-  return <SelectedValue key={index} {...{value, index, self}} />
+  return <SelectValueMemo key={index} {...{value, index, self}} />
 }

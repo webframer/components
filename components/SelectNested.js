@@ -153,6 +153,12 @@ SelectNested.propTypes = {
   // select: type.Enum(['key', 'value']),
 }
 
+const SelectNestedMemo = React.memo(SelectNested)
+SelectNestedMemo.name = SelectNested.name
+SelectNestedMemo.propTypes = SelectNested.propTypes
+SelectNestedMemo.defaultProps = SelectNested.defaultProps
+export default SelectNestedMemo
+
 function NestedDropdown_ ({
   options, self, // required
   parentPath = [], // parent key path

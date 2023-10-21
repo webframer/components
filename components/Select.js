@@ -701,7 +701,13 @@ Select.propTypes = {
   // ...other native `<input>` props
 }
 
-export default React.memo(Select)
+const SelectMemo = React.memo(Select)
+SelectMemo.name = Select.name
+SelectMemo.propTypes = Select.propTypes
+SelectMemo.defaultProps = Select.defaultProps
+export default SelectMemo
+
+// HELPERS -----------------------------------------------------------------------------------------
 
 /**
  * Convert list of values to Select options, each as objects.

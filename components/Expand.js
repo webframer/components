@@ -202,4 +202,8 @@ ExpandPanel.defaultProps = {
   _nodrag: '',
 }
 
-export default React.memo(Expand)
+const ExpandMemo = React.memo(Expand)
+ExpandMemo.name = Expand.name
+ExpandMemo.propTypes = Expand.propTypes
+ExpandMemo.defaultProps = Expand.defaultProps
+export default ExpandMemo

@@ -302,8 +302,11 @@ Tooltip.defaultProps = {
   role: 'tooltip',
 }
 
-let ToolTip
-export default ToolTip = React.memo(Tooltip)
+let TooltipMemo = React.memo(Tooltip)
+TooltipMemo.name = Tooltip.name
+TooltipMemo.propTypes = Tooltip.propTypes
+TooltipMemo.defaultProps = Tooltip.defaultProps
+export default TooltipMemo
 
 function TooltipRender ({
   open, position, prerender, self, // props from state
@@ -376,7 +379,7 @@ export function useTooltip (props, defaultProps) {
   if (props.tooltip == null) return [null]
   const tooltip = tooltipProps(props.tooltip, defaultProps)
   delete props.tooltip
-  return [<ToolTip {...tooltip} />]
+  return [<TooltipMemo {...tooltip} />]
 }
 
 // Convert Tooltip `align` props to flex layout alignment CSS className

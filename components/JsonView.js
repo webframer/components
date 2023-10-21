@@ -42,4 +42,8 @@ JsonView.defaultProps = {
   theme: defaultTheme,
 }
 
-export default React.memo(JsonView)
+const JsonViewMemo = React.memo(JsonView)
+JsonViewMemo.name = JsonView.name
+JsonViewMemo.propTypes = JsonView.propTypes
+JsonViewMemo.defaultProps = JsonView.defaultProps
+export default JsonViewMemo

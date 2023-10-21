@@ -88,4 +88,7 @@ DropdownMenu.propTypes = {
   style: type.Style,
 }
 
-export default React.memo(DropdownMenu)
+const DropdownMenuMemo = React.memo(DropdownMenu)
+DropdownMenuMemo.name = DropdownMenu.name
+DropdownMenuMemo.propTypes = DropdownMenu.propTypes
+export default DropdownMenuMemo

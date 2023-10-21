@@ -101,4 +101,8 @@ Input.propTypes = {
   // ...other native HTML `<input/>` props
 }
 
-export default React.memo(Input)
+const InputMemo = React.memo(Input)
+InputMemo.name = Input.name
+InputMemo.propTypes = Input.propTypes
+InputMemo.defaultProps = Input.defaultProps
+export default InputMemo

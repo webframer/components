@@ -281,7 +281,11 @@ UploadGrid.propTypes = {
   // ...other Upload props to pass
 }
 
-export default React.memo(UploadGrid)
+const UploadGridMemo = React.memo(UploadGrid)
+UploadGridMemo.name = UploadGrid.name
+UploadGridMemo.propTypes = UploadGrid.propTypes
+UploadGridMemo.defaultProps = UploadGrid.defaultProps
+export default UploadGridMemo
 
 // Garbage clean to release memory for unused File preview URLs
 function cleanPreviewURLs (previewByURL, fileInputs) {

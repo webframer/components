@@ -72,7 +72,11 @@ SelectOption.propTypes = {
   query: type.String,
 }
 
-export default React.memo(SelectOption)
+const SelectOptionMemo = React.memo(SelectOption)
+SelectOptionMemo.name = SelectOption.name
+SelectOptionMemo.propTypes = SelectOption.propTypes
+SelectOptionMemo.defaultProps = SelectOption.defaultProps
+export default SelectOptionMemo
 
 // Tooltip Props for Select Option
 export const optionTooltipProps = {

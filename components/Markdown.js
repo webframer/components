@@ -58,4 +58,8 @@ function createMarkdown () {
 }
 
 export const [Markdown] = createMarkdown()
-export default React.memo(Markdown)
+const MarkdownMemo = React.memo(Markdown)
+MarkdownMemo.name = Markdown.name
+MarkdownMemo.propTypes = Markdown.propTypes
+MarkdownMemo.defaultProps = Markdown.defaultProps
+export default MarkdownMemo

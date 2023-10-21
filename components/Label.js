@@ -13,4 +13,7 @@ export function Label ({sound, _ref, ...props}, ref) {
 }
 
 export const LabelRef = React.forwardRef(Label)
-export default React.memo(Label)
+const LabelMemo = React.memo(Label)
+LabelMemo.name = Label.name
+LabelMemo.propTypes = Label.propTypes
+export default LabelMemo

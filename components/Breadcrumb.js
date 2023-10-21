@@ -35,4 +35,8 @@ Breadcrumb.propTypes = {
   // Custom breadcrumb items
   children: type.NodeOrFunction,
 }
-export default React.memo(Breadcrumb)
+
+const BreadcrumbMemo = React.memo(Breadcrumb)
+BreadcrumbMemo.name = Breadcrumb.name
+BreadcrumbMemo.propTypes = Breadcrumb.propTypes
+export default BreadcrumbMemo

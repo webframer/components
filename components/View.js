@@ -1,4 +1,4 @@
-import { hasProp, isString, merge, throttle, toUniqueListFast } from '@webframer/js'
+import { hasProp, isString, merge, throttle, toCapCase, toUniqueListFast } from '@webframer/js'
 import cn from 'classnames'
 import React from 'react'
 import { accessibilitySupport, assignRef, isRef, useInstance, useIsomorphicLayoutEffect } from '../react.js'
@@ -260,6 +260,12 @@ export function createView (defaultProp) {
     )
   }
 
+  if (defaultProp) {
+    Object.defineProperty(View, 'name', {
+      get () {return toCapCase(defaultProp)},
+    })
+  }
+
   const ViewRef = React.forwardRef(View)
 
   if (defaultProp) {
@@ -367,7 +373,10 @@ export const [View, ViewRef] = createView()
  * This is because whenever parent component re-renders, a View component wrapping other components
  * will have its `children` prop changed. Thus, it will generally be slower when memoized.
  */
-export default React.memo(View)
+const ViewMemo = React.memo(View)
+ViewMemo.name = View.name // React function component name is preserved in production bundle
+ViewMemo.propTypes = View.propTypes
+export default ViewMemo
 
 /**
  * Extract key->value pairs from `props` object by mutation, returning new object of extracted keys

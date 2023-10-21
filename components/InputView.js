@@ -230,7 +230,11 @@ InputView.propTypes = {
   // ...other props to pass to View or Input
 }
 
-export default React.memo(InputView)
+const InputViewMemo = React.memo(InputView)
+InputViewMemo.name = InputView.name
+InputViewMemo.propTypes = InputView.propTypes
+InputViewMemo.defaultProps = InputView.defaultProps
+export default InputViewMemo
 
 function ViewWithLabel ({className, label, value, childBefore, childAfter, type, ...props}) {
   return (<>

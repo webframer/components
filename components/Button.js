@@ -63,4 +63,7 @@ function createButton () {
 }
 
 export const [Button] = createButton()
-export default React.memo(Button)
+const ButtonMemo = React.memo(Button)
+ButtonMemo.name = Button.name
+ButtonMemo.propTypes = Button.propTypes
+export default ButtonMemo

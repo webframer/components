@@ -70,7 +70,11 @@ export function SelectOptions ({
   return <ListBox {...{optionsProps, forceRender, open, self, ...restProps}} />
 }
 
-export default React.memo(SelectOptions)
+const SelectOptionsMemo = React.memo(SelectOptions)
+SelectOptionsMemo.name = SelectOptions.name
+SelectOptionsMemo.propTypes = SelectOptions.propTypes
+SelectOptionsMemo.defaultProps = SelectOptions.defaultProps
+export default SelectOptionsMemo
 
 // Virtual List Options Renderer
 // todo: improvement - fix keyboard up/down focus jumps in scroll after about 30 steps

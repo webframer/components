@@ -26,4 +26,8 @@ export function Modal ({
   )
 }
 
-export default React.memo(Modal)
+const ModalMemo = React.memo(Modal)
+ModalMemo.name = Modal.name
+ModalMemo.propTypes = Modal.propTypes
+ModalMemo.defaultProps = Modal.defaultProps
+export default ModalMemo

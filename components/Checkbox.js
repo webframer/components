@@ -79,4 +79,8 @@ Checkbox.defaultProps = {
   valueTrue: true,
   valueFalse: false,
 }
-export default React.memo(Checkbox)
+const CheckboxMemo = React.memo(Checkbox)
+CheckboxMemo.name = Checkbox.name
+CheckboxMemo.propTypes = Checkbox.propTypes
+CheckboxMemo.defaultProps = Checkbox.defaultProps
+export default CheckboxMemo

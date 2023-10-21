@@ -45,4 +45,8 @@ Spinner.propTypes = {
   className: PropTypes.string,
 }
 
-export default React.memo(Spinner)
+const SpinnerMemo = React.memo(Spinner)
+SpinnerMemo.name = Spinner.name
+SpinnerMemo.propTypes = Spinner.propTypes
+SpinnerMemo.defaultProps = Spinner.defaultProps
+export default SpinnerMemo

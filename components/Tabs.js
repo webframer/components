@@ -159,7 +159,11 @@ Tabs.propTypes = {
   tabListProps: type.Object,
 }
 
-export default React.memo(Tabs)
+const TabsMemo = React.memo(Tabs)
+TabsMemo.name = Tabs.name
+TabsMemo.propTypes = Tabs.propTypes
+TabsMemo.defaultProps = Tabs.defaultProps
+export default TabsMemo
 
 /**
  * Tab List ----------------------------------------------------------------------------------------

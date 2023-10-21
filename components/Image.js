@@ -57,4 +57,7 @@ export function imageSrc ({avatar, src, name = '', path = FILE.PATH_IMAGES}) {
 }
 
 export const [Image, ImageRef] = createImage()
-export default React.memo(Image)
+const ImageMemo = React.memo(Image)
+ImageMemo.name = Image.name
+ImageMemo.propTypes = Image.propTypes
+export default ImageMemo

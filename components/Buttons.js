@@ -54,4 +54,8 @@ Buttons.propTypes = {
   // ...other View.jsx props
 }
 
-export default React.memo(Buttons)
+const ButtonsMemo = React.memo(Buttons)
+ButtonsMemo.name = Buttons.name
+ButtonsMemo.propTypes = Buttons.propTypes
+ButtonsMemo.defaultProps = Buttons.defaultProps
+export default ButtonsMemo

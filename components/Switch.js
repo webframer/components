@@ -95,6 +95,10 @@ Switch.propTypes = {
   // ...other native HTML `<input/>` props
 }
 
-export default React.memo(Switch)
+const SwitchMemo = React.memo(Switch)
+SwitchMemo.name = Switch.name
+SwitchMemo.propTypes = Switch.propTypes
+SwitchMemo.defaultProps = Switch.defaultProps
+export default SwitchMemo
 
 const switchEnabledOptions = {childBefore: true, childAfter: true}

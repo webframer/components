@@ -13,4 +13,7 @@ function createDivider () {
 }
 
 export const [Divider] = createDivider()
-export default React.memo(Divider)
+const DividerMemo = React.memo(Divider)
+DividerMemo.name = Divider.name
+DividerMemo.propTypes = Divider.propTypes
+export default DividerMemo

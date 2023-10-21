@@ -32,4 +32,8 @@ function createBadge () {
 }
 
 export const [Badge] = createBadge()
-export default React.memo(Badge)
+const BadgeMemo = React.memo(Badge)
+BadgeMemo.name = Badge.name
+BadgeMemo.propTypes = Badge.propTypes
+BadgeMemo.defaultProps = Badge.defaultProps
+export default BadgeMemo

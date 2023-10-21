@@ -28,4 +28,8 @@ function createSpacer () {
 }
 
 export const [Spacer] = createSpacer()
-export default React.memo(Spacer)
+const SpacerMemo = React.memo(Spacer)
+SpacerMemo.name = Spacer.name
+SpacerMemo.propTypes = Spacer.propTypes
+SpacerMemo.defaultProps = Spacer.defaultProps
+export default SpacerMemo

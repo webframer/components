@@ -27,7 +27,7 @@ export function createMarkdownComponentsProp (language, style = highlightCodeThe
     code ({node, inline, className, children, ...props}) {
       const match = /language-(\w+)/.exec(className || '')
       return !inline && match ? (
-        <HighlightCode children={String(children).replace(/\n$/, '')} {...{language, style}} {...props} />
+        <HighlighterMemo children={String(children).replace(/\n$/, '')} {...{language, style}} {...props} />
       ) : (
         <code className={className} {...props}>
           {children}
@@ -58,8 +58,11 @@ Highlighter.propTypes = {
   PreTag: type.OneOf([type.String, type.JSXElementType]).isRequired,
 }
 
-const HighlightCode = React.memo(Highlighter)
-export default HighlightCode
+const HighlighterMemo = React.memo(Highlighter)
+HighlighterMemo.name = Highlighter.name
+HighlighterMemo.propTypes = Highlighter.propTypes
+HighlighterMemo.defaultProps = Highlighter.defaultProps
+export default HighlighterMemo
 
 export const highlightCodeTheme = {
   'code[class*="language-"]': {

@@ -72,7 +72,11 @@ ShadowDOM.defaultProps = {
   styleSheets: [],
 }
 
-export default React.memo(ShadowDOM)
+const ShadowDOMMemo = React.memo(ShadowDOM)
+ShadowDOMMemo.name = ShadowDOM.name
+ShadowDOMMemo.propTypes = ShadowDOM.propTypes
+ShadowDOMMemo.defaultProps = ShadowDOM.defaultProps
+export default ShadowDOMMemo
 
 export const ShadowRootContext = createContext(null)
 

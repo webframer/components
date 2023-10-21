@@ -40,4 +40,7 @@ function createIcon () {
 }
 
 export const [Icon, IconRef] = createIcon()
-export default React.memo(Icon)
+const IconMemo = React.memo(Icon)
+IconMemo.name = Icon.name
+IconMemo.propTypes = Icon.propTypes
+export default IconMemo

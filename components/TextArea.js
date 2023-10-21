@@ -92,4 +92,8 @@ TextArea.propTypes = {
   // ...other native HTML `<textarea/>` props
 }
 
-export default React.memo(TextArea)
+const TextAreaMemo = React.memo(TextArea)
+TextAreaMemo.name = TextArea.name
+TextAreaMemo.propTypes = TextArea.propTypes
+TextAreaMemo.defaultProps = TextArea.defaultProps
+export default TextAreaMemo

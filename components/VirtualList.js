@@ -307,7 +307,11 @@ VirtualList.propTypes = {
   // ...other `<View>` props to pass
 }
 
-export default React.memo(VirtualList)
+const VirtualListMemo = React.memo(VirtualList)
+VirtualListMemo.name = VirtualList.name
+VirtualListMemo.propTypes = VirtualList.propTypes
+VirtualListMemo.defaultProps = VirtualList.defaultProps
+export default VirtualListMemo
 
 function VirtualListItem ({children}) {
   return renderProp(children)

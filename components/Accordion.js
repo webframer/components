@@ -82,4 +82,7 @@ Accordion.propTypes = {
   forceRender: type.Boolean,
 }
 
-export default React.memo(Accordion)
+const AccordionMemo = React.memo(Accordion)
+AccordionMemo.name = Accordion.name
+AccordionMemo.propTypes = Accordion.propTypes
+export default AccordionMemo

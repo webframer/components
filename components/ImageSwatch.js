@@ -40,4 +40,8 @@ ImageSwatch.propTypes = {
   style: type.Object,
 }
 
-export default React.memo(ImageSwatch)
+const ImageSwatchMemo = React.memo(ImageSwatch)
+ImageSwatchMemo.name = ImageSwatch.name
+ImageSwatchMemo.propTypes = ImageSwatch.propTypes
+ImageSwatchMemo.defaultProps = ImageSwatch.defaultProps
+export default ImageSwatchMemo
