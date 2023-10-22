@@ -541,7 +541,7 @@ export const TooltipPropTypes = {
   // Class name for the Tooltip container
   tooltipClass: type.ClassName,
 }
-// Tooltip prop(s)
+// Tooltip props (or content to display as tooltip) on interaction with this component
 type.Tooltip = type.OneOf([type.NodeOrFunction, type.Obj(TooltipPropTypes)])
 
 // Generic Component props

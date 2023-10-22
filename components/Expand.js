@@ -91,7 +91,7 @@ Expand.propTypes = {
   forceRender: type.Boolean,
   // Optional unique identifier, will be passed to `onChange`, default is React.useId() string
   id: type.String,
-  // Optional index identifier, will be passed to `onChange` (used by Accordion)
+  // Optional index identifier, will be passed to `onChange` (used by [Accordion](Accordion))
   index: type.Number,
   // Callback(event: Event, open: boolean, id: string, index?: number) when `open` state changes
   onChange: type.Function,

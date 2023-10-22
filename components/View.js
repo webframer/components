@@ -46,7 +46,7 @@ export function createView (defaultProp) {
    * @param [o.scrollProps]
    * @param [o.scrollOffset]
    * @param [o.scrollOverflowProps]
-   * @param [o.reverseScroll]
+   * @param [o.scrollReversed]
    * @param [o.[props: string]]
    * @param [ref]
    * @returns {JSX.Element}
@@ -57,7 +57,7 @@ export function createView (defaultProp) {
     left, right, top, bottom, center, middle, sound,
     className, children, childBefore, childAfter, preventOffset, _ref,
     scroll, scrollClass, scrollStyle, scrollAlongDirectionOnly, scrollRef, scrollProps,
-    scrollOffset, scrollOverflowProps, reverseScroll,
+    scrollOffset, scrollOverflowProps, scrollReversed,
     ...props
   }, ref) {
     const [tooltip] = useTooltip(props)
@@ -68,9 +68,10 @@ export function createView (defaultProp) {
 
     // Ordinary View
     if (!(scroll)) {
+      if (grid) col = row = false
       className = cn(
         className, {
-          col, row, fill, reverse, rtl,
+          col, row, grid, fill, reverse, rtl,
           left, right, top, bottom, center, middle,
           pointer: props.onClick && props.tabIndex !== -1,
         },
@@ -195,19 +196,13 @@ export function createView (defaultProp) {
         col, row, fill, rtl,
         center: center && !(row), // avoid Tailwind bug by negation with brackets
         middle: middle && !(col),
-        'reverse-scroll': reverseScroll,
+        'reverse-scroll': scrollReversed,
         '!overflow-x-hidden': scrollAlongDirectionOnly && !(row),
         '!overflow-y-hidden': scrollAlongDirectionOnly && row,
       },
       // 'max-size' class is to be extended inside _layout.less to reduce html footprint
       // 'max-size', // row ? 'max-width' : 'max-height', // a scroll can overflow in any direction
     )
-
-    if (grid) {
-      scrollClass = cn(scrollClass, 'wrap')
-      row = !(row)
-      col = !(row)
-    }
 
     // Allow override for inner direction
     if (scrollProps && scrollProps.row != null) {
@@ -217,7 +212,10 @@ export function createView (defaultProp) {
       delete scrollProps.row
     }
 
-    scrollClass = cn( // inner div directly wrapping the children
+    if (grid) col = row = false
+
+    // Inner div directly wrapping the children
+    scrollClass = cn(
       // @note: this will not prevent overflow in the other direction (ex. Row inside Scroll column)
       // The only way to prevent that is with overflow-x: hidden, but applied to the outer div.
       // If applied to inner div, it makes this inner div restrict itself within the outer div's
@@ -237,7 +235,7 @@ export function createView (defaultProp) {
       //    - Warn users when there are two nested scroll components with the same direction?
       //      Because that use-case is not valid anyway?
       scrollClass, row ? 'min-width no-max-width' : 'min-height no-max-height', {
-        col, row, fill, reverse, rtl,
+        col, row, grid, fill, reverse, rtl,
         left, right, top, bottom, center, middle,
         pointer: props.onClick && props.tabIndex !== -1,
         'margin-auto-h': center, // when layout is row and inner div is smaller than outer
@@ -274,32 +272,20 @@ export function createView (defaultProp) {
   }
 
   View.propTypes = {
-    // CSS class names separated by space
+    // CSS class names string, separated by space
     className: type.ClassName,
     // CSS style object with camelCase attribute keys
     style: type.Style,
-    // Whether to use column layout, true if `row` is falsy by default
+    // Whether to use vertical (i.e. column) layout. By default, it is `true` if `row` prop is falsy
     col: type.Boolean,
-    // Whether to use row layout, column by default
+    // Whether to use horizontal layout. By default, it is falsy
     row: type.Boolean,
-    // Whether to render as grid with automatic items distribution using flex wrap
+    // Whether to use grid layout, instead of the default `col`/`row` flex layout
     grid: type.Boolean,
     // Whether to make the view fill up available height and width
     fill: type.Boolean,
-    // Whether to reverse the order of rendering
+    // Whether to reverse the render order of inner content items
     reverse: type.Boolean,
-    /**
-     * Whether to use right to left scroll direction and place the scrollbar on the left.
-     *  - If `rtl` is true, the scroll direction is left to right and the scrollbar is on the right.
-     *  - To achieve left scrollbar without changing horizontal scroll direction,
-     *    restrict this Scroll component to allow only vertical scroll,
-     *    then create a nested Scroll component that can only scroll horizontally.
-     * @example:
-     *  <Scroll rtl={rtl} reverseScroll scrollAlongDirectionOnly>
-     *     <Scroll row scrollAlongDirectionOnly>...</Scroll>
-     *  </Scroll>
-     */
-    reverseScroll: type.Boolean,
     // Whether to use right to left text, layout, and scroll direction
     rtl: type.Boolean,
     // Align inner content to the start
@@ -317,19 +303,22 @@ export function createView (defaultProp) {
     // @param {object|HTMLAudioElement} new Audio(URL) sound file to play on click
     sound: type.Object,
     // Inner content to render
-    children: type.Node,
+    children: type.NodeOrFunction,
     // Custom UI to render before `children` in Scroll mode (outside inner Scroll component)
     childBefore: type.NodeOrFunction,
     // Custom UI to render after `children` in Scroll mode (outside inner Scroll component)
     childAfter: type.NodeOrFunction,
-    // Ref for the View or outer Scroll container
-    _ref: type.Ref,
     /**
      * Whether to prevent components from setting size offset for this component.
      * This can prevent bugs caused by children Scroll components with `scrollOffset` enabled.
      */
     preventOffset: type.Boolean,
-    // Whether to make the View scrollable
+    tooltip: type.Tooltip,
+    /**
+     * Whether to enable `scroll` mode so that overflow content is scrollable.
+     * Note: because of browser quirks related to flex layout, this mode adds an extra
+     * inner scroll `div` element that wraps `children` content.
+     */
     scroll: type.Boolean,
     // Whether to restrict scrolling along the layout direction.
     // Scrollable in all directions by default.
@@ -338,16 +327,16 @@ export function createView (defaultProp) {
     scrollClass: type.ClassName,
     // CSS style for inner wrapper Scroll component
     scrollStyle: type.Style,
-    // Ref for the inner Scroll component
-    scrollRef: type.Ref,
     // Props for the inner Scroll component
     scrollProps: type.Object,
-    // Whether to allow Scroll element to set offset style to its parent element.
-    // The Scroll component may set max-width or max-height style to the parent
-    // element in order for it to calculate the maximum available space correctly.
-    // Sometimes, this behavior leads to false positives, and needs to be disabled.
+    /**
+     * Whether to allow `Scroll` element to set offset style to its parent element.
+     * The Scroll component may set `max-width` or `max-height` style to the parent
+     * element in order for it to calculate the maximum available space correctly.
+     * Sometimes, this behavior leads to false positives, and needs to be disabled.
+     */
     scrollOffset: type.OneOf([type.Boolean, type.Enum(['height', 'width'])]),
-    // Props for outer Scroll div when content overflows in given direction, set `false` to disable
+    // Props for outer Scroll `div` when content overflows in given direction, set to `false` to disable
     scrollOverflowProps: type.OneOf([
       type.Obj({
         top: type.Props,
@@ -357,8 +346,28 @@ export function createView (defaultProp) {
       }),
       type.Boolean,
     ]),
-    // Tooltip props or value to display as tooltip on hover
-    tooltip: type.Tooltip,
+    /**
+     * When `true`:
+     * - For column layout - left scrollbar
+     * - For row layout - reverses scroll direction.
+     *
+     * Here is how it works when enabled:
+     *  - for LTR direction it uses right to left scroll direction and place the scrollbar on the left.
+     *  - If `rtl` is true, the scroll direction is left to right and the scrollbar is on the right.
+     *
+     * To achieve left scrollbar without changing horizontal scroll direction,
+     * restrict this `Scroll` component to allow only vertical scroll,
+     * then create a nested Scroll component that can only scroll horizontally.
+     * @example:
+     *  <Scroll rtl={rtl} scrollReversed scrollAlongDirectionOnly>
+     *     <Scroll row scrollAlongDirectionOnly>...</Scroll>
+     *  </Scroll>
+     */
+    scrollReversed: type.Boolean,
+    // Ref for the inner Scroll component
+    scrollRef: type.Ref,
+    // Ref for the View or outer Scroll container
+    _ref: type.Ref,
   }
 
   ViewRef.propTypes = View.propTypes

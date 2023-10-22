@@ -1,0 +1,45 @@
+import { Text } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
+import PropsTable from '@webframer/ui/containers/PropsTable.js'
+
+# Text
+
+A component to display text that provides inline editing experience (WYSIWYG) when developing with Webframe Editor.
+
+## Prop Types
+
+<PropsTable component={Text} />
+
+## Examples
+<CodeExample desc='Header title'>
+  <Text className='h1'>H1</Text>
+  <Text className='h2'>H2</Text>
+  <Text className='h3'>H3</Text>
+  <Text className='h4'>H4</Text>
+  <Text className='h5'>H5</Text>
+  <Text className='h6'>H6</Text>
+</CodeExample>
+
+<CodeExample desc='Bold text'>
+  <Text className='bold'>Lorem Ipsum</Text>
+</CodeExample>
+
+<CodeExample desc='Basic line of text'>
+  <Text>Lorem Ipsum has been the industry's standard dummy text</Text>
+</CodeExample>
+
+<CodeExample desc='Overflow text truncation'>
+  <Text className='truncate max-width-mobile'>
+    {'Lorem ipsum dolor sit amet, consectetur adipiscing ' +
+      'elit. Suspendisse rhoncus sem sed porta malesuada.'}
+  </Text>
+</CodeExample>
+
+<CodeExample desc='Paragraph of text'>
+  <Text className='p'>
+    {'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse rhoncus sem sed porta malesuada. Pellentesque ' +
+      'justo ante, tincidunt nec diam eu, convallis venenatis tellus. Vivamus quis tellus felis. Nulla eu rutrum felis. ' +
+      'Donec accumsan sit amet metus tempor sagittis. Nam consectetur mi tempus ligula elementum dapibus. Proin enim orci, ' +
+      'blandit vitae dolor pretium, mattis posuere ipsum. Vestibulum gravida tincidunt eleifend.'}
+  </Text>
+</CodeExample>

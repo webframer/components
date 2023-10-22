@@ -1,0 +1,91 @@
+import { Text, View } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
+import PropsTable from '@webframer/ui/containers/PropsTable.js'
+
+# View
+
+The universal container element to wrap UI views.
+In browsers, it uses HTML `<div>` element. In native mobile apps, like React Native, it uses `<View>`.
+
+Use View component to abstract away framework implementations, so that your app works on all platforms.
+
+Most Webframe UI components have `View` as the wrapper element. This means that in addition to each component's props, you can send in View props, or make it [scrollable](Scroll).
+
+## Prop Types
+
+<PropsTable component={View} />
+
+## Examples
+
+### Distribution & Alignment
+
+<CodeExample desc='Default - vertical layout'>
+  <View className='border-primary' style={{borderWidth: 3}}>
+    <Text className='padding border'>1</Text>
+    <Text className='padding border'>2</Text>
+    <Text className='padding border'>3</Text>
+  </View>
+</CodeExample>
+
+<CodeExample desc='Reverse items rendering order'>
+  <View reverse className='border-primary' style={{borderWidth: 3}}>
+    <Text className='padding border'>1</Text>
+    <Text className='padding border'>2</Text>
+    <Text className='padding border'>3</Text>
+  </View>
+</CodeExample>
+
+<CodeExample desc='Scrollable content without `scroll` mode enabled'>
+  <View className='scrollable border-primary'
+        style={{borderWidth: 3, maxHeight: '100px'}}>
+    <Text className='padding border'>1</Text>
+    <Text className='padding border'>2</Text>
+    <Text className='padding border'>3</Text>
+  </View>
+</CodeExample>
+
+<CodeExample desc='Wrap overflow items vertically, with gaps in between, like grid layout'>
+  {/*
+    * @Note:
+    * There is an inconsistent bug in browsers for vertical layout.
+    * Content overflows when View `width` is unspecified.
+    * Example here sets `minWidth` to fix this bug.
+    * <Row> - horizontal layout does not have this problem.
+    */}
+  <View className='wrap gap border-primary'
+        style={{borderWidth: 3, maxHeight: 140, minWidth: 200}}>
+    <Text className='padding border'>1</Text>
+    <Text className='padding border'>2</Text>
+    <Text className='padding border'>3</Text>
+  </View>
+</CodeExample>
+
+<CodeExample desc='Align items to the bottom'>
+  <View className='bottom border-primary'
+        style={{borderWidth: 3, minHeight: 240}}>
+    <Text className='padding border'>1</Text>
+    <Text className='padding border'>2</Text>
+    <Text className='padding border'>3</Text>
+  </View>
+</CodeExample>
+
+<CodeExample desc='Fill available space and center items'>
+  <View fill className='center border-primary' style={{borderWidth: 3}}>
+    <Text className='padding border'>1</Text>
+    <Text className='padding border'>2</Text>
+    <Text className='padding border'>3</Text>
+  </View>
+</CodeExample>
+
+<CodeExample desc='Stretch items vertically and align to the right'>
+  <View fill className='stretch right border-primary'
+        style={{borderWidth: 3, minHeight: 240}}>
+    <Text className='padding border'>1</Text>
+    <Text className='padding border'>2</Text>
+    <Text className='padding border'>3</Text>
+  </View>
+</CodeExample>
+
+### Horizontal Layout & Scrolling
+- [horizontal layout examples](Row#examples) with `Row` component
+- [content overflow examples](Scroll#examples) with `scroll` mode enabled.

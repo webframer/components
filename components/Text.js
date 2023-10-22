@@ -37,6 +37,7 @@ function createText () {
   }
 
   Text.propTypes = {
+    // The text content
     children: type.NodeOrFunction,
     className: type.ClassName,
     style: type.Style,

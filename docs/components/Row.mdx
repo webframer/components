@@ -1,0 +1,76 @@
+import { Row, Text } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
+
+# Row
+
+The same as [View](View) component, only with `row` prop set to `true` by default to use horizontal layout.
+
+Refer to View [Prop Types](View#prop-types) for reference.
+
+## Examples
+
+### Horizontal Layout
+
+<CodeExample desc='Default - horizontal layout'>
+  <Row className='border-primary' style={{borderWidth: 3}}>
+    <Text className='padding border'>1</Text>
+    <Text className='padding border'>2</Text>
+    <Text className='padding border'>3</Text>
+  </Row>
+</CodeExample>
+
+<CodeExample desc='Right to left (RTL) direction'>
+  <Row rtl className='border-primary' style={{borderWidth: 3}}>
+    <Text className='padding border'>1</Text>
+    <Text className='padding border'>2</Text>
+    <Text className='padding border'>3</Text>
+  </Row>
+</CodeExample>
+
+<CodeExample desc='Scrollable along the width without `scroll` mode'>
+  <Row className='scrollable border-primary'
+       style={{borderWidth: 3, maxWidth: '100px'}}>
+    <Text className='padding border'>1</Text>
+    <Text className='padding border'>2</Text>
+    <Text className='padding border'>3</Text>
+  </Row>
+</CodeExample>
+
+<CodeExample desc='Wrap overflow items horizontally, with gaps in between, like grid layout'>
+  <Row className='wrap gap border-primary'
+       style={{borderWidth: 3, maxWidth: 120}}>
+    <Text className='padding border'>1</Text>
+    <Text className='padding border'>2</Text>
+    <Text className='padding border'>3</Text>
+  </Row>
+</CodeExample>
+
+<CodeExample desc='Align row to the bottom'>
+  <Row className='bottom border-primary'
+       style={{borderWidth: 3, minHeight: 120}}>
+    <Text className='padding border'>1</Text>
+    <Text className='padding border'>2</Text>
+    <Text className='padding border'>3</Text>
+  </Row>
+</CodeExample>
+
+<CodeExample desc='Fill available space and spread items evenly'>
+  <Row fill className='spread border-primary' style={{borderWidth: 3}}>
+    <Text className='padding border'>1</Text>
+    <Text className='padding border'>2</Text>
+    <Text className='padding border'>3</Text>
+  </Row>
+</CodeExample>
+
+<CodeExample desc='Justify and align items in the middle vertically'>
+  <Row fill className='justify middle border-primary'
+       style={{borderWidth: 3, minHeight: 140}}>
+    <Text className='padding border'>1</Text>
+    <Text className='padding border'>2</Text>
+    <Text className='padding border'>3</Text>
+  </Row>
+</CodeExample>
+
+### Vertical & Scroll Examples
+- [vertical layout examples](View#examples) with `View` component
+- [scrollable examples](Scroll#examples) with `Scroll` component.

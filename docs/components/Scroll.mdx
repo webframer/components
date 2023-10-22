@@ -1,0 +1,109 @@
+import { Row, Scroll, Text, View } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
+import { Callout } from 'nextra/components'
+
+export const items = Array(13).fill(true).map((v, i) => (
+  <Text className={'padding padding-h-largest ' + (i % 2 ? 'bg-tint' : 'bg-shade')}>{i + 1}</Text>
+))
+export const items2 = Array(13).fill(true).map((v, i) => (
+  <Text className={'padding padding-h-largest ' + (i % 2 ? 'bg-shade' : 'bg-tint')}>{i + 14}</Text>
+))
+export const largeItems = (
+  <Row>
+    <View>{items}</View>
+    <View>{items2}</View>
+  </Row>
+)
+
+# Scroll
+
+This is [View](View) component with `scroll` prop set to `true` by default to enable scrollbar for overflowing content.
+
+<Callout type='info' emoji='ℹ️️'>
+Because of browser quirks related to flex layout, `View` with scroll mode enabled will have an extra inner `div` element that wraps `children` content.
+</Callout>
+
+Refer to View [Prop Types](View#prop-types) for reference.
+
+### When to Use Scroll View?
+
+Scroll component is useful when you want:
+
+1. Scrollable content within a predefined container (not the entire browser or app screen)
+2. Multiple scrolling sections in one screen, each having a scrollbar in different directions
+3. To make sure content is accessible in all screen sizes for a fully responsive design.
+
+## Examples
+
+### Scroll Directions
+
+<CodeExample desc='Default - vertical scrollbar'>
+  <Scroll className='border-primary'
+          style={{borderWidth: 3, maxHeight: 150}}>
+    {items}
+  </Scroll>
+</CodeExample>
+
+<CodeExample desc='Row direction - horizontal scrollbar'>
+  <Scroll row className='border-primary'
+          style={{borderWidth: 3, maxWidth: 180}}>
+    {items}
+  </Scroll>
+</CodeExample>
+
+<CodeExample desc='Reversed order of items for row layout'>
+  <Scroll reverse row className='border-primary'
+          style={{borderWidth: 3, maxWidth: 180}}>
+    {items}
+  </Scroll>
+</CodeExample>
+
+<CodeExample desc='RTL - right to left scroll direction'>
+  <Scroll rtl row className='border-primary'
+          style={{borderWidth: 3, maxWidth: 180}}>
+    {items}
+  </Scroll>
+</CodeExample>
+
+<CodeExample desc='RTL - in column layout'>
+  <Scroll rtl className='border-primary'
+          style={{borderWidth: 3, maxHeight: 150}}>
+    {items}
+  </Scroll>
+</CodeExample>
+
+<CodeExample desc='Two scrollbars for content overflow in all directions'>
+  <Scroll className='border-primary'
+          style={{borderWidth: 3, maxWidth: 120, maxHeight: 150}}>
+    {largeItems}
+  </Scroll>
+</CodeExample>
+
+### Scrollbar Customisation
+
+<CodeExample desc='Restrict scrollbar to layout direction'>
+  <Scroll scrollAlongDirectionOnly className='border-primary'
+          style={{borderWidth: 3, maxWidth: 120, maxHeight: 150}}>
+    {largeItems}
+  </Scroll>
+</CodeExample>
+
+<CodeExample desc='Left scrollbar for vertical layout with horizontal overflow'>
+  <Scroll scrollReversed scrollAlongDirectionOnly
+          className='border-primary'
+          style={{borderWidth: 3, maxWidth: 120, maxHeight: 150}}>
+    <Scroll row scrollAlongDirectionOnly>
+      {largeItems}
+    </Scroll>
+  </Scroll>
+</CodeExample>
+
+<CodeExample desc='Right scrollbar in RTL direction'>
+  <Scroll rtl scrollReversed scrollAlongDirectionOnly
+          className='border-primary'
+          style={{borderWidth: 3, maxWidth: 120, maxHeight: 150}}>
+    <Scroll row scrollAlongDirectionOnly>
+      {largeItems}
+    </Scroll>
+  </Scroll>
+</CodeExample>

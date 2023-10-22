@@ -276,32 +276,34 @@ VirtualList.defaultProps = {
 VirtualList.propTypes = {
   // List of items to render (can be an array of any value)
   items: type.ListOf(type.Any).isRequired,
-  // Number of items to render initially or when list `items` array changes
+  // Number of items to render initially, or when `items` prop changes
   initialItems: type.Integer,
   // Whether to render as grid (alias for `scrollClass='row top wrap'` for col)
   grid: type.Boolean,
-  // Whether to render as row of items
+  // Whether to render in horizontal layout direction
   row: type.Boolean,
   // Function(item, index, items, self) to render each item in the list, default is `renderProp()`
   renderItem: type.Function,
   /**
    * Percentage of the visible list container size to pre-render items around.
-   * Set to `0` to only render items when they scroll into view.
-   * Set to `1` (ie. 100%) to render items within an area that is 3x the size of the view.
-   * Set to `true` to use automatic calculation based on scroll speed (this is default).
-   *  ┌─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─┐
-   *  │               ↑               │
-   *  │       renderRadius: 100%      │
-   *  │               ↓               │
-   *  ┌───────────────────────────────┐
-   *  │             start             │
-   *  │      view (visible area)      │
-   *  │              end              │
-   *  └───────────────────────────────┘
-   *  │               ↑               │
-   *  │       renderRadius: 100%      │
-   *  │               ↓               │
-   *  └─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─┘
+   * - Set to `0` to only render items when they scroll into view.
+   * - Set to `1` (ie. 100%) to render items within an area that is 3x the size of the view.
+   * - Set to `true` to use automatic calculation based on scroll speed (this is default).
+   * ```
+   *  ┌─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─┐
+   *  │            ↑            │
+   *  │    renderRadius: 100%   │
+   *  │            ↓            │
+   *  ┌─────────────────────────┐
+   *  │          start          │
+   *  │  visible items in view  │
+   *  │           end           │
+   *  └─────────────────────────┘
+   *  │            ↑            │
+   *  │    renderRadius: 100%   │
+   *  │            ↓            │
+   *  └─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─┘
+   * ```
    */
   renderRadius: type.OneOf([type.Boolean, type.Percentage]),
   // ...other `<View>` props to pass
