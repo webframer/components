@@ -1,8 +1,10 @@
-import { Button, Row } from '@webframer/ui'
+import { Button, Icon, Row, Spacer, Text, View } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
 import PropsTable from '@webframer/ui/containers/PropsTable.js'
 
 # Button
+
+A native button element for `onClick` action handlers.
 
 ## Prop Types
 
@@ -12,7 +14,7 @@ import PropsTable from '@webframer/ui/containers/PropsTable.js'
 
 ### Button Colors
 
-<CodeExample>
+<CodeExample desc='Theme Palette'>
   <Row className='gap spread wrap'>
     <Button>Default</Button>
     <Button className='btn-primary'>Primary</Button>
@@ -21,7 +23,7 @@ import PropsTable from '@webframer/ui/containers/PropsTable.js'
   </Row>
 </CodeExample>
 
-<CodeExample desc='Informational'>
+<CodeExample desc='Callout'>
   <Row className='gap spread wrap'>
     <Button className='btn-info'>Info</Button>
     <Button className='btn-success'>Success</Button>
@@ -30,11 +32,98 @@ import PropsTable from '@webframer/ui/containers/PropsTable.js'
   </Row>
 </CodeExample>
 
-<CodeExample desc='Greyscale'>
+<CodeExample desc='Shades'>
   <Row className='gap spread wrap'>
     <Button className='btn-dark'>Dark</Button>
     <Button className='btn-grey'>Grey</Button>
     <Button className='btn-light'>Light</Button>
     <Button className='btn-neutral'>Neutral</Button>
   </Row>
+</CodeExample>
+
+<CodeExample desc='Others'>
+  <Row className='gap spread wrap'>
+    <Button className='btn-delete'>Delete</Button>
+    <Button className='btn-link'>Link</Button>
+    <Button className='btn-transparent'>Transparent</Button>
+  </Row>
+</CodeExample>
+
+### Button Sizes
+
+<CodeExample desc='Sizes'>
+  <View className='gap'>
+    <Button className='btn-largest'>Largest</Button>
+    <Button className='btn-larger'>Larger</Button>
+    <Button className='btn-large'>Large</Button>
+    <Button>Medium</Button>
+    <Button className='btn-small'>Small</Button>
+    <Button className='btn-smaller'>Smaller</Button>
+    <Button className='btn-smallest'>Smallest</Button>
+  </View>
+</CodeExample>
+
+### Button States
+
+<CodeExample desc='Active button'>
+  <Button active>Active</Button>
+</CodeExample>
+
+<CodeExample desc='Disabled button'>
+  <Button disabled>Disabled</Button>
+</CodeExample>
+
+<CodeExample desc='Loading state'>
+  <Button loading>Loading...</Button>
+</CodeExample>
+
+### Button Styles
+
+<CodeExample desc='Theme style border radius'>
+  <Button className='radius'>Radius</Button>
+</CodeExample>
+
+<CodeExample desc='Rounded (Tailwind CSS style)'>
+  <Button className='rounded'>Rounded</Button>
+</CodeExample>
+
+<CodeExample desc='Round (circular - 50% border radius)'>
+  <Button className='round'>Round</Button>
+</CodeExample>
+
+<CodeExample desc='Circle - maintained aspect ratio of 1:1'>
+  <Button className='circle'>
+    <Icon name='heart' />
+  </Button>
+  <Spacer />
+  <Button className='circle'>
+    <Icon name='heart' />
+    <Icon name='heart' />
+  </Button>
+</CodeExample>
+
+<CodeExample desc='Square - maintained aspect ratio of 1:1'>
+  <Button className='square'>
+    <Icon name='heart' />
+  </Button>
+  <Spacer />
+  <Button className='square'>
+    <Icon name='heart' />
+    <Icon name='heart' />
+  </Button>
+</CodeExample>
+
+### Button Icons
+
+<CodeExample>
+  <Button>
+    <Icon name='heart' />
+  </Button>
+</CodeExample>
+
+<CodeExample desc='Icon with Text'>
+  <Button className='gap-smaller'>
+    <Icon name='heart' />
+    <Text>Like</Text>
+  </Button>
 </CodeExample>

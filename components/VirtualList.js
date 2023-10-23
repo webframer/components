@@ -277,8 +277,8 @@ VirtualList.propTypes = {
   // List of items to render (can be an array of any value)
   items: type.ListOf(type.Any).isRequired,
   // Number of items to render initially, or when `items` prop changes
-  initialItems: type.Integer,
-  // Whether to render as grid (alias for `scrollClass='row top wrap'` for col)
+  initialItems: type.UnsignedInteger,
+  // Whether to render as grid (equivalent to `scrollClass='row top wrap'` for `col` container)
   grid: type.Boolean,
   // Whether to render in horizontal layout direction
   row: type.Boolean,
@@ -286,23 +286,23 @@ VirtualList.propTypes = {
   renderItem: type.Function,
   /**
    * Percentage of the visible list container size to pre-render items around.
+   * - Set to `true` to use automatic calculation based on scroll speed (this is default).
    * - Set to `0` to only render items when they scroll into view.
    * - Set to `1` (ie. 100%) to render items within an area that is 3x the size of the view.
-   * - Set to `true` to use automatic calculation based on scroll speed (this is default).
    * ```
-   *  ┌─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─┐
-   *  │            ↑            │
-   *  │    renderRadius: 100%   │
-   *  │            ↓            │
-   *  ┌─────────────────────────┐
-   *  │          start          │
-   *  │  visible items in view  │
-   *  │           end           │
-   *  └─────────────────────────┘
-   *  │            ↑            │
-   *  │    renderRadius: 100%   │
-   *  │            ↓            │
-   *  └─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─┘
+   *   ┌─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─┐
+   *   │            ↑            │
+   *   │    renderRadius: 100%   │
+   *   │            ↓            │
+   *   ┌─────────────────────────┐
+   *   │          start          │
+   *   │  visible items in view  │
+   *   │           end           │
+   *   └─────────────────────────┘
+   *   │            ↑            │
+   *   │    renderRadius: 100%   │
+   *   │            ↓            │
+   *   └─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─┘
    * ```
    */
   renderRadius: type.OneOf([type.Boolean, type.Percentage]),

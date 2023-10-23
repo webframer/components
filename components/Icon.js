@@ -27,14 +27,16 @@ function createIcon () {
 
   const IconRef = React.forwardRef(Icon)
 
-  Icon.propTypes = IconRef.propTypes = {
+  Icon.propTypes = {
     // Icon name, can be empty string to be styled with custom CSS
     name: type.Icon.isRequired,
+    // If `true`, use Font icon, instead of CSS masked image, which is the default
+    font: type.Boolean,
     className: type.ClassName,
     style: type.Style,
-    // If true, use Font Icon, instead of CSS Mask Icon - the default
-    font: type.Boolean,
   }
+
+  IconRef.propTypes = Icon.propTypes
 
   return [Icon, IconRef]
 }

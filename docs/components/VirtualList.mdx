@@ -1,6 +1,7 @@
 import { Text, VirtualList } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
 import PropsTable from '@webframer/ui/containers/PropsTable.js'
+import { Callout } from 'nextra/components'
 
 export const items10k = Array(10000).fill(true).map((v, i) => (
   <Text className={'padding padding-h-largest ' + (i % 2 ? 'bg-tint' : 'bg-shade')}>{i + 1}</Text>
@@ -9,17 +10,23 @@ export const items100k = Array(100000).fill(true).map((v, i) => (
   <Text className={'padding padding-h-largest ' + (i % 2 ? 'bg-tint' : 'bg-shade')}>{i + 1}</Text>
 ))
 
+export const style = {border: '3px solid var(--primary)'}
+
 # VirtualList
 
-A [View](View) container component to display large list of items without performance penalty.
+A [View](View) container to display large list of items (thousands) without performance penalty.
 
 ### Unique Features
 
-1. Items can vary in sizes (both width and height)
-2. No need to specify or calculate item dimensions
-3. Grid layout support.
+<Callout type='info' emoji=''>
+  1. List items can vary in sizes (both width and height)
+  2. No need to specify or calculate item dimensions
+  3. Grid layout support.
+</Callout>
 
-Virtual List works by only rendering the visible items in the list that are in view, and the surrounding items within `renderRadius`.
+Virtual List works by only rendering the visible items in the list. As user scrolls, it pre-renders the incoming items within `renderRadius`, and stops rendering those that scroll out of view.
+
+This dynamic rendering is great for **Infinite Scroll** experience. It can support millions of rows and columns without UI lags or freezes.
 
 ## Prop Types
 
@@ -28,28 +35,26 @@ Virtual List works by only rendering the visible items in the list that are in v
 ## Examples
 
 <CodeExample desc={items100k.length.toLocaleString() + ' items list'}>
-  <VirtualList className='border-primary'
-               style={{borderWidth: 3, maxHeight: 150}}
-               items={items100k} />
+  <VirtualList items={items100k}
+               style={{maxHeight: 150, ...style}} />
 </CodeExample>
 
 <CodeExample desc='Grid distribution with dynamic item sizes'>
-  <VirtualList grid initialItems={30} className='border-primary'
-               style={{borderWidth: 3, maxHeight: 150}}
-               items={items100k} />
+  <VirtualList grid
+               initialItems={30}
+               items={items100k}
+               style={{maxHeight: 150, ...style}} />
 </CodeExample>
 
-<CodeExample desc={items10k.length.toLocaleString() + ' items in horizontal direction'}>
+<CodeExample desc={items10k.length.toLocaleString() + ' items scrollable in horizontal direction'}>
   <VirtualList row
-               className='border-primary'
-               style={{borderWidth: 3}}
-               items={items10k} />
+               items={items10k}
+               style={style} />
 </CodeExample>
 
-<CodeExample desc='Vertical distribution with horizontal scrollbar'>
+<CodeExample desc='Column distribution with horizontal scrollbar'>
   <VirtualList row grid
                initialItems={30}
-               className='border-primary'
-               style={{borderWidth: 3, maxHeight: 150}}
-               items={items10k} />
+               items={items10k}
+               style={{maxHeight: 130, ...style}} />
 </CodeExample>
