@@ -9,6 +9,8 @@ import { TooltipPropTypes } from '../types.js'
 
 /**
  * Tooltip Component
+ * todo: component improvement - move tooltip as parent element scrolls
+ * todo: component improvement - only open tooltip by default if the parent element is in view
  * todo: component improvement 3 - RTL position/align support
  *
  * Logic:
@@ -257,7 +259,7 @@ export function Tooltip ({
   // Archived version: using absolute position
   // return ( // Outer div is required to take full size of the parent element for positioning
   //   <span className={cn(
-  //     'tooltip row', `theme-${theme}`,
+  //     'tooltip row', theme,
   //     !prerender && `from-${position} ${alignClass(align, position)} position-fill`,
   //   )} ref={ref} style={prerender ? styleFixed : noPointerEvents}>
   //     {/**
@@ -298,7 +300,7 @@ Tooltip.defaultProps = {
   on: ['focus', 'hover'],
   offset: 16,
   position: 'top',
-  theme: 'dark',
+  theme: 'inverted',
   role: 'tooltip',
 }
 
@@ -311,7 +313,8 @@ export default TooltipMemo
 function TooltipRender ({
   open, position, prerender, self, // props from state
   animation, on, theme, align = (position === 'left' || position === 'right') ? 'middle' : 'center',
-  className, style, tooltipClass, row, col = !(row), fill, reverse, rtl,
+  className, style, tooltipClass,
+  row, col = !(row), fill, reverse, rtl,
   left, right, top, bottom, center, middle,
   children, ...props
 }) {
@@ -333,7 +336,7 @@ function TooltipRender ({
   }, [on])
 
   return (
-    <div className={cn(tooltipClass, 'tooltip col position-fixed', `theme-${theme}`,
+    <div className={cn(tooltipClass, 'tooltip col position-fixed', theme,
       !prerender && `t-pos-${position} t-align-${align}`,
       open ? 'pointer-events-auto z-10' : 'pointer-events-none', {
         'invisible': prerender, // tailwind only recognizes text literal

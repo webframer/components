@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
-import { Markdown, mdJSX, Tooltip, View } from '../index.js'
 import Text from '../components/Text.js'
+import { Markdown, mdJSX, Tooltip, View } from '../index.js'
 
 /**
  * Help description popover explaining the control type
@@ -16,7 +16,14 @@ export function TypeHelpTooltip ({_type, text, desc}) {
       }
     </View>
   ), [_type, text, desc])
-  return <Tooltip className='max-width-400' position='right' children={children} />
+  return <Tooltip {...helpTooltipProps} children={children} />
 }
 
 export default React.memo(TypeHelpTooltip)
+
+export const helpTooltipProps = {
+  className: 'max-width-400',
+  on: ['click', 'focus', 'hover'],
+  position: 'right',
+  theme: 'glass',
+}

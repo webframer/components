@@ -536,7 +536,8 @@ export const TooltipPropTypes = {
   onClose: type.Function,
   // Callback(self: object) => void - when Tooltip container has mounted
   onMount: type.Function,
-  // Name of the theme style to apply - must be one of the available themes
+  // Name of the theme mode to apply - must be one of the available theme styles
+  // Example: 'inverted', 'light', 'dark', 'dracula', 'glass', etc.
   theme: type.String,
   // Class name for the Tooltip container
   tooltipClass: type.ClassName,
