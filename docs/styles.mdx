@@ -1,7 +1,35 @@
+import { Icon } from '@webframer/ui'
+import { Callout } from 'nextra/components'
+
+export const tailwindcss = <Icon name='logo/tailwindcss' className='font-large' />
+export const logo = <Icon name='logo' className='font-large' />
+export const light = <Icon name='md/light-mode' />
+export const dark = <Icon name='hi2/moon' />
+export const glass = <Icon name='io5/snow' />
+
 # Webframe UI Styles
 
-Webframe uses CSS variables to style UI. This way, you can dynamically adjust the Look & Feel of the app according to the selected UI theme.
+<Callout type='info' emoji="🪄">
+  A User-centered Approach to UI Styling
+</Callout>
 
-Your app can support many theme modes, besides the default Light and Dark modes.
+The built-in Webframe UI styles use {tailwindcss} **Tailwind CSS** in combination with {logo} **Webframe CSS**, which is differentiated by the {logo} logo icon in CSS preview.
+
+### Similarity with Tailwind CSS
+
+- [CSS variables](/docs/ui/styles/variables) to style UI. This way, you can dynamically adjust the Look & Feel of the app according to the selected UI theme.
+- Style composition - Webframe has been fine-tuning the utility-first CSS like Tailwind since 2015, but with some differences inspired by [Semantic UI](https://semantic-ui.com/).
+
+### Unique to Webframe Styles
+
+- [Intuitive class names](/docs/ui/styles/classes) that match your intentions. For example, to align content to the middle and center it, add `className='middle center'`.
+- [Semantic color](/docs/ui/styles/colors) variables with human-friendly naming conventions for a delightful DUX (Developer User Experience)
+- Support for many themes, besides the default {light} **Light** and {dark} **Dark** modes. {glass} **Glass** effect is another slick choice.
+- Switch between themes with ease. For example, just add `className='dark'` and the UI should look great automatically, without manual color fixes like Tailwind CSS.
+
+### Custom UI Theme
 
 The easiest way to create your own theme is to modify existing CSS variables.
+
+For 100% bespoke UI/UX, create CSS styles for all [headless UI components](/docs/ui/components) that you use in the app, then import your compiled CSS file, instead of Webframe's built-in CSS.
+
