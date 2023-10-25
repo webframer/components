@@ -6,30 +6,47 @@ export const logo = <Icon name='logo' className='font-large' />
 export const light = <Icon name='md/light-mode' />
 export const dark = <Icon name='hi2/moon' />
 export const glass = <Icon name='io5/snow' />
+export const dracula = <Icon name='gi/vampire-dracula' />
 
 # Webframe UI Styles
 
 <Callout type='info' emoji="🪄">
-  A User-centered Approach to UI Styling
+  User-centered Design for UI Styling
 </Callout>
 
-The built-in Webframe UI styles use {tailwindcss} **Tailwind CSS** in combination with {logo} **Webframe CSS**, which is differentiated by the {logo} logo icon in CSS preview.
+The built-in Webframe UI styles use {tailwindcss} **Tailwind CSS** in combination with {logo} **Webframe CSS**.
 
 ### Similarity with Tailwind CSS
 
-- [CSS variables](/docs/ui/styles/variables) to style UI. This way, you can dynamically adjust the Look & Feel of the app according to the selected UI theme.
-- Style composition - Webframe has been fine-tuning the utility-first CSS like Tailwind since 2015, but with some differences inspired by [Semantic UI](https://semantic-ui.com/).
+- [CSS variables](/docs/ui/styles/variables) - styling UI with only variables allows you to dynamically adjust the Look & Feel according to the selected theme.
+- Style composition - Webframe has been fine-tuning the utility-first CSS since 2015. It's similar to Tailwind, but with some differences inspired by [Semantic UI](https://semantic-ui.com/).
 
 ### Unique to Webframe Styles
 
-- [Intuitive class names](/docs/ui/styles/classes) that match your intentions. For example, to align content to the middle and center it, add `className='middle center'`.
+- [Preview Intellisense](/docs/ui/styles/classes#preview-intellisense) - Webframe Intellisense automatically generates preview for all CSS classes in your project.
+- Intuitive class names that match your intentions. For example, to align content to the middle and center it, add `middle center` class name.
 - [Semantic color](/docs/ui/styles/colors) variables with human-friendly naming conventions for a delightful DUX (Developer User Experience)
-- Support for many themes, besides the default {light} **Light** and {dark} **Dark** modes. {glass} **Glass** effect is another slick choice.
-- Switch between themes with ease. For example, just add `className='dark'` and the UI should look great automatically, without manual color fixes like Tailwind CSS.
+- Support for many [UI themes](/docs/ui/styles/themes), besides the default {light} **Light** and {dark} **Dark** modes. {glass} **Glass** effect is another slick choice, to name a few.
+- Switch between themes with ease. For example, just add class name `dark` and the UI should look great automagically, without manual color fixes like Tailwind CSS.
 
 ### Custom UI Theme
 
-The easiest way to create your own theme is to modify existing CSS variables.
+The easiest way to create your own theme is to modify existing CSS variables under your new theme's name space.
+
+For example, here is how you can create a new UI theme called {dracula} **Dracula**:
+```css
+/* styles/themes/dracula.{css,less,sass} */
+.dracula {
+  --primary: hsl(250, 66%, 60%);
+  --secondary: hsl(327, 80%, 61%);
+  --accent: hsl(200, 100%, 43%);
+  /* ... */
+}
+```
 
 For 100% bespoke UI/UX, create CSS styles for all [headless UI components](/docs/ui/components) that you use in the app, then import your compiled CSS file, instead of Webframe's built-in CSS.
+
+All CSS classes in your file will be available as `Class Name` option for styling in Webframe Editor.
+
+The Webframe Compiler will also create [CSS preview](/docs/ui/styles/classes#preview-intellisense) for all classes, and prune them during production bundling using Tailwind CLI.
 
