@@ -1,33 +1,21 @@
 import { Button, Text, Tooltip, View } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
 import PropsTable from '@webframer/ui/containers/PropsTable.js'
+import { Callout } from 'nextra/components'
 
 # Tooltip
 
 Tooltips display additional information (text, images, or explanations), when users hover over, focus on, click or tap an element.
-
-## Unique Features
-
-### 1. Intuitive Code Markup
-
-Webframe Tooltip inserts itself as a child of any component that needs popover, instead of wrapping the element like most UI libraries. The benefits of this is that you can have:
-- Multiple tooltips for the same element without JSX nesting nightmare
-- Markup that aligns with human thinking, see [code examples](#examples) below.
-
-### 2. Render Modes
-
-I. `position: fixed` - by default, Tooltip renders inside a React Portal, as direct child of the document body, to ensure correct positioning for most use cases.
-II. `position: absolute` - Tooltip with `embedded`  set to true renders inside the parent node with correct event bubbling and keyboard accessibility. This is great for UX, like nested dropdown menus.
-
-### 3. Weights 1kB gzipped
-
-This is in contrast to similar components using react-popper, like Material UI Popper, which weights 24.9kB gzipped (at the moment of this writing).
 
 ## Prop Types
 
 <PropsTable component={Tooltip} />
 
 ## Examples
+
+<Callout emoji="🚨">
+  Todo: sync Tooltip position on scroll.
+</Callout>
 
 <CodeExample desc='Default Tooltip'>
   <Button>
@@ -89,3 +77,20 @@ This is in contrast to similar components using react-popper, like Material UI P
     <Tooltip theme='glass' on={['click', 'hover', 'focus']} position='bottom'>Tooltip</Tooltip>
   </Button>
 </CodeExample>
+
+## Unique Features
+
+### 1. Intuitive Code Markup
+
+Webframe Tooltip inserts itself as a child of any component that needs popover, instead of wrapping the element like most UI libraries. The benefits of this is that you can have:
+- Multiple tooltips for the same element without JSX nesting nightmare
+- Markup that aligns with human thinking, see [code examples](#examples) for reference.
+
+### 2. Render Modes
+
+I. `position: fixed` - by default, Tooltip renders inside a React Portal, as direct child of the document body, to ensure correct positioning for most use cases.
+II. `position: absolute` - Tooltip with `embedded`  set to true renders inside the parent node with correct event bubbling and keyboard accessibility. This is great for UX, like nested dropdown menus.
+
+### 3. Weights 1kB gzipped
+
+This is in contrast to similar components using react-popper, like Material UI Popper, which weights 24.9kB gzipped (at the moment of this writing).

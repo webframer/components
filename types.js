@@ -510,14 +510,21 @@ const tooltipOnEnum = type.Enum(['click', 'focus', 'hover'])
 export const TooltipPropTypes = {
   // Tooltip content
   children: type.NodeOrFunction.isRequired,
-  // One of, or any combination of: 'hover', 'click'
+  // One of, or any combination of `['click', 'focus', 'hover']`
   on: type.OneOf([tooltipOnEnum, type.ListOf(tooltipOnEnum)]),
   // Location of the Tooltip relative to the parent element
   position: type.Enum(['top', 'right', 'bottom', 'left']),
   /**
    * Tooltip alignment relative to the `position`, default is center/middle alignment.
-   *   - `start === 'left'` and `end === 'right'` if position is 'top' or 'bottom'
-   *   - `start === 'top'` and `end === 'bottom'` if position is 'left' or 'right'
+   * ```
+   * Position 'top'/'bottom':
+   *    'start' -> left
+   *    'end' -> right
+   *
+   * Position 'left'/'right':
+   *    'start' -> top
+   *    'end' -> bottom
+   * ```
    */
   align: type.Enum(['start', 'end']),
   // Animation CSS class to apply
@@ -536,8 +543,8 @@ export const TooltipPropTypes = {
   onClose: type.Function,
   // Callback(self: object) => void - when Tooltip container has mounted
   onMount: type.Function,
-  // Name of the theme mode to apply - must be one of the available theme styles
-  // Example: 'inverted', 'light', 'dark', 'dracula', 'glass', etc.
+  // Name of the theme mode to apply - must be one of the available theme styles.
+  // Example: `inverted`, `light`, `dark`, `glass`, etc.
   theme: type.String,
   // Class name for the Tooltip container
   tooltipClass: type.ClassName,
