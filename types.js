@@ -517,13 +517,13 @@ export const TooltipPropTypes = {
   /**
    * Tooltip alignment relative to the `position`, default is center/middle alignment.
    * ```
-   * Position 'top'/'bottom':
-   *    'start' -> left
-   *    'end' -> right
+   * For position 'top'/'bottom':
+   *    'start' is left
+   *    'end' is right
    *
-   * Position 'left'/'right':
-   *    'start' -> top
-   *    'end' -> bottom
+   * For position 'left'/'right':
+   *    'start' is top
+   *    'end' is bottom
    * ```
    */
   align: type.Enum(['start', 'end']),

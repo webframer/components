@@ -1,22 +1,32 @@
 import Accordion from 'view/assets/Accordion.js'
+import Audio from 'view/assets/Audio.js'
+import Avatar from 'view/assets/Avatar.js'
 import Badge from 'view/assets/Badge.js'
 import Button from 'view/assets/Button.js'
+import Carousel from 'view/assets/Carousel.js'
 import Checkbox from 'view/assets/Checkbox.js'
+import Datepicker from 'view/assets/Datepicker.js'
 import Divider from 'view/assets/Divider.js'
 import Expand from 'view/assets/Expand.js'
 import Icon from 'view/assets/Icon.js'
+import Iframe from 'view/assets/Iframe.js'
 import Image from 'view/assets/Image.js'
 import Input from 'view/assets/Input.js'
+import Link from 'view/assets/Link.js'
 import Loader from 'view/assets/Loader.js'
+import Radio from 'view/assets/Radio.js'
 import Row from 'view/assets/Row.js'
 import Scroll from 'view/assets/Scroll.js'
 import Select from 'view/assets/Select.js'
+import Slider from 'view/assets/Slider.js'
 import Spacer from 'view/assets/Spacer.js'
 import Switch from 'view/assets/Switch.js'
+import Table from 'view/assets/Table.js'
 import Tabs from 'view/assets/Tabs.js'
 import Text from 'view/assets/Text.js'
 import Tooltip from 'view/assets/Tooltip.js'
 import Upload from 'view/assets/Upload.js'
+import Video from 'view/assets/Video.js'
 import View from 'view/assets/View.js'
 import VirtualList from 'view/assets/VirtualList.js'
 import AssetLink from 'view/components/AssetLink.jsx'
@@ -44,30 +54,40 @@ These UI components do not have any CSS style by default. You can provide your o
 <Row className='full-width gap wrap'>
   <AssetLink component={Button} />
   <AssetLink component={Icon} />
-  <AssetLink component={Image} />
-  <AssetLink component={Divider} />
-  <AssetLink component={Spacer} />
-  <AssetLink component={Tooltip} />
+  <AssetLink pending component={Link} />
+  <AssetLink pending component={Image} />
+  <AssetLink pending component={Video} />
+  <AssetLink pending component={Audio} />
+  <AssetLink pending component={Avatar} />
+  <AssetLink pending component={Iframe} />
+  <AssetLink pending component={Divider} />
+  <AssetLink pending component={Spacer} />
 </Row>
 
 
 ## Inputs
 
 <Row className='full-width gap wrap'>
-  <AssetLink component={Input} />
-  <AssetLink component={Select} />
-  <AssetLink component={Upload} />
-  <AssetLink component={Checkbox} />
-  <AssetLink component={Switch} />
+  <AssetLink pending component={Input} />
+  <AssetLink pending component={Select} />
+  <AssetLink pending component={Datepicker} />
+  <AssetLink pending component={Upload} />
+  <AssetLink pending component={Checkbox} />
+  <AssetLink pending component={Radio} />
+  <AssetLink pending component={Switch} />
+  <AssetLink pending component={Slider} />
 </Row>
 
 ## Widgets
 
 <Row className='full-width gap wrap'>
-  <AssetLink component={Accordion} />
+  <AssetLink pending component={Accordion} />
   <AssetLink component={Expand} />
-  <AssetLink component={Badge} />
-  <AssetLink component={Loader} />
-  <AssetLink component={Tabs} />
+  <AssetLink pending component={Badge} />
+  <AssetLink pending component={Carousel} />
+  <AssetLink pending component={Loader} />
+  <AssetLink pending component={Table} />
+  <AssetLink pending component={Tabs} />
+  <AssetLink component={Tooltip} />
 </Row>
 

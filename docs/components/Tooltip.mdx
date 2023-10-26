@@ -13,9 +13,7 @@ Tooltips display additional information (text, images, or explanations), when us
 
 ## Examples
 
-<Callout emoji="🚨">
-  Todo: sync Tooltip position on scroll.
-</Callout>
+### Basic Usage
 
 <CodeExample desc='Default Tooltip'>
   <Button>
@@ -30,12 +28,32 @@ Tooltips display additional information (text, images, or explanations), when us
   </Button>
 </CodeExample>
 
+<Callout emoji="🚨">
+  Todo: sync Tooltip position on scroll.
+</Callout>
+
+<CodeExample desc='Render Tooltip inside parent node'>
+  <Button>
+    <Text>Embedded Tooltip</Text>
+    <Tooltip embedded on='click'>Rendered Inside Parent Node</Tooltip>
+  </Button>
+</CodeExample>
+
 <CodeExample desc='Open or close popup on click'>
   <Button>
     <Text>Click to Open</Text>
     <Tooltip on='click'>Popup</Tooltip>
   </Button>
 </CodeExample>
+
+<CodeExample desc='Show Tooltip initially'>
+  <Button>
+    <Text>Opened Initially</Text>
+    <Tooltip open>Tooltip</Tooltip>
+  </Button>
+</CodeExample>
+
+### Position & Alignment
 
 <CodeExample desc='Tooltip Position'>
   <Button>
@@ -47,7 +65,7 @@ Tooltips display additional information (text, images, or explanations), when us
   </Button>
 </CodeExample>
 
-<CodeExample desc='Tooltip Alignment'>
+<CodeExample desc='Aligning within Position'>
   <Button>
     <View>
       <Text className='padding'>Click to Show Position + Align</Text>
@@ -64,17 +82,31 @@ Tooltips display additional information (text, images, or explanations), when us
   </Button>
 </CodeExample>
 
+### Styling Tooltip
+
 <CodeExample desc='Tooltip adopts to content size by default'>
   <Button>
     <Text>Long Tooltip Text</Text>
-    <Tooltip on={['click', 'hover', 'focus']}>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</Tooltip>
+    <Tooltip on={['click', 'hover', 'focus']}>
+      <Text className='bold'>Title</Text>
+      <Text className='p'>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</Text>
+    </Tooltip>
+  </Button>
+</CodeExample>
+
+<CodeExample desc='Customize Tooltip with `className` or `style`'>
+  <Button>
+    <Text>Custom Tooltip Style</Text>
+    <Tooltip className='bg-primary'
+             style={{color: 'white'}}
+             on={['click', 'hover', 'focus']}>Tooltip</Tooltip>
   </Button>
 </CodeExample>
 
 <CodeExample desc='Glass Theme (popup closes when the cursor is outside the element)'>
   <Button>
     <Text>Glass Effect</Text>
-    <Tooltip theme='glass' on={['click', 'hover', 'focus']} position='bottom'>Tooltip</Tooltip>
+    <Tooltip theme='glass' on={['click', 'hover', 'focus']}>Tooltip</Tooltip>
   </Button>
 </CodeExample>
 
@@ -88,8 +120,8 @@ Webframe Tooltip inserts itself as a child of any component that needs popover, 
 
 ### 2. Render Modes
 
-I. `position: fixed` - by default, Tooltip renders inside a React Portal, as direct child of the document body, to ensure correct positioning for most use cases.
-II. `position: absolute` - Tooltip with `embedded`  set to true renders inside the parent node with correct event bubbling and keyboard accessibility. This is great for UX, like nested dropdown menus.
+- **Detached** - by default, Tooltip renders inside a React Portal, as direct child of the document body, to ensure correct positioning for most use cases.
+- **Embedded** - Tooltip with `embedded`  set to true renders inside the parent node with correct event bubbling and keyboard accessibility. This is great for UX, like nested dropdown menus.
 
 ### 3. Weights 1kB gzipped
 

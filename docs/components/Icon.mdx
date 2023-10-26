@@ -3,16 +3,20 @@ import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
 import PropsTable from '@webframer/ui/containers/PropsTable.js'
 import { SelectIconInput } from 'view/components/SelectIconInput.jsx'
 
-export let total = 0
+export let total = <b id='webframe-total-icons'>{Number(30000).toLocaleString()}+</b>
 
 # Icon
 
 <SelectIconInput className='margin-top max-width-320'
-                 onLoad={({props: {options}}) => total = options.length.toLocaleString()} />
+                 onLoad={({props: {options}}) => {
+                   setTimeout(() => {
+                     document.getElementById('webframe-total-icons').innerHTML = options.length.toLocaleString()
+                   }, 0)
+                 }} />
 
 A lazy loaded component to display graphical elements. It supports: Font Icons, SVG Icons and Image Icons (the default).
 
-Webframe has **{total}** built-in open source icons that you can use in any project. You can add your own icon pack by placing icon files in the static folder `/static/icons/`.
+Webframe has {total} built-in open source icons that you can use in any project. You can add your own icon pack by placing icon files in the static folder `/static/icons/`.
 
 Set Icon to any text size using Tailwind CSS or Webframe UI [classes](/docs/ui/styles/classes) and [style variables](/docs/ui/styles/variables). The same apply to Icon [color](/docs/ui/styles/colors), which is treated like text color.
 
