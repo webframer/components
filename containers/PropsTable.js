@@ -3,7 +3,7 @@ import React, { Fragment, useMemo } from 'react'
 import Text from '../components/Text.js'
 import { cn, extractProps, Markdown, mdJSX, Row, Tooltip, type, View } from '../index.js'
 import proptypes from '../propTypes.json'
-import TypeHelpTooltip from './TypeHelpTooltip.js'
+import TypeHelpTooltip, { helpTooltipProps } from './TypeHelpTooltip.js'
 
 /**
  * Component Props Table View.
@@ -99,7 +99,7 @@ export function PropsTable ({component, manifest = proptypes, ...view}) {
                 {defaultValue &&
                   <Markdown components={mdJSX} children={`~~~jsx\n${defaultValue}\n~~~`} />
                 }
-                {defaultHelp && <Tooltip children={defaultHelp} />}
+                {defaultHelp && <Tooltip {...helpTooltipProps} children={defaultHelp} />}
               </td>
               <td>
                 {description &&

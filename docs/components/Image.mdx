@@ -1,0 +1,24 @@
+import { Image } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
+import PropsTable from '@webframer/ui/containers/PropsTable.js'
+
+# Image
+
+A component to display graphical elements.
+
+## Prop Types
+
+<PropsTable component={Image} />
+
+## Examples
+<CodeExample desc='Using file `name` relative to `/static/images/` folder'>
+  <Image name='image.png' />
+</CodeExample>
+
+<CodeExample desc='Using `src` attribute'>
+  <Image src='/static/images/image.png' />
+</CodeExample>
+
+<CodeExample desc='Custom Image Style'>
+  <Image className='max-width-mobile animate-bounce' name='image.png' />
+</CodeExample>

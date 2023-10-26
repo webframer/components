@@ -10,7 +10,7 @@ function createImage () {
    */
   function Image ({
     name,
-    path,
+    dir,
     className,
     _ref,
     ...props
@@ -19,7 +19,7 @@ function createImage () {
     if (isRef(ref)) props.ref = ref
     else if (_ref) props.ref = _ref
 
-    if (props.src == null) props.src = imageSrc({name, path})
+    if (props.src == null) props.src = imageSrc({name, dir})
     if (props.alt == null) props.alt = fileNameWithoutExt(name)
 
     return <img className={cn('img', className)} {...props} />
@@ -27,33 +27,35 @@ function createImage () {
 
   const ImageRef = React.forwardRef(Image)
 
-  Image.defaultProps = ImageRef.defaultProps = {
-    name: 'image.svg', // to prevent error and for better UX
+  Image.defaultProps = {
+    // Placeholder image to prevent error and for better UX
+    name: 'image.svg',
     loading: 'lazy',
     decoding: 'async',
   }
 
-  Image.propTypes = ImageRef.propTypes = {
-    // Optional CSS classes
-    className: type.ClassName,
-    style: type.Style,
-    // Alternative text description of the image
-    alt: type.String,
+  Image.propTypes = {
     // File name (required if `src` or `alt` not defined)
     name: type.Src,
     // Directory path to the file (without file name) if `src` not given
-    path: type.String,
-    // Image file source URL or directory path
+    dir: type.String,
+    // Image file source URL or full file path (takes priority over file `name`)
     src: type.Src,
+    // Alternative text description of the image (auto generated from file `name`)
+    alt: type.String,
     loading: type.Enum(['eager', 'lazy']),
     decoding: type.Enum(['auto', 'async', 'sync']),
+    className: type.ClassName,
+    style: type.Style,
   }
 
+  ImageRef.propTypes = Image.propTypes
+  ImageRef.defaultProps = Image.defaultProps
   return [Image, ImageRef]
 }
 
-export function imageSrc ({avatar, src, name = '', path = FILE.PATH_IMAGES}) {
-  return avatar || src || (path + name.replace(/\s/g, '-').toLowerCase())
+export function imageSrc ({avatar, src, name = '', dir = FILE.PATH_IMAGES}) {
+  return avatar || src || (dir + name.replace(/\s/g, '-').toLowerCase())
 }
 
 export const [Image, ImageRef] = createImage()
