@@ -3,7 +3,7 @@
 This package contains commonly used **user interface components** (written in React by default).
 
 All UI components are **headless** (i.e. no default CSS styling). For integrated UI themes and styles,
-check [@webframer/style](https://www.npmjs.com/package/@webframer/style), or provide your own.
+check the [style guide](https://webframe.app/docs/ui/styles), or provide your own.
 
 ## Why Should You Use this Library?
 
@@ -36,3 +36,7 @@ return (
   </Scroll>
 )
 ```
+
+## Documentation
+
+Go to [Webframe UI Docs](https://webframe.app/docs) for complete API documentation.
