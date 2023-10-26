@@ -1,0 +1,68 @@
+import { Row, Spacer, Text, View } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
+import PropsTable from '@webframer/ui/containers/PropsTable.js'
+
+export const item = 'padding bg-shade'
+
+# Spacer
+
+An element to separate content visually by creating an empty space in between them.
+
+> Spacer is a great replacement for CSS **margin** or **gap** properties because it takes up content space within the parent container. This prevents flex **fill** items from overflowing their parent containers when they are supposed to wrap.
+
+## Prop Types
+
+<PropsTable component={Spacer} />
+
+## Examples
+<CodeExample>
+  <Text className={item}>Item 1</Text>
+  <Spacer />
+  <Text className={item}>Item 2</Text>
+</CodeExample>
+
+<CodeExample desc='Spacer sizes'>
+  <Row className='gap wrap'>
+    <View>
+      <Text className={item}>1</Text>
+      <Spacer size='smallest' />
+      <View className={item} />
+    </View>
+    <View>
+      <Text className={item}>2</Text>
+      <Spacer size='smaller' />
+      <View className={item} />
+    </View>
+    <View>
+      <Text className={item}>3</Text>
+      <Spacer size='small' />
+      <View className={item} />
+    </View>
+    <View>
+      <Text className={item}>4</Text>
+      <Spacer />
+      <View className={item} />
+    </View>
+    <View>
+      <Text className={item}>5</Text>
+      <Spacer size='large' />
+      <View className={item} />
+    </View>
+    <View>
+      <Text className={item}>6</Text>
+      <Spacer size='larger' />
+      <View className={item} />
+    </View>
+    <View>
+      <Text className={item}>7</Text>
+      <Spacer size='largest' />
+      <View className={item} />
+    </View>
+  </Row>
+</CodeExample>
+
+<CodeExample desc='Custom Spacer style'>
+  <Text className={item}>Item 1</Text>
+  <Spacer className='bg-primary' />
+  <Text className={item}>Item 2</Text>
+</CodeExample>

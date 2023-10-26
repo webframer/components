@@ -22,6 +22,8 @@ function createSpacer () {
 
   Spacer.propTypes = {
     size: type.SizeModifier,
+    className: type.ClassName,
+    style: type.Style,
   }
 
   return [Spacer]
