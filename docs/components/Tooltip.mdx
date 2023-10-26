@@ -28,28 +28,44 @@ Tooltips display additional information (text, images, or explanations), when us
   </Button>
 </CodeExample>
 
+### Custom Behaviors
+
+<CodeExample desc='Show Tooltip initially'>
+  <Button>
+    <Text>Opened Initially</Text>
+    <Tooltip open>Tooltip</Tooltip>
+  </Button>
+</CodeExample>
+
+<CodeExample desc='Appear on element `focus` only'>
+  <Button>
+    <Text>Tab to Focus</Text>
+    <Tooltip on='focus'>Tooltip</Tooltip>
+  </Button>
+</CodeExample>
+
+<CodeExample desc='Appear on element `hover` only'>
+  <Button>
+    <Text>Hover Over</Text>
+    <Tooltip on='hover'>Tooltip</Tooltip>
+  </Button>
+</CodeExample>
+
 <Callout emoji="🚨">
   Todo: sync Tooltip position on scroll.
 </Callout>
 
-<CodeExample desc='Render Tooltip inside parent node'>
-  <Button>
-    <Text>Embedded Tooltip</Text>
-    <Tooltip embedded on='click'>Rendered Inside Parent Node</Tooltip>
-  </Button>
-</CodeExample>
-
-<CodeExample desc='Open or close popup on click'>
+<CodeExample desc='Open or close popup on `click`'>
   <Button>
     <Text>Click to Open</Text>
     <Tooltip on='click'>Popup</Tooltip>
   </Button>
 </CodeExample>
 
-<CodeExample desc='Show Tooltip initially'>
+<CodeExample desc='Render Tooltip inside parent node'>
   <Button>
-    <Text>Opened Initially</Text>
-    <Tooltip open>Tooltip</Tooltip>
+    <Text>Embedded Tooltip</Text>
+    <Tooltip embedded on='click'>Rendered Inside Parent Node</Tooltip>
   </Button>
 </CodeExample>
 
@@ -103,10 +119,23 @@ Tooltips display additional information (text, images, or explanations), when us
   </Button>
 </CodeExample>
 
-<CodeExample desc='Glass Theme (popup closes when the cursor is outside the element)'>
+### Glass Effect
+
+To enable the slick frosty glass effect, use the `glass` theme.
+
+<CodeExample>
   <Button>
     <Text>Glass Effect</Text>
     <Tooltip theme='glass' on={['click', 'hover', 'focus']}>Tooltip</Tooltip>
+  </Button>
+</CodeExample>
+
+> Note: the popup may close when the cursor is outside the element because of browser quirks related to CSS 'backdrop-filter'. To persist tooltip when the cursor moves over, remove the gap between it and the parent element.
+
+<CodeExample desc='Hoverable Glass Theme Tooltip'>
+  <Button>
+    <Text>Move Cursor Over to Tooltip</Text>
+    <Tooltip theme='glass' on={['click', 'hover', 'focus']} style={{margin: 0}}>Hoverable Tooltip</Tooltip>
   </Button>
 </CodeExample>
 

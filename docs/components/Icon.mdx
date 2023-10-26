@@ -10,7 +10,7 @@ export let total = <b id='webframe-total-icons'>{Number(30000).toLocaleString()}
 <SelectIconInput className='margin-top max-width-320'
                  onLoad={({props: {options}}) => {
                    setTimeout(() => {
-                     document.getElementById('webframe-total-icons').innerHTML = options.length.toLocaleString()
+                     document.getElementById('webframe-total-icons').innerText = options.length.toLocaleString()
                    }, 0)
                  }} />
 

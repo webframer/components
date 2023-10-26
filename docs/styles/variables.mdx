@@ -1,9 +1,24 @@
+import { Switch, View } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
+
 # CSS Variables
 
+#### Spacing
 
+`--padding` and `--margin` use relative `em` unit so that the entire UI scales dynamically according to the font size.
 
-import { Callout } from 'nextra/components'
+This is the desired and expected behavior for most use cases, because it eliminates the bloated code required to style all UI Components for different sizes.
 
-<Callout emoji="🚨">
-  This page is a stub. Documentation is coming soon!
-</Callout>
+For example, in order to scale the [Switch](/docs/ui/components/Switch) component, all we have to do is set the font size:
+
+<CodeExample>
+  <View className='gap'>
+    <Switch className='font-smallest' value={true} />
+    <Switch className='font-smaller' value={true} />
+    <Switch className='font-small' value={true} />
+    <Switch value={true} />
+    <Switch className='font-large' value={true} />
+    <Switch className='font-larger' value={true} />
+    <Switch className='font-largest' value={true} />
+  </View>
+</CodeExample>

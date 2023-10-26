@@ -1,6 +1,7 @@
 import { _, l, translate } from '@webframer/js'
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import Icon from '../components/Icon.js'
+import Switch from '../components/Switch.js'
 import Text from '../components/Text.js'
 import { Button, cn, Expand, extractProps, Markdown, mdJSX, Row, type, View } from '../index.js'
 
@@ -12,13 +13,24 @@ export function CodeExample ({children, className, source = '', desc, ...view}) 
   const sourceCode = useMemo(() => source
     .replace(CODE_INDENT_REGEX, '\n')
     .replace(CODE_TRIM_REGEX, ''), [source])
+
+  // RTL toggle switch -----------------------------------------------------------------------------
+  const [rtl, setRtl] = useState(!!view.rtl)
+  const toggleDir = useCallback((_e, value) => setRtl(value), [setRtl])
+
   return (
     <View className={cn('CodeExample', className, 'embossed rounded')} {...extractProps(view)}>
       <Row>
-        <View className='padding fill middle'>
-          <Text className='CodeExample__desc p fill faded'>{desc || _.EXAMPLE}</Text>
+        <View className='CodeExample__desc padding fill middle'>
+          <Text className='p fill faded'>{desc || _.EXAMPLE}</Text>
         </View>
-        <Row className='middle padding-h wrap'>
+        <Row className='CodeExample__buttons middle padding-h gap'>
+          <Switch className='font-smallest appear-on-hover-only'
+                  onChange={toggleDir}
+                  value={rtl}
+                  title={_.TOGGLE_LAYOUT_DIRECTION}
+                  checkedLabel={<Text className='font-smaller'>{_.RTL}</Text>}
+                  uncheckedLabel={<Text className='font-smaller'>{_.LTR}</Text>} />
           <Button className='gap-smaller btn-transparent padding-v-smallest padding-h-smaller fade'
                   onClick={() => setOpen(!open)}>
             <Icon name='hi/code' className='font-large' />
@@ -33,7 +45,7 @@ export function CodeExample ({children, className, source = '', desc, ...view}) 
                       components={mdJSX} children={`~~~jsx\n${sourceCode}\n~~~`} />
           )}
         </Expand>
-        <View className='CodeExample__preview fill middle center padding-largest'>
+        <View className='CodeExample__preview fill middle center padding-largest' rtl={rtl}>
           {children}
         </View>
       </Row>
@@ -44,10 +56,11 @@ export function CodeExample ({children, className, source = '', desc, ...view}) 
 CodeExample.propTypes = {
   // Example source code
   children: type.Node.isRequired,
-  // `children` as literal source code string for documentation
-  source: type.String,
   // Description text - default is "Example"
   desc: type.String,
+  // `children` as literal source code string for documentation
+  // Autogenerate this using [webframe-docs](https://www.npmjs.com/package/webframe-docs) CLI.
+  source: type.String,
 }
 
 export default React.memo(CodeExample)
@@ -56,11 +69,20 @@ translate({
   EXAMPLE: {
     [l.ENGLISH]: 'Example',
   },
+  HIDE_CODE: {
+    [l.ENGLISH]: 'Hide Code',
+  },
   SHOW_CODE: {
     [l.ENGLISH]: 'Show Code',
   },
-  HIDE_CODE: {
-    [l.ENGLISH]: 'Hide Code',
+  LTR: {
+    [l.ENGLISH]: 'LTR',
+  },
+  RTL: {
+    [l.ENGLISH]: 'RTL',
+  },
+  TOGGLE_LAYOUT_DIRECTION: {
+    [l.ENGLISH]: 'Toggle Layout Direction',
   },
 })
 
