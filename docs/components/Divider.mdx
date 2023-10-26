@@ -1,0 +1,37 @@
+import { Divider, Row, Text, View } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
+import PropsTable from '@webframer/ui/containers/PropsTable.js'
+
+# Divider
+
+An element to separate content visually.
+Usually it's a horizontal or vertical line, depending on the [container layout](/docs/ui/components/View).
+
+## Prop Types
+
+<PropsTable component={Divider} />
+
+## Examples
+<CodeExample>
+  <Divider />
+</CodeExample>
+
+<CodeExample desc='Separating footer links with pipes'>
+  <Row className='gap'>
+    <Text>About</Text>
+    <Divider />
+    <Text>Contact</Text>
+    <Divider />
+    <Text>Privacy</Text>
+  </Row>
+</CodeExample>
+
+<CodeExample desc='Custom Divider style'>
+  <View className='padding gap radius bg-shade-softest'>
+    <Text>Menu Item 1</Text>
+    <Divider className='divide-v' />
+    <Text>Menu Item 2</Text>
+    <Divider className='divide-v' />
+    <Text>Menu Item 3</Text>
+  </View>
+</CodeExample>
