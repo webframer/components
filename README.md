@@ -39,4 +39,4 @@ return (
 
 ## Documentation
 
-Go to [Webframe UI Docs](https://webframe.app/docs) for complete API documentation.
+Go to [Webframe UI Docs](https://webframe.app/docs/ui) for complete API documentation.
