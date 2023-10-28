@@ -9,6 +9,8 @@ import { View } from './View.js'
 
 /**
  * List rendering of large Arrays.
+ * @see https://webframe.app/docs/ui/components/VirtualList
+ *
  * Features:
  *  - Dynamic list container and item sizes (no need to specify width/height)
  *  - List items can expand/collapse in width/height like usual

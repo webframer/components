@@ -6,7 +6,8 @@ import { type } from '../types.js'
 
 function createImage () {
   /**
-   * Image - Pure Component
+   * Image - Pure Component.
+   * @see https://webframe.app/docs/ui/components/Image
    */
   function Image ({
     name,

@@ -9,6 +9,7 @@ function createText () {
   /**
    * Text View - Pure Component
    * (to be used as replacement for `<span></span>` for cross platform integration).
+   * @see https://webframe.app/docs/ui/components/Text
    *
    * @param {string} [className] - optional css class name
    * @param {Function} [onClick] - callback to fire on click or Enter press (if `onKeyPress` not given)

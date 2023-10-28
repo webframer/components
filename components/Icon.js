@@ -6,7 +6,8 @@ import { type } from '../types.js'
 
 function createIcon () {
   /**
-   * Icon - Pure Component
+   * Icon - Pure Component.
+   * @see https://webframe.app/docs/ui/components/Icon
    */
   function Icon ({name, className, font, path = FILE.PATH_ICONS, _ref, children, ...props}, ref) {
     props = accessibilitySupport(props) // ensures correct focus behavior on click

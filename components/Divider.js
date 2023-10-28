@@ -4,7 +4,8 @@ import { type } from '../types.js'
 
 function createDivider () {
   /**
-   * Divider Line - Dumb Component.
+   * Divider Line - Pure Component.
+   * @see https://webframe.app/docs/ui/components/Divider
    */
   function Divider ({className, ...props}) {
     return <span className={cn(className, 'divider')} {...props} />

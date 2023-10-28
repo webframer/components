@@ -8,7 +8,9 @@ import { renderProp } from '../react/render.js'
 import { TooltipPropTypes } from '../types.js'
 
 /**
- * Tooltip Component
+ * Tooltip Component.
+ * @see https://webframe.app/docs/ui/components/Tooltip
+ *
  * todo: component improvement - move tooltip as parent element scrolls
  * todo: component improvement - only open tooltip by default if the parent element is in view
  * todo: component improvement 3 - RTL position/align support

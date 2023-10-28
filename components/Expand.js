@@ -10,6 +10,8 @@ const ExpandState = React.createContext({})
 
 /**
  * Expand/Collapse - Accessible Component.
+ * @see https://webframe.app/docs/ui/components/Expand
+ *
  * Multiple Expand Components can be used to create an Accordion.
  * @example:
  *     import { Expand, ExpandPanel, ExpandTab } from '@webframer/ui'

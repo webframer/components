@@ -11,6 +11,7 @@ import { useTooltip } from './Tooltip.js'
 function createButton () {
   /**
    * Button - Pure Component.
+   * @see https://webframe.app/docs/ui/components/Button
    */
   function Button ({
     onClick,

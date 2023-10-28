@@ -14,43 +14,9 @@ import { useTooltip } from './Tooltip.js'
  */
 export function createView (defaultProp) {
   /**
-   * View Layout - Pure Component.
-   * With default `display: flex` in column/row style
-   * (to replace browser's `<div>` with a platform-agnostic component for React Native, etc.)
-   *
-   * @param {object} o - props
-   * @param [o.row]
-   * @param [o.col]
-   * @param [o.grid]
-   * @param [o.fill]
-   * @param [o.reverse]
-   * @param [o.rtl]
-   * @param [o.left]
-   * @param [o.right]
-   * @param [o.top]
-   * @param [o.bottom]
-   * @param [o.center]
-   * @param [o.middle]
-   * @param [o.sound]
-   * @param {string} [o.className]
-   * @param [o.children]
-   * @param [o.childBefore]
-   * @param [o.childAfter]
-   * @param [o.preventOffset]
-   * @param [o._ref]
-   * @param [o.scroll]
-   * @param [o.scrollClass]
-   * @param [o.scrollStyle]
-   * @param [o.scrollAlongDirectionOnly]
-   * @param [o.scrollRef]
-   * @param [o.scrollProps]
-   * @param [o.scrollOffset]
-   * @param [o.scrollOverflowProps]
-   * @param [o.scrollReversed]
-   * @param [o.[props: string]]
-   * @param [ref]
-   * @returns {JSX.Element}
-   * @constructor
+   * View Layout - Pure Component
+   * (to replace browser's `<div>` with a platform-agnostic component for React Native, etc.).
+   * @see https://webframe.app/docs/ui/components/View
    */
   function View ({
     row, col = !(row), grid, fill, reverse, rtl,

@@ -5,7 +5,8 @@ import { type } from '../types.js'
 
 function createSpacer () {
   /**
-   * Spacer - Dumb Component
+   * Spacer - Pure Component
+   * @see https://webframe.app/docs/ui/components/Spacer
    *
    * @param {{
    *    className?: string,
