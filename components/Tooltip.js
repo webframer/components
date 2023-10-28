@@ -11,8 +11,6 @@ import { TooltipPropTypes } from '../types.js'
  * Tooltip Component.
  * @see https://webframe.app/docs/ui/components/Tooltip
  *
- * todo: component improvement - move tooltip as parent element scrolls
- * todo: component improvement - only open tooltip by default if the parent element is in view
  * todo: component improvement 3 - RTL position/align support
  *
  * Logic:
@@ -74,7 +72,10 @@ export function Tooltip ({
       if (Date.now() - self.canceledOpen < delay) return
       if (onOpen) onOpen.call(this, e, self)
       if (e.defaultPrevented) return
-      self.setState({prerender: true, style: {bottom: 0, right: 0}})
+      self.setState({prerender: true, style: {bottom: 0, right: 0}}, () => {
+        // https://stackoverflow.com/questions/24270036/listening-to-all-scroll-events-on-a-page
+        subscribeTo('scroll', self.onScrollPosition, true, document)
+      })
       // ^ first prerender to compute dimensions for positioning
       // (must have bottom + right positions set to work within scroll).
       // The actual opening is called within useLayoutEffect to ensure the prerender has finished.
@@ -87,7 +88,9 @@ export function Tooltip ({
       const {onClose} = self.props
       if (onClose) onClose.call(this, e, self)
       if (e.defaultPrevented) return
-      self.setState({open: false, prerender: false, style: null})
+      self.setState({open: false, prerender: false, style: null}, () => {
+        unsubscribeFrom('scroll', self.onScrollPosition, true, document)
+      })
     }
 
     // Handle click events
@@ -154,7 +157,7 @@ export function Tooltip ({
     }, 16) // debounce to capture cursor transition to tooltip
 
     // Handle pointer enter events on the Tooltip
-    self.enterTooltip = function (e) {
+    self.onEnterTooltip = function (e) {
       self.hasTooltipHover = true
     }
 
@@ -170,7 +173,7 @@ export function Tooltip ({
      *    => it is also the desired UX for multilevel nested dropdowns that open on `hover`,
      *       where pointer leaving the nested dropdown should keep parent dropdowns open.
      */
-    self.leaveTooltip = debounce(function ({clientX, clientY}) {
+    self.onLeaveTooltip = debounce(function ({clientX, clientY}) {
       if (self.node) {
         // Using `hitNodeFrom` is not reliable over scrollbar, use coordinates instead
         const {top, left, right, bottom} = self.node.getBoundingClientRect()
@@ -182,6 +185,16 @@ export function Tooltip ({
       self.hasTooltipHover = false
       if (!self.hasFocus && !self.hasHover) self.close.apply(this, arguments)
     }, 16)
+
+    // Handle scroll events to sync Tooltip position
+    self.onScrollPosition = function (e) {
+      if (self.isPendingPositionUpdate || !e.target || !e.target.contains(self.parent)) return
+      self.isPendingPositionUpdate = true
+      requestAnimationFrame(() => {
+        self.setState(positionFrom(self.node, self.parent, self.props))
+        self.isPendingPositionUpdate = false
+      })
+    }
   }
   self.openDelayed = useMemo(() => debounce(self.open, delay), [delay])
   self.props = arguments[0]
@@ -427,16 +440,24 @@ function eventsFromProp (on) {
  *    align: string - desired initially
  *    position: string - desired initially
  *    offset: number - to account for Tooltip offset position and pointer (ex. triangle)
- * @returns {{position: string, style: object}} state - props for optimum placement
+ * @returns {{position: string, style: object}|{}} state - props for optimum placement
  */
 function positionFrom (node, parentElement, {align, position, offset = 0}) {
+  // safety check because requestAnimationFrame may call this function after unmounting
+  if (!node || !node.children || !node.children[0]) return {}
+
+  const {top, left, bottom, right, width, height} = parentElement.getBoundingClientRect()
+  const {innerWidth, innerHeight} = window
+
+  // Hide Tooltip if the parent element is completely out of view
+  if (top > innerHeight || bottom < 0 || left > innerWidth || right < 0)
+    return {position: 'none', style: {display: 'none'}}
+
   // The outer div can have 0 height if Tooltip children is an inline element.
   // Use .tooltip__content div to guarantee correct Tooltip dimensions.
   // offsetHeight/offsetWidth dimensions may be incorrect within scroll, make sure the outer div has
   // fixed bottom and right positions set to 0 during the prerender phase.
   const {offsetHeight, offsetWidth} = node.children[0] // tooltip content
-  const {top, left, bottom, right, width, height} = parentElement.getBoundingClientRect()
-  const {innerWidth, innerHeight} = window
   const _bottom = innerHeight - Math.max(0, top + height) // available space from the edge of viewport
   const _right = innerWidth - Math.max(0, left + width) // available space from the edge of viewport
   position = positionComputed(position, top, _bottom, left, _right, offsetWidth, offsetHeight, offset)
