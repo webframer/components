@@ -468,6 +468,7 @@ function positionFrom (node, parentElement, {align, position, offset = 0}) {
   switch (position) {
     case 'left':
     case 'right':
+      const body = document.body.getBoundingClientRect() // to offset scrollbar
       style = {}
       switch (align) {
         case 'start':
@@ -481,8 +482,10 @@ function positionFrom (node, parentElement, {align, position, offset = 0}) {
           style.top = Math.max(0, top + height / 2 - offsetHeight / 2)
       }
       style.top = Math.min(innerHeight - offsetHeight, style.top) // prevent bottom clipping
-      if (position === 'left') style.right = innerWidth - left
-      if (position === 'right') style.left = right
+      if (position === 'left')
+        style.right = (body.width < innerWidth && !body.left ? body.width : innerWidth) - left
+      if (position === 'right')
+        style.left = right - (body.width < innerWidth ? body.left : 0)
       return {position, style}
     case 'bottom':
     case 'top':
@@ -500,6 +503,9 @@ function positionFrom (node, parentElement, {align, position, offset = 0}) {
           style.left = Math.max(0, left + width / 2 - offsetWidth / 2)
       }
       style.left = Math.min(innerWidth - offsetWidth, style.left) // prevent right clipping
+      // There is no way to find out if document.body has a horizontal scrollbar that needs offset,
+      // because body can have height bigger than viewport's innerHeight, but still have scrollbar.
+      // => since that is a rare use case, ignore it for now.
       if (position === 'bottom') style.top = bottom
       if (position === 'top') style.bottom = innerHeight - top
       return {position, style}
