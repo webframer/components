@@ -1,0 +1,140 @@
+import { ips } from '@webframer/js'
+import { Button, Icon, Input, Spacer, Switch, Text, View } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
+import PropsTable from '@webframer/ui/containers/PropsTable.js'
+import { useState } from 'react'
+
+# Switch
+
+A toggle input to switch between boolean values (true or false), or a pair of values with two possible outcomes.
+
+Switch input can have any internal value assigned to checked and unchecked states, with optional text labels or custom UI.
+
+It is part of [Universal Input API](/docs/ui/components/Input), with input data `format`, `parse`, `normalize` and event action handlers.
+
+## Prop Types
+
+<PropsTable component={Switch} />
+
+## Examples
+
+### Basic Usage
+
+<CodeExample>
+  <Switch />
+</CodeExample>
+
+<CodeExample desc='Universal Input'>
+  <Input type='switch' value={true} />
+</CodeExample>
+
+### Switch Labels
+
+<CodeExample desc='Unchecked Label'>
+  <Switch uncheckedLabel='NO' />
+</CodeExample>
+
+<CodeExample desc='Checked Label'>
+  <Switch checkedLabel='YES' value={true} />
+</CodeExample>
+
+<CodeExample desc='Toggle Label'>
+  <Switch className='gap' label='Label' />
+</CodeExample>
+
+<CodeExample desc='Reverse Label'>
+  <Switch className='gap' label='Label' reverse />
+</CodeExample>
+
+<CodeExample desc='Custom Labels'>
+  <Switch className='gap'
+          label={<Text><Icon name='im/switch' /> Switch</Text>}
+          checkedLabel={<Text><Icon name='md/light-mode' /> ON</Text>}
+          uncheckedLabel={<Text><Icon name='hi2/moon' /> OFF</Text>}
+          value={true} />
+</CodeExample>
+
+### Toggle Sizes
+
+<CodeExample>
+  <View className='gap'>
+    <Switch className='font-smallest' label='smallest' value />
+    <Switch className='font-smaller' label='smaller' value />
+    <Switch className='font-small' label='small' value />
+    <Switch label='base' value />
+    <Switch className='font-large' label='large' value />
+    <Switch className='font-larger' label='larger' value />
+    <Switch className='font-largest gap' label='largest' value />
+  </View>
+</CodeExample>
+
+### Input States
+
+<CodeExample desc='Disabled'>
+  <Switch disabled uncheckedLabel='disabled' />
+  <Spacer />
+  <Switch disabled checkedLabel='disabled' value={true} />
+</CodeExample>
+
+<CodeExample desc='Read only'>
+  <Switch readonly uncheckedLabel='readonly' />
+  <Spacer />
+  <Switch readonly checkedLabel='readonly' value={true} />
+</CodeExample>
+
+<CodeExample desc='Loading'>
+  <Switch loading uncheckedLabel='loading' />
+  <Spacer />
+  <Switch loading checkedLabel='loading' value={true} />
+</CodeExample>
+
+### Input Values
+
+<CodeExample desc='Checked Initially'>
+  <Switch defaultValue={true}
+          row={false} className='gap' label='Default Value' />
+</CodeExample>
+
+<CodeExample desc='Controlled State'>
+  <Switch controlledValue value={true}
+          row={false} className='gap' label='Controlled Value' />
+</CodeExample>
+
+<CodeExample desc='Sync Value with Uncontrolled State'>
+  {() => {
+    const [value, setValue] = useState(true)
+    return (
+      <View className='center gap'>
+        <Switch value={value}
+                row={false}
+                className='gap'
+                label='Uncontrolled Synced Value'
+                uncheckedLabel='Toggle' />
+        <Button onClick={() => setValue(!value)}>👆🏽 Toggle Value</Button>
+      </View>
+    )
+  }}
+</CodeExample>
+
+### Event Handlers
+
+<CodeExample desc='On Change Callback'>
+  <Switch uncheckedLabel='Toggle to fire event' onChange={(e, value) => alert(
+    ips('onChange(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
+  )} />
+</CodeExample>
+
+<CodeExample desc='On Focus Callback'>
+  <Switch uncheckedLabel='Focus to fire event' onFocus={(e, value) => {
+    // cannot alert() because after alert input gets focus again
+    console.log(ips('onFocus(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value}))
+  }} />
+</CodeExample>
+
+<CodeExample desc='On Blur Callback'>
+  <Switch uncheckedLabel='Blur to fire event' onBlur={(e, value) => alert(
+    ips('onBlur(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
+  )} />
+</CodeExample>
+
+### Format / Parse / Normalize

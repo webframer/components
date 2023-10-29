@@ -4,6 +4,7 @@ import Icon from '../components/Icon.js'
 import Switch from '../components/Switch.js'
 import Text from '../components/Text.js'
 import { Button, cn, Expand, extractProps, Markdown, mdJSX, Row, type, View } from '../index.js'
+import { renderProp } from '../react/render.js'
 
 /**
  * Renders `children` along with its source code representation
@@ -46,7 +47,7 @@ export function CodeExample ({children, className, source = '', desc, ...view}) 
           )}
         </Expand>
         <View className='CodeExample__preview fill middle center padding-largest' rtl={rtl}>
-          {children}
+          {renderProp(children, {props: arguments[0]})}
         </View>
       </Row>
     </View>
@@ -55,7 +56,7 @@ export function CodeExample ({children, className, source = '', desc, ...view}) 
 
 CodeExample.propTypes = {
   // Example source code
-  children: type.Node.isRequired,
+  children: type.NodeOrFunction.isRequired,
   // Description text - default is "Example"
   desc: type.String,
   // `children` as literal source code string for documentation

@@ -26,10 +26,10 @@ import { extractProps } from './View.js'
  *  9. Sticky placeholder that persists as user enters text
  *  10. todo: improvement - Floating Label style
  */
-export function InputNative ({className, error, loading, ...props}) {
+export function InputNative ({className, error, ...props}) {
   const viewProps = extractProps(props, {childBefore: false, childAfter: false})
   let {
-    active, compact, disabled, readonly,
+    active, compact, disabled, loading, readonly,
     childBefore, childAfter, id, icon, iconEnd, input, label, prefix, suffix, self,
   } = useInputSetup(props)
 
@@ -100,7 +100,7 @@ export function renderInputLabel (label, self, {required, className = 'input__la
  *  function MyComponent ({className, float, error, loading, ...props}) {
  *    const viewProps = extractViewProps(props)
  *    let {
- *      active, compact, disabled, readonly,
+ *      active, compact, disabled, loading, readonly,
  *      childBefore, childAfter, id, icon, iconEnd, label, prefix, suffix, input, self,
  *    } = useInputSetup(props)
  *  }
@@ -111,7 +111,7 @@ export function useInputSetup ({
   type, id = useId(),
   compact, controlledValue, float, format = formatByType[type], parse = parseByType[type], normalize,
   icon, iconEnd, label, prefix, suffix, onRemove, noSpellCheck = type === 'password', stickyPlaceholder,
-  childBefore, childAfter, inputRef, initialValues: _1,
+  loading, childBefore, childAfter, inputRef, initialValues: _1,
   ...input // rest props should only contain `input` props
 }, enabled = inputEnabledOptions) {
   input.id = id
@@ -228,11 +228,13 @@ export function useInputSetup ({
     )
 
   // Render Props ----------------------------------------------------------------------------------
-  const {disabled, readOnly: readonly} = input
+  const {readOnly: readonly} = input
   if (noSpellCheck) Object.assign(input, noSpellCheckProps)
+  if (loading) input.disabled = true
+  const disabled = input.disabled
 
   return {
-    active, compact, disabled, readonly, hasValue, value,
+    active, compact, disabled, loading, readonly, hasValue, value,
     childBefore, childAfter, id, icon, iconEnd, label,
     prefix, suffix, stickyPlaceholder, input, self,
   }
