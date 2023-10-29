@@ -49,7 +49,7 @@ import { TooltipPropTypes } from '../types.js'
  *    => Need to capture mouse enter event on the tooltip itself with debounce to check open state.
  */
 export function Tooltip ({
-  position, on: onEvent, offset, open, onOpen, onClose, onMount, delay, embedded, style, ...props
+  position, on: onEvent, offset, openInitially, onOpen, onClose, onMount, delay, embedded, style, ...props
 }) {
   const ref = useRef(null) // empty span container embedded inside the parent element
   const [self, state] = useInstance({position}) // initially always closed to prerender
@@ -242,9 +242,9 @@ export function Tooltip ({
   }, [on])
   useEffect(() => {
     self.mounted = true
-    const {onMount, open} = self.props
+    const {onMount, openInitially} = self.props
     if (onMount) onMount(self)
-    if (open) self.open(new Event('mount')) // Show Tooltip on mount
+    if (openInitially) self.open(new Event('mount')) // Show Tooltip on mount
     return () => {self.willUnmount = true}
   }, [])
   useIsomorphicLayoutEffect(() => {

@@ -535,8 +535,8 @@ export const TooltipPropTypes = {
   embedded: type.Boolean,
   // Tooltip pointer offset from the parent element, default is `16`
   offset: type.Px,
-  // Whether to show Tooltip by default
-  open: type.Boolean,
+  // Whether to show Tooltip initially
+  openInitially: type.Boolean,
   // Handler(event, self: object) => void - before Tooltip opens
   onOpen: type.Function,
   // Handler(event, self: object) => void - before Tooltip closes
