@@ -5,7 +5,8 @@ import { type } from '../types.js'
 
 function createBadge () {
   /**
-   * Badge Counter Component
+   * Badge Counter Component.
+   * @see https://webframe.app/docs/ui/components/Badge
    */
   function Badge ({
     count,

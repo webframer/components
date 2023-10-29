@@ -1,0 +1,37 @@
+import { Badge, Icon, View } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
+import PropsTable from '@webframer/ui/containers/PropsTable.js'
+
+# Badge
+
+An element to display shortened numbers - usually an alert or notification count on top of menu icons.
+
+The count number is shortened to `maxDigits` length by rounding to the last retained digit. Additionally, it may have a corresponding letter appended.
+
+## Prop Types
+
+<PropsTable component={Badge} />
+
+## Examples
+<CodeExample>
+  <Badge count={1} />
+</CodeExample>
+
+<CodeExample desc='Badge for a number of 1000'>
+  <Badge count={1000} />
+</CodeExample>
+
+<CodeExample desc='Badge for a number of 1234567'>
+  <Badge count={1234567} />
+</CodeExample>
+
+<CodeExample desc='Badge for 1234567 with max one digit'>
+  <Badge count={1234567} maxDigits={1} />
+</CodeExample>
+
+<CodeExample desc='Custom Badge style'>
+  <View className='padding-small radius bg-shade'>
+    <Icon name='bs/chat-dots' className='font-largest' />
+    <Badge count={5} className='bg-secondary position-top-right margin-smallest' />
+  </View>
+</CodeExample>

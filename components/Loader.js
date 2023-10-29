@@ -8,14 +8,15 @@ import Text from './Text.js'
 import { extractProps, View } from './View.js'
 
 /**
- * Loading Overlay - Pure Component
+ * Loading Overlay - Pure Component.
+ * @see https://webframe.app/docs/ui/components/Loader
  */
 export function Loader ({
-  loading = true,
+  loading,
   size,  // Enum
   className,
   iconClass,
-  transparent = false,
+  transparent,
   children,
   ...props
 }) {
@@ -28,6 +29,10 @@ export function Loader ({
       )}
     </View>
   )
+}
+
+Loader.defaultProps = {
+  loading: true,
 }
 
 Loader.propTypes = {
