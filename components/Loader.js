@@ -33,10 +33,14 @@ export function Loader ({
 Loader.propTypes = {
   // Whether to show this Component or not
   loading: type.Boolean,
-  // Spinner size
+  // Optional loading text or custom UI to render as loading indicator
+  children: type.NodeOrFunction,
+  // Loading icon size (ie. the spinner)
   size: type.SizeModifier,
-  className: type.ClassName,
+  // Class name for the loading icon
   iconClass: type.ClassName,
+  className: type.ClassName,
+  style: type.Style,
   // ...other props to pass to Spinner
 }
 

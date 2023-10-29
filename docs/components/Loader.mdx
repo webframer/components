@@ -1,0 +1,56 @@
+import { Loader, View } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
+import PropsTable from '@webframer/ui/containers/PropsTable.js'
+
+export const style = {width: '12em', height: '12em'}
+
+# Loader
+
+An indicator to show loading state. By default, it uses a timeless animated spinner that is recognisable by most people in the world.
+
+A loading spinning icon is great for usability and accessibility because it is commonly found in all kind of user interfaces.
+
+Additionally, you can set a personalised text message to reduce user fatigue.
+
+## Prop Types
+
+<PropsTable component={Loader} />
+
+## Examples
+<CodeExample>
+  <Loader />
+</CodeExample>
+
+<CodeExample desc='Blinking Loading Text'>
+  <View fill style={{minHeight: 160}}>
+    <Loader>Please wait...</Loader>
+  </View>
+</CodeExample>
+
+<CodeExample desc='Loading Spinner Sizes'>
+  <View style={style}>
+    <Loader size='smallest'>smallest</Loader>
+  </View>
+  <View style={style}>
+    <Loader size='smaller'>smaller</Loader>
+  </View>
+  <View style={style}>
+    <Loader size='small'>small</Loader>
+  </View>
+  <View style={style}>
+    <Loader>base</Loader>
+  </View>
+  <View style={style}>
+    <Loader size='large'>large</Loader>
+  </View>
+  <View style={style}>
+    <Loader size='larger'>larger</Loader>
+  </View>
+  <View style={style}>
+    <Loader size='largest'>largest</Loader>
+  </View>
+</CodeExample>
+
+<CodeExample desc='Custom Loader style'>
+  <Loader iconClass='color-primary' />
+</CodeExample>
