@@ -1,0 +1,84 @@
+import Link from '@webframer/kit/router/next/Link.jsx'
+import { Input, inputControls, Text } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/views/CodeExample.js'
+import PropsTable from '@webframer/ui/views/PropsTable.js'
+import { useState } from 'react'
+
+export function InputComponents ({controls}) {
+  const [, forceUpdate] = useState(0)
+  return (
+    <ul>
+      {Object.entries(controls).map(([name, Control]) => {
+        if (Control instanceof Promise) {
+          Control.then(() => forceUpdate(Date.now()))
+          Control = null
+        }
+        return (
+          <li key={name}>
+            <Text><code>{name}</code> → </Text>
+            {Control && <Link className='a' to={'/docs/ui/inputs/' + Control.name}>{Control.name}</Link>}
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
+
+# Input
+
+A universal Input component that handles user inputs of all types, including using your own custom UI.
+
+This component is a thin wrapper that delegates rendering to other input components.
+
+It supports the [Universal Input API](/docs/ui/inputs#universal-input-api) and adds extra elements, like help info and error messages, for a consistent user experience.
+
+## Prop Types
+
+<PropsTable component={Input} />
+
+## Examples
+
+### Basic Usage
+
+<CodeExample>
+  <Input />
+</CodeExample>
+
+<CodeExample desc='Number Input'>
+  <Input type='number' value={5} />
+</CodeExample>
+
+<CodeExample desc='Switch Input'>
+  <Input type='switch' value={true} />
+</CodeExample>
+
+## Custom Input Type
+
+Webframe universal `Input` supports rendering with any custom input component. Add as many components as you like without worrying about bundle size. Webframe uses automatic code splitting by lazy loading them on client side.
+
+### Setup
+
+```js
+import { dynamicImport } from '@webframer/js'
+import { Input } from '@webframer/ui'
+
+Input.defaultProps.controls = dynamicImport({
+  'MyCustomInput': () => import (`./MyCustomInput.jsx`),
+})
+```
+
+### Usage
+
+```jsx
+import { Input } from '@webframer/ui'
+
+function Form () {
+  return <Input type='MyCustomInput' />
+}
+```
+
+### Built-in Types
+
+In addition to native browser input types (ie. `text`, `number`, `email`, etc.), these are built-in types with corresponding components:
+<InputComponents controls={inputControls} />

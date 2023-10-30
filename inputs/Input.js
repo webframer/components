@@ -84,6 +84,8 @@ Input.defaultProps = {
 }
 
 Input.propTypes = {
+  // Native input `type` attribute, also a key identifier for delegated input components. See [examples](#types).
+  type: type.String,
   // Unique input identifier, default is string created from React.useId()
   id: type.String,
   // Help information to show after the Input
@@ -92,12 +94,13 @@ Input.propTypes = {
   error: type.NodeOrFunction,
   // Whether to enable input info/error animation transition (or expandCollapse transition options)
   helpTransition: type.OneOf([type.Boolean, type.Object]),
-  // Tooltip props or value to display as tooltip
-  tooltip: type.Tooltip,
+  // Whether to make input take only the minimum content width necessary
+  compact: type.Boolean,
   // Map of Input Control components by their `type` string to use for rendering
   controls: type.ObjectOf(type.OneOf([type.JSXElementType, type.Promise])),
   // Props to pass to Input Control component
   controlProps: type.Object,
+  tooltip: type.Tooltip,
   // ...other native HTML `<input/>` props
 }
 
