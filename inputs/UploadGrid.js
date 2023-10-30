@@ -4,14 +4,14 @@ import { canAccept, FILE, previewSize, previewSizes } from '@webframer/js/file.j
 import { closestDivisor, shortNumber } from '@webframer/js/number.js'
 import cn from 'classnames'
 import React, { useEffect } from 'react'
+import Image from '../components/Image.js'
+import Loader from '../components/Loader.js'
+import { Row } from '../components/Row.js'
+import Text from '../components/Text.js'
+import { View } from '../components/View.js'
 import { useInstance, useSyncedState } from '../react/hooks.js'
 import { type } from '../types.js'
-import Image from './Image.js'
-import Loader from './Loader.js'
-import { Row } from './Row.js'
-import Text from './Text.js'
 import { Upload } from './Upload.js'
-import { View } from './View.js'
 
 /**
  * Multiple Files Uploader in Grid Layout with optional File preview.

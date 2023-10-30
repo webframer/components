@@ -1,15 +1,15 @@
 import { __CLIENT__, isEqual, isObject, isString, numericPattern, parseNumberLocale } from '@webframer/js'
 import cn from 'classnames'
 import React, { useId, useState } from 'react'
+import Icon from '../components/Icon.js'
+import { Row } from '../components/Row.js'
+import Text from '../components/Text.js'
+import { extractProps } from '../components/View.js'
 import { assignRef, toReactProps } from '../react.js'
 import { useCompactStyle, useInputValue, useInstance } from '../react/hooks.js'
 import { renderProp } from '../react/render.js'
 import { type } from '../types.js'
-import Icon from './Icon.js'
 import Label from './Label.js'
-import { Row } from './Row.js'
-import Text from './Text.js'
-import { extractProps } from './View.js'
 
 /**
  * Wrapper for Native HTML Input, such as: 'text', 'number', 'email', etc. where value is text.

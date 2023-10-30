@@ -1,15 +1,15 @@
 import { _, __CLIENT__, hasListValue, ips, l, shortNumber, SIZE_KB, toListTotal, translate } from '@webframer/js'
 import cn from 'classnames'
 import React, { useId } from 'react'
+import Icon from '../components/Icon.js'
+import Loader from '../components/Loader.js'
+import Text from '../components/Text.js'
+import { View } from '../components/View.js'
 import { assignRef, toReactProps, useInputValue, useInstance } from '../react.js'
 import { renderProp } from '../react/render.js'
 import { type } from '../types.js'
 import { hitNodeFrom } from '../utils/element.js'
-import Icon from './Icon.js'
 import { Label } from './Label.js'
-import Loader from './Loader.js'
-import Text from './Text.js'
-import { View } from './View.js'
 
 /**
  * File Uploader Input component that works with native HTML form submit.

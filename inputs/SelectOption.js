@@ -1,11 +1,11 @@
 import { ips, isFunction, isObject, TIME_DURATION_INSTANT, toList, trimSpaces } from '@webframer/js'
 import cn from 'classnames'
 import React, { useCallback, useMemo } from 'react'
+import { Row } from '../components/Row.js'
+import Text from '../components/Text.js'
 import { renderProp } from '../react/render.js'
 import { type } from '../types.js'
 import { onEventStopPropagation } from '../utils/interaction.js'
-import { Row } from './Row.js'
-import Text from './Text.js'
 
 // Select Dropdown Option Item
 export function SelectOption ({

@@ -1,12 +1,12 @@
 import { dynamicImport, isObject } from '@webframer/js'
 import cn from 'classnames'
 import React, { useId, useState } from 'react'
+import { extractProps, View } from '../components/View.js'
 import { useExpandCollapse, usePreviousProp } from '../react.js'
 import { renderProp } from '../react/render.js'
 import { type } from '../types.js'
 import { InputNative } from './InputNative.js'
 import Label from './Label.js'
-import { extractProps, View } from './View.js'
 
 // Default Input `controls` map of Components by input `type` string
 export const inputControls = dynamicImport({

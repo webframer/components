@@ -1,13 +1,13 @@
 import { get, isCollection, isEmpty, toList } from '@webframer/js'
 import cn from 'classnames'
 import React, { useMemo } from 'react'
+import { DropdownMenu } from '../components/DropdownMenu.js'
+import Icon from '../components/Icon.js'
+import Text from '../components/Text.js'
 import { useInstance } from '../react.js'
 import { type } from '../types.js'
-import { DropdownMenu } from './DropdownMenu.js'
-import Icon from './Icon.js'
 import { Select } from './Select.js'
 import { optionTooltipProps } from './SelectOption.js'
-import Text from './Text.js'
 
 /**
  * Nested Dropdown Selection, where `options` is a deeply nested collection (object or array),

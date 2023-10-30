@@ -1,10 +1,10 @@
 import { isNumber } from '@webframer/js'
 import cn from 'classnames'
 import React, { useMemo } from 'react'
+import { Scroll } from '../components/Scroll.js'
+import { VirtualList } from '../components/VirtualList.js'
 import { renderProp } from '../react/render.js'
-import { Scroll } from './Scroll.js'
 import { useSelectionOptionProps } from './SelectOption.js'
-import { VirtualList } from './VirtualList.js'
 
 /**
  * Higher Order Component to render Select Options.

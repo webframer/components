@@ -1,10 +1,10 @@
 import cn from 'classnames'
 import React from 'react'
+import { Row } from '../components/Row.js'
+import { extractProps } from '../components/View.js'
 import { type } from '../types.js'
 import { toTextHeight, toTextHeightDebounce } from '../utils/element.js'
 import { useInputSetup } from './InputNative.js'
-import { Row } from './Row.js'
-import { extractProps } from './View.js'
 
 /**
  * Wrapper for Native HTML `<textarea>`.

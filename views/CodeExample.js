@@ -1,9 +1,9 @@
 import { _, l, translate } from '@webframer/js'
 import React, { useCallback, useMemo, useState } from 'react'
 import Icon from '../components/Icon.js'
-import Switch from '../components/Switch.js'
 import Text from '../components/Text.js'
 import { Button, cn, Expand, extractProps, Markdown, mdJSX, Row, type, View } from '../index.js'
+import Switch from '../inputs/Switch.js'
 import { renderProp } from '../react/render.js'
 
 /**

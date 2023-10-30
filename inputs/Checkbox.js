@@ -1,10 +1,10 @@
 import cn from 'classnames'
 import React, { Fragment, useId } from 'react'
+import { Row } from '../components/Row.js'
+import Text from '../components/Text.js'
+import View from '../components/View.js'
 import { type } from '../types.js'
 import Label from './Label.js'
-import { Row } from './Row.js'
-import Text from './Text.js'
-import View from './View.js'
 
 /**
  * Checkbox Input Component.

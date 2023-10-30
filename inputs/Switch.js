@@ -1,16 +1,16 @@
 import cn from 'classnames'
 import React from 'react'
+import Icon from '../components/Icon.js'
+import { Loader } from '../components/Loader.js'
+import { Row } from '../components/Row.js'
+import Spacer from '../components/Spacer.js'
+import { extractProps } from '../components/View.js'
 import { useExpandCollapse } from '../react.js'
 import { renderProp } from '../react/render.js'
 import { type } from '../types.js'
 import checkbox from './Checkbox.js'
-import Icon from './Icon.js'
 import { renderInputLabel, useInputSetup } from './InputNative.js'
 import Label from './Label.js'
-import { Loader } from './Loader.js'
-import { Row } from './Row.js'
-import Spacer from './Spacer.js'
-import { extractProps } from './View.js'
 
 /**
  * Switch (Toggle) Input Component
@@ -73,7 +73,7 @@ Switch.propTypes = {
   controlledValue: type.Boolean,
   // Initial value for uncontrolled checked or unchecked state
   defaultValue: type.Any,
-  // Label to show before the switch (or after Switch with `reverse` true)
+  // Label to show before the Switch (or after Switch with `reverse` true)
   label: type.NodeOrFunction,
   // UI to show for checked state inside the Switch toggle, defaults to a checkmark icon
   checkedLabel: type.NodeOrFunction,

@@ -1,0 +1,47 @@
+import Checkbox from 'view/assets/Checkbox.js'
+import Datepicker from 'view/assets/Datepicker.js'
+import Input from 'view/assets/Input.js'
+import Radio from 'view/assets/Radio.js'
+import Row from 'view/assets/Row.js'
+import Select from 'view/assets/Select.js'
+import Slider from 'view/assets/Slider.js'
+import Switch from 'view/assets/Switch.js'
+import Upload from 'view/assets/Upload.js'
+import AssetLink from 'view/components/AssetLink.jsx'
+import 'view/dist/editor.css'
+
+export const uri = '/docs/ui/inputs/'
+
+# Webframe UI Inputs
+
+Webframe's Universal Input API allows the use one a singled unified Input component for all user inputs.
+## Components
+
+<Row className='full-width gap wrap'>
+  <AssetLink pending component={Input} uri={uri} />
+  <AssetLink pending component={Select} uri={uri} />
+  <AssetLink pending component={Datepicker} uri={uri} />
+  <AssetLink pending component={Upload} uri={uri} />
+  <AssetLink pending component={Checkbox} uri={uri} />
+  <AssetLink pending component={Radio} uri={uri} />
+  <AssetLink component={Switch} uri={uri} />
+  <AssetLink pending component={Slider} uri={uri} />
+</Row>
+
+## Universal Input API
+
+### UX Patterns
+
+### Event Handlers
+#### On Change
+#### On Focus
+#### On Blur
+
+### Value Functions
+#### Format
+#### Parse
+#### Normalize
+
+### Custom Setup
+#### Dynamic Import
+#### Self Instance

@@ -1,16 +1,16 @@
 import { ips } from '@webframer/js'
 import { Button, Icon, Input, Spacer, Switch, Text, View } from '@webframer/ui'
-import { CodeExample } from '@webframer/ui/containers/CodeExample.js'
-import PropsTable from '@webframer/ui/containers/PropsTable.js'
+import { CodeExample } from '@webframer/ui/views/CodeExample.js'
+import PropsTable from '@webframer/ui/views/PropsTable.js'
 import { useState } from 'react'
 
 # Switch
 
-A toggle input to switch between boolean values (true or false), or a pair of values with two possible outcomes.
+A toggle input to switch between boolean values (`true` or `false`), or any pair of values with two possible outcomes.
 
-Switch input can have any internal value assigned to checked and unchecked states, with optional text labels or custom UI.
+Switch input can have any internal value assigned to **checked** and **unchecked** states, with optional text labels or custom UI.
 
-It is part of [Universal Input API](/docs/ui/components/Input), with input data `format`, `parse`, `normalize` and event action handlers.
+It is part of [Universal Input API](/docs/ui/inputs#universal-input-api), with input data `format`, `parse`, `normalize` and event action handlers.
 
 ## Prop Types
 
@@ -46,7 +46,7 @@ It is part of [Universal Input API](/docs/ui/components/Input), with input data 
   <Switch className='gap' label='Label' reverse />
 </CodeExample>
 
-<CodeExample desc='Custom Labels'>
+<CodeExample desc='Custom UI Labels'>
   <Switch className='gap'
           label={<Text><Icon name='im/switch' /> Switch</Text>}
           checkedLabel={<Text><Icon name='md/light-mode' /> ON</Text>}

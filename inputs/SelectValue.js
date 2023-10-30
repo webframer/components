@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react'
+import Icon from '../components/Icon.js'
 import { onEventStopPropagation } from '../utils/interaction.js'
-import Icon from './Icon.js'
 import { InputView } from './InputView.js'
 
 /**

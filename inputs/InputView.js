@@ -2,13 +2,13 @@ import { debounce, TIME_DURATION_INSTANT } from '@webframer/js'
 import { isPureKeyPress } from '@webframer/js/keyboard.js'
 import cn from 'classnames'
 import React from 'react'
+import { View } from '../components/View.js'
 import { useInputValue, useInstance } from '../react/hooks.js'
 import { renderProp } from '../react/render.js'
 import { type } from '../types.js'
 import { onEventHandler } from '../utils/interaction.js'
 import { Input } from './Input.js'
 import { Label } from './Label.js'
-import { View } from './View.js'
 
 /**
  * Input with dynamic types that switches between View (`viewType`) and Input (`type`) Control
