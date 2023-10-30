@@ -212,9 +212,11 @@ const list = []
 // These props can be mutated during the implementation
 export const selectNestedTooltipProps = {
   ...optionTooltipProps,
-  className: 'max-width-320 p-0 after:hidden divide-h--wrap scrollable',
   embedded: false,
-  position: 'right', on: ['click', 'focus', 'hover'],
+  className: 'max-width-320 p-0 after:hidden divide-h--wrap scrollable',
+  position: 'right',
+  on: ['click', 'focus', 'hover'],
+  theme: 'glass',
 }
 
 // todo: component style - move custom styling to CSS, or provide default

@@ -10,7 +10,6 @@ import { TooltipPropTypes } from '../types.js'
 /**
  * Tooltip Component.
  * @see https://webframe.app/docs/ui/components/Tooltip
- *
  * todo: component improvement 3 - RTL position/align support
  *
  * Logic:
@@ -315,7 +314,7 @@ Tooltip.defaultProps = {
   on: ['focus', 'hover'],
   offset: 16,
   position: 'top',
-  theme: 'inverted',
+  theme: 'dark',
   role: 'tooltip',
 }
 
@@ -339,14 +338,14 @@ function TooltipRender ({
     if (!on.find(e => e === 'hover')) return
     const eventArgs = [void 0, self.node]
     // noinspection JSCheckFunctionSignatures
-    subscribeTo('pointerenter', self.enterTooltip, ...eventArgs)
+    subscribeTo('pointerenter', self.onEnterTooltip, ...eventArgs)
     // noinspection JSCheckFunctionSignatures
-    subscribeTo('pointerleave', self.leaveTooltip, ...eventArgs)
+    subscribeTo('pointerleave', self.onLeaveTooltip, ...eventArgs)
     return () => {
       // noinspection JSCheckFunctionSignatures
-      unsubscribeFrom('pointerenter', self.enterTooltip, ...eventArgs)
+      unsubscribeFrom('pointerenter', self.onEnterTooltip, ...eventArgs)
       // noinspection JSCheckFunctionSignatures
-      unsubscribeFrom('pointerleave', self.leaveTooltip, ...eventArgs)
+      unsubscribeFrom('pointerleave', self.onLeaveTooltip, ...eventArgs)
     }
   }, [on])
 
