@@ -16,18 +16,6 @@ export const style = {border: '3px solid var(--primary)'}
 
 A [View](/docs/ui/components/View) container to display large list of items (thousands) without performance penalty.
 
-### Unique Features
-
-<Callout type='info' emoji=''>
-  1. List items can vary in sizes (both width and height)
-  2. No need to specify or calculate item dimensions
-  3. Grid layout support.
-</Callout>
-
-Virtual List works by only rendering the visible items in the list. As user scrolls, it pre-renders the incoming items within `renderRadius`, and stops rendering those that scroll out of view.
-
-This dynamic rendering is great for **Infinite Scroll** experience. It can support millions of rows and columns without UI lags or freezes.
-
 ## Prop Types
 
 <PropsTable component={VirtualList} />
@@ -58,3 +46,15 @@ This dynamic rendering is great for **Infinite Scroll** experience. It can suppo
                items={items10k}
                style={{maxHeight: 130, ...style}} />
 </CodeExample>
+
+## Unique Features
+
+<Callout type='info' emoji=''>
+  1. List items can vary in sizes (both width and height)
+  2. No need to specify or calculate item dimensions
+  3. Grid layout support.
+</Callout>
+
+Virtual List works by only rendering the visible items in the list. As user scrolls, it pre-renders the incoming items within `renderRadius`, and stops rendering those that scroll out of view.
+
+This dynamic rendering is great for **Infinite Scroll** experience. It can support millions of rows and columns without UI lags or freezes.

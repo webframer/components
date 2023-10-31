@@ -9,6 +9,7 @@ import cn from 'classnames'
 import Fuse from 'fuse.js'
 import React, { useEffect, useId, useMemo } from 'react'
 import Icon from '../components/Icon.js'
+import Loader from '../components/Loader.js'
 import { Row } from '../components/Row.js'
 import Text from '../components/Text.js'
 import { assignRef, toReactProps, useExpandCollapse, useInstance, useSyncedState } from '../react.js'
@@ -75,7 +76,7 @@ import SelectOptions from './SelectOptions.js'
  * @param {string[] | number[] | any[] | {value: any, text?: string, [p: string]: any}[]} o.options
  * @param [o.defaultValue]
  * @param [o.name]
- * @param [o.defaultOpen]
+ * @param [o.openInitially]
  * @param [o.searchOptions]
  * @param [o.searchNonce]
  * @param [o.focusIndex]
@@ -131,7 +132,7 @@ import SelectOptions from './SelectOptions.js'
  * @constructor
  */
 export function Select ({
-  options, defaultValue, name, defaultOpen, searchOptions, searchNonce, focusIndex,
+  options, defaultValue, name, openInitially, searchOptions, searchNonce, focusIndex,
   multiple, query, search, compact, controlledValue, excludeSelected, forceRender, fixed, upward,
   onChange, onFocus, onBlur, onRemove, onSearch, onSelect, onClickValue, onMount, queryParser,
   icon, iconEnd,
@@ -145,7 +146,7 @@ export function Select ({
   input = toReactProps(input)
   let {value = defaultValue} = input
   const [self, state] = useInstance({options, query, value, focusIndex})
-  let [{open, animating}, toggleOpen, ref] = useExpandCollapse(defaultOpen)
+  let [{open, animating}, toggleOpen, ref] = useExpandCollapse(openInitially)
   self.toggleOpen = toggleOpen
   self.open = open // for internal logic
   self.animating = animating // to prevent multiple opening when toggling Label -> input to close
@@ -465,10 +466,12 @@ export function Select ({
   focusIndex = state.focusIndex // focused selection without actual focus
   const optPos = self.optPos = self.getOptionsPosition()
   upward = self.upward = upward && (!optPos || optPos.canBeUpward || optPos.optimalPosition.bottom > 0)
-  const {disabled, readOnly: readonly} = input
+  const {readOnly: readonly} = input
   const hasValue = multiple ? hasListValue(value) : value != null
   if (hasValue) delete input.placeholder // remove for multiple search
   else if (!search && value === null) query = '' // show `null` value as placeholder
+  if (loading) input.disabled = true
+  const disabled = input.disabled
 
   // Compact Input ---------------------------------------------------------------------------------
   // Logic to get compact input width:
@@ -589,6 +592,8 @@ export function Select ({
         addOption, addOptionMsg, options, noOptionsMsg,
         focusIndex, multiple, search, query, value, optionProps,
       }} />
+
+      {loading && <Loader loading size='smaller' />}
     </Row>
   </>)
 }
@@ -642,7 +647,7 @@ Select.propTypes = {
   // Whether to lock selected value when `value` prop is given
   controlledValue: type.Boolean,
   // Whether to open options initially
-  defaultOpen: type.Boolean,
+  openInitially: type.Boolean,
   // Whether to filter out selected value from options dropdown
   excludeSelected: type.Boolean,
   // Function(value, name?, self) => any - Serializer for internal Select state value
@@ -689,7 +694,8 @@ Select.propTypes = {
   upward: type.Boolean,
   // Selected value(s) - if passed, becomes a controlled component
   value: type.Any,
-  // Function(value: any, index: number, array, self) => JSX - to render selected option
+  // Function(value: any, index: number, array, self) => JSX - to render selected option.
+  // Currently only works for `multiple` selections.
   renderSelected: type.Function,
   // Message string to display when there are no options left for multiple select, or
   // Handler(self) => string - function to render message dynamically (example: using query)

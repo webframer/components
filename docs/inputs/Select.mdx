@@ -1,0 +1,214 @@
+import { ips } from '@webframer/js'
+import { Button, Icon, Input, Select, Text, View } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/views/CodeExample.js'
+import PropsTable from '@webframer/ui/views/PropsTable.js'
+import { useState } from 'react'
+
+export const options = [1, 2, 3]
+export const optionsText = ['Alpha', 'Beta', 'Theta', 'Omega', 'Gamma']
+
+# Select
+
+A dropdown menu input with selection of choices. Options are searchable with fuzzy search.
+
+Select input can have any internal value assigned to each option, with text or custom UI labels. It supports multiple selections and can render large list of options using [Virtual List](/docs/ui/components/VirtualList).
+
+Select is part of [Universal Input API](/docs/ui/inputs#universal-input-api), with input data `format`, `parse`, `normalize` and event action handlers.
+
+## Prop Types
+
+<PropsTable component={Select} />
+
+## Examples
+
+### Basic Usage
+
+<CodeExample>
+  <Select options={options} />
+</CodeExample>
+
+<CodeExample desc='Universal Input'>
+  <Input type='select' options={options} />
+</CodeExample>
+
+<CodeExample desc='Select Label'>
+  <View>
+    <Select label='Label' options={options} />
+  </View>
+</CodeExample>
+
+<CodeExample desc='Placeholder Text'>
+  <Select placeholder='Placeholder...' options={options} />
+</CodeExample>
+
+<CodeExample desc='Expand dropdown options upward'>
+  <Select upward options={options} />
+</CodeExample>
+
+### Select Icons
+
+<CodeExample desc='Icon at the start'>
+  <Select icon='search' options={options} />
+</CodeExample>
+
+<CodeExample desc='Icon at the end'>
+  <Select iconEnd='logo' options={options} />
+</CodeExample>
+
+<CodeExample desc='Icon at both ends'>
+  <Select icon='search' iconEnd='logo' options={options} />
+</CodeExample>
+
+### Select Types
+
+<CodeExample desc='Multiple Choices'>
+  <Select multiple options={optionsText} value={['Alpha', 'Beta']} />
+</CodeExample>
+
+<CodeExample desc='Search Selection'>
+  <Select search options={optionsText} />
+</CodeExample>
+
+<CodeExample desc='Multiple Search Selection'>
+  <Select multiple search options={optionsText} value={['Alpha']} />
+</CodeExample>
+
+<CodeExample desc='Allow adding new options'>
+  <Select addOption multiple search options={optionsText} placeholder={'Enter new option...'} />
+</CodeExample>
+
+<CodeExample desc='Default Search Query'>
+  <Select query='eta' multiple search options={optionsText} />
+</CodeExample>
+
+
+### Select Sizes
+
+<CodeExample>
+  <View className='gap'>
+    <Select className='font-smallest' placeholder='smallest' options={options} />
+    <Select className='font-smaller' placeholder='smaller' options={options} />
+    <Select className='font-small' placeholder='small' options={options} />
+    <Select placeholder='base' options={options} />
+    <Select className='font-large' placeholder='large' options={options} />
+    <Select className='font-larger' placeholder='larger' options={options} />
+    <Select className='font-largest' placeholder='largest' options={options} />
+  </View>
+</CodeExample>
+
+<CodeExample desc='Compact Selection'>
+  <Select compact options={options} />
+</CodeExample>
+
+### Selection Configs
+
+<CodeExample desc='Prefix Selected Option'>
+  <Select prefix='$ ' value={1} options={options} />
+</CodeExample>
+
+<CodeExample desc='Selection Suffix'>
+  <Select suffix=' USD' value={1} options={options} />
+</CodeExample>
+
+<CodeExample desc='Exclude Selected from Options'>
+  <Select excludeSelected value={2} options={options} />
+</CodeExample>
+
+<CodeExample desc='Selection with overflowing text'>
+  <Select value='Super Long Text that Overflows 200px'
+          style={{maxWidth: 200}}
+          options={options}
+  />
+</CodeExample>
+
+<CodeExample desc='Multiple selections with overflow'>
+  <Select multiple search
+          value={['Super Long Text that Overflows 200px', 2]}
+          style={{maxWidth: 200}}
+          options={options}
+  />
+</CodeExample>
+
+### Input States
+
+<CodeExample desc='Disabled'>
+  <Select disabled placeholder='disabled' options={options} />
+</CodeExample>
+
+<CodeExample desc='Read only'>
+  <Select readonly placeholder='readonly' options={options} />
+</CodeExample>
+
+<CodeExample desc='Loading'>
+  <Select loading placeholder='loading' options={options} />
+</CodeExample>
+
+### Input Values
+
+<CodeExample desc='Default Value'>
+  <Select defaultValue={1} options={options} />
+</CodeExample>
+
+<CodeExample desc='Controlled State'>
+  <Select controlledValue value={2} options={options} />
+</CodeExample>
+
+<CodeExample desc='Sync Value with Uncontrolled State'>
+  {() => {
+    const [value, setValue] = useState(3)
+    const nextValue = options[options.indexOf(value) + 1] || options[0]
+    return (
+      <View className='center gap'>
+        <Select value={value} options={options} />
+        <Button onClick={() => setValue(nextValue)}>👆🏽 Change to {nextValue}</Button>
+      </View>
+    )
+  }}
+</CodeExample>
+
+<CodeExample desc='Option `value` different from text label'>
+  <Select value={1} options={[
+    {text: 'Alpha', value: 1},
+    {text: 'Beta', value: 2},
+    {text: 'Theta', value: 3},
+  ]} />
+</CodeExample>
+
+<CodeExample desc='Custom Options UI'>
+  <Select value={0}
+          options={[
+            {
+              text: 'Light', value: 1, children: (
+                <Text><Icon name='md/light-mode' /> Light</Text>
+              )
+            },
+            {
+              text: 'Dark', value: 2, children: (
+                <Text><Icon name='hi2/moon' /> Dark</Text>
+              )
+            },
+            {text: 'System', value: 0},
+          ]}
+  />
+</CodeExample>
+
+### Event Handlers
+
+<CodeExample desc='On Change Callback'>
+  <Select placeholder='Select to fire event' onChange={(e, value) => alert(
+    ips('onChange(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
+  )} options={options} />
+</CodeExample>
+
+<CodeExample desc='On Focus Callback'>
+  <Select placeholder='Focus to fire event' onFocus={(e, value) => {
+    // cannot alert() because after alert input gets focus again
+    console.log(ips('onFocus(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value}))
+  }} options={options} />
+</CodeExample>
+
+<CodeExample desc='On Blur Callback'>
+  <Select placeholder='Blur to fire event' onBlur={(e, value) => alert(
+    ips('onBlur(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
+  )} options={options} />
+</CodeExample>

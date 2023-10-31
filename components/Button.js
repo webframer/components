@@ -37,7 +37,7 @@ function createButton () {
         {...props}
       >
         {renderProp(children)}
-        {loading && <Loader loading size={size || 'smallest'} />}
+        {loading && <Loader loading size={size || 'smaller'} />}
         {tooltip}
       </button>
     )
