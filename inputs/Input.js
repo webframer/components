@@ -84,7 +84,10 @@ Input.defaultProps = {
 }
 
 Input.propTypes = {
-  // Native input `type` attribute, also a key identifier for delegated input components. See [examples](#types).
+  /**
+   * Native input `type` attribute, also a key identifier for delegated input components.
+   * See [input type examples](#input-types).
+   */
   type: type.String,
   // Unique input identifier, default is string created from React.useId()
   id: type.String,

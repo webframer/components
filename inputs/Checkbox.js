@@ -26,9 +26,9 @@ export function Checkbox ({
   } else {
     props.checked = !!value
   }
-  if (!readonly) props.onChange = (event) => onChange(
+  if (!readonly) props.onChange = onChange && ((event) => onChange(
     event, event.target.checked ? valueTrue : valueFalse, props.name,
-  )
+  ))
   const toggle = type === 'toggle'
   return (
     <Row className={cn('checkbox', className, {toggle})}>
@@ -75,6 +75,7 @@ Checkbox.propTypes = {
 }
 
 Checkbox.defaultProps = {
+  className: 'gap-smaller',
   type: 'checkbox',
   valueTrue: true,
   valueFalse: false,

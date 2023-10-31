@@ -2,6 +2,7 @@ import { __CLIENT__, isEqual, isObject, isString, numericPattern, parseNumberLoc
 import cn from 'classnames'
 import React, { useId, useState } from 'react'
 import Icon from '../components/Icon.js'
+import Loader from '../components/Loader.js'
 import { Row } from '../components/Row.js'
 import Text from '../components/Text.js'
 import { extractProps } from '../components/View.js'
@@ -60,6 +61,7 @@ export function InputNative ({className, error, ...props}) {
              {...input} ref={self.ref} />
       {iconEnd}
       {childAfter}
+      {loading && <Loader loading size='smaller' />}
     </Row>
   </>)
 }

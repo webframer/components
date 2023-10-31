@@ -102,7 +102,7 @@ It is part of [Universal Input API](/docs/ui/inputs#universal-input-api), with i
 
 <CodeExample desc='Sync Value with Uncontrolled State'>
   {() => {
-    const [value, setValue] = useState(true)
+    const [value, set] = useState(true)
     return (
       <View className='center gap'>
         <Switch value={value}
@@ -110,7 +110,9 @@ It is part of [Universal Input API](/docs/ui/inputs#universal-input-api), with i
                 className='gap'
                 label='Uncontrolled Synced Value'
                 uncheckedLabel='Toggle' />
-        <Button onClick={() => setValue(!value)}>👆🏽 Toggle Value</Button>
+        <Button onClick={() => set(!value)}>
+          👆🏽 Toggle Value
+        </Button>
       </View>
     )
   }}

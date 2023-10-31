@@ -5,7 +5,7 @@ import PropsTable from '@webframer/ui/views/PropsTable.js'
 import { useState } from 'react'
 
 export const options = [1, 2, 3]
-export const optionsText = ['Alpha', 'Beta', 'Theta', 'Omega', 'Gamma']
+export const optionsText = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon']
 
 # Select
 
@@ -155,12 +155,14 @@ Select is part of [Universal Input API](/docs/ui/inputs#universal-input-api), wi
 
 <CodeExample desc='Sync Value with Uncontrolled State'>
   {() => {
-    const [value, setValue] = useState(3)
+    const [value, set] = useState(3)
     const nextValue = options[options.indexOf(value) + 1] || options[0]
     return (
       <View className='center gap'>
         <Select value={value} options={options} />
-        <Button onClick={() => setValue(nextValue)}>👆🏽 Change to {nextValue}</Button>
+        <Button onClick={() => set(nextValue)}>
+          👆🏽 Change to {nextValue}
+        </Button>
       </View>
     )
   }}
@@ -170,7 +172,7 @@ Select is part of [Universal Input API](/docs/ui/inputs#universal-input-api), wi
   <Select value={1} options={[
     {text: 'Alpha', value: 1},
     {text: 'Beta', value: 2},
-    {text: 'Theta', value: 3},
+    {text: 'Gamma', value: 3},
   ]} />
 </CodeExample>
 

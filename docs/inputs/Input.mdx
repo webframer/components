@@ -1,5 +1,5 @@
 import Link from '@webframer/kit/router/next/Link.jsx'
-import { Input, inputControls, Text } from '@webframer/ui'
+import { Button, Input, inputControls, Text, View } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
 import PropsTable from '@webframer/ui/views/PropsTable.js'
 import { useState } from 'react'
@@ -45,21 +45,129 @@ It supports the [Universal Input API](/docs/ui/inputs#universal-input-api) and a
   <Input />
 </CodeExample>
 
+<CodeExample desc='Input Label & Placeholder'>
+  <Input label='Label' placeholder='Placeholder...' />
+</CodeExample>
+
+<CodeExample desc='Required Input'>
+  <Input required label='Required' />
+</CodeExample>
+
+<CodeExample desc='Help Info'>
+  <Input type='email'
+         placeholder='Email'
+         info='Your privacy is important to us' />
+</CodeExample>
+
+<CodeExample desc='Error Message'>
+  <Input type='url'
+         placeholder='URL'
+         error='Please enter a correct URL' />
+</CodeExample>
+
+<CodeExample desc='Tooltip Popup'>
+  <Input tooltip='Tooltip'
+         placeholder='Hover over me' />
+</CodeExample>
+
+### Input Types
+
+<CodeExample desc='Text Input'>
+  <Input type='text' value='text' />
+</CodeExample>
+
+<CodeExample desc='Text Area'>
+  <Input type='textarea' value='textarea' />
+</CodeExample>
+
+<CodeExample desc='Password'>
+  <Input type='password' value='hidden' />
+</CodeExample>
+
 <CodeExample desc='Number Input'>
   <Input type='number' value={5} />
+</CodeExample>
+
+<CodeExample desc='Select Input'>
+  <Input type='select' options={[
+    {text: 'Alpha', value: 1},
+    {text: 'Beta', value: 2},
+    {text: 'Gamma', value: 3},
+  ]} />
 </CodeExample>
 
 <CodeExample desc='Switch Input'>
   <Input type='switch' value={true} />
 </CodeExample>
 
+<CodeExample desc='Checkbox'>
+  <Input type='checkbox' label='Checkbox' />
+</CodeExample>
+
+### Input Sizes
+
+<CodeExample>
+  <View className='gap'>
+    <Input className='font-smallest' placeholder='smallest' />
+    <Input className='font-smaller' placeholder='smaller' />
+    <Input className='font-small' placeholder='small' />
+    <Input placeholder='base' />
+    <Input className='font-large' placeholder='large' />
+    <Input className='font-larger' placeholder='larger' />
+    <Input className='font-largest' placeholder='largest' />
+  </View>
+</CodeExample>
+
+<CodeExample desc='Compact Input'>
+  <Input compact placeholder='compact' />
+</CodeExample>
+
+### Input States
+
+<CodeExample desc='Disabled'>
+  <Input disabled placeholder='disabled' />
+</CodeExample>
+
+<CodeExample desc='Read only'>
+  <Input readonly placeholder='readonly' />
+</CodeExample>
+
+<CodeExample desc='Loading'>
+  <Input loading placeholder='loading' />
+</CodeExample>
+
+### Input Values
+
+<CodeExample desc='Default Value'>
+  <Input defaultValue={1} />
+</CodeExample>
+
+<CodeExample desc='Controlled State'>
+  <Input controlledValue value={2} />
+</CodeExample>
+
+<CodeExample desc='Sync Value with Uncontrolled State'>
+  {() => {
+    const [value, set] = useState(1)
+    const nextValue = value + 1
+    return (
+      <View className='center gap'>
+        <Input value={value} />
+        <Button onClick={() => set(nextValue)}>
+          👆🏽 Change to {nextValue}
+        </Button>
+      </View>
+    )
+  }}
+</CodeExample>
+
 ## Custom Input Type
 
-Webframe universal `Input` supports rendering with any custom input component. Add as many components as you like without worrying about bundle size. Webframe uses automatic code splitting by lazy loading them on client side.
+Webframe universal `Input` supports rendering with any custom input component. Add as many components as you like without worrying about the bundle size because Webframe uses automatic code splitting by lazy loading them on client side.
 
 ### Setup
 
-```js
+```js copy
 import { dynamicImport } from '@webframer/js'
 import { Input } from '@webframer/ui'
 
@@ -70,7 +178,7 @@ Input.defaultProps.controls = dynamicImport({
 
 ### Usage
 
-```jsx
+```jsx copy
 import { Input } from '@webframer/ui'
 
 function Form () {
@@ -80,5 +188,5 @@ function Form () {
 
 ### Built-in Types
 
-In addition to native browser input types (ie. `text`, `number`, `email`, etc.), these are built-in types with corresponding components:
+In addition to native browser [input types](https://www.w3schools.com/html/html_form_input_types.asp) (ie. `text`, `number`, `email`, etc.), these are Webframe built-in types with their corresponding components:
 <InputComponents controls={inputControls} />
