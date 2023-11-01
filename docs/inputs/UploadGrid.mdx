@@ -1,0 +1,105 @@
+import { FILE, ips } from '@webframer/js'
+import { Icon, Input, Text, UploadGrid, View } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/views/CodeExample.js'
+import PropsTable from '@webframer/ui/views/PropsTable.js'
+
+# UploadGrid
+
+A set of file [Upload](/docs/ui/inputs/Upload) inputs with multiple dropzones that can show image preview of selected files, with additional info, such as image resolution and file size.
+
+> TODO: [Universal Input API](/docs/ui/inputs#universal-input-api), with input file `format`, `parse`, `normalize` and event action handlers.
+
+## Prop Types
+
+<PropsTable component={UploadGrid} />
+
+## Examples
+
+### Basic Usage
+
+<CodeExample>
+  <UploadGrid />
+</CodeExample>
+
+<CodeExample desc='Via Universal Input'>
+  <Input type='file' />
+</CodeExample>
+
+### Grid Customisation
+
+<CodeExample desc='File Uploads Grid of 3 Dropzones'>
+  <UploadGrid maxFiles={3} />
+</CodeExample>
+
+<CodeExample desc='Grid of 3 in a Row'>
+  <UploadGrid maxFiles={3} maxColumns={3} />
+</CodeExample>
+
+<CodeExample desc='Tinder Photo Upload Grid Style (9 Square Slots)'>
+  <View className='min-width-mobile'>
+    <UploadGrid
+      maxFiles={9}
+      previewClass='img-cover'
+      slotLabel
+      square />
+  </View>
+</CodeExample>
+
+<CodeExample desc='Custom Dropzone UI'>
+  <UploadGrid children={(
+    <View className='padding center'>
+      <Icon name='io/md-cloud-upload' className='font-largest' />
+      <Text className='bold'>Drag & Drop<br />Files</Text>
+    </View>
+  )} maxFiles={3} maxColumns={3} />
+</CodeExample>
+
+<CodeExample desc='Custom Select/Remove Icon'>
+  <UploadGrid iconSelect='md/add' iconRemove='fi/x'
+              maxFiles={3} maxColumns={3} />
+</CodeExample>
+
+### Input States
+
+<CodeExample desc='Disabled'>
+  <UploadGrid disabled label='disabled' maxFiles={3} maxColumns={3} />
+</CodeExample>
+
+<CodeExample desc='Read only'>
+  <View className='padding-h max-width-400'>
+    <UploadGrid readonly label='readonly' maxFiles={4} maxColumns={4}
+                initialValues={[
+                  {i: 0, name: 'image.png', src: `${FILE.PATH_IMAGES}image.png`, width: 512, height: 512},
+                  {i: 1, name: 'image.svg', src: `${FILE.PATH_IMAGES}image.svg`, size: 1024},
+                  {i: 2, name: 'file.csv', src: 'file.csv', size: 1024},
+                ]} />
+
+  </View>
+</CodeExample>
+
+<CodeExample desc='Loading'>
+  <UploadGrid loading label='loading' maxFiles={3} maxColumns={3} />
+</CodeExample>
+
+### Event Handlers
+
+<CodeExample desc='On Change Callback'>
+  <UploadGrid label='Toggle to fire event' onChange={(e, value) => alert(
+    ips('onChange(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
+  )} maxFiles={3} maxColumns={3} />
+</CodeExample>
+
+<CodeExample desc='On Focus Callback'>
+  <UploadGrid label='Focus to fire event' onFocus={(e, value) => {
+    // cannot alert() because after alert input gets focus again
+    console.log(ips('onFocus(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value}))
+  }} maxFiles={3} maxColumns={3} />
+</CodeExample>
+
+<CodeExample desc='On Blur Callback'>
+  <UploadGrid label='Blur to fire event' onBlur={(e, value) => alert(
+    ips('onBlur(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
+  )} maxFiles={3} maxColumns={3} />
+</CodeExample>
+
+Please refer to [Universal File Uploads Input](/docs/ui/inputs/Input) for additional upload field props.

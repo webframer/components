@@ -111,7 +111,13 @@ A **Universal Input** component that handles user inputs of all types, including
 </CodeExample>
 
 <CodeExample desc='Multiple Files Uploader'>
-  <Input type='file' maxFiles={9} />
+  <View className='min-width-mobile'>
+    <Input type='file'
+           maxFiles={9}
+           previewClass='img-cover'
+           slotLabel
+           square />
+  </View>
 </CodeExample>
 
 <CodeExample desc='Range Slider'>

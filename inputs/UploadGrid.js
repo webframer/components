@@ -186,7 +186,7 @@ export function UploadGrid ({
         // If File was just selected from the device, use preview as is,
         // else try to load medium size Image
         let hasPreviewType = file && showPreview && canAccept(fileInput, previewAccept)
-        let filePreview = null
+        let filePreview = props.children // allow custom dropzone UI when no file selected
         if (isString(hasPreviewType)) {
           if (hasPreviewType.indexOf('.') === 0) hasPreviewType = FILE.MIME_TYPE_BY_EXT[hasPreviewType]
           if (hasPreviewType && hasPreviewType.indexOf('image/') === 0)

@@ -7,7 +7,7 @@ import PropsTable from '@webframer/ui/views/PropsTable.js'
 
 A file input to browse and upload files from local devices, such as computer, laptop, tablet, etc. It has a drag & drop file upload dropzone that can restrict uploadable file types.
 
-For file preview or multiple file uploads, use [UploadGrid](/docs/ui/inputs/UploadGrid) because it has better UX (user experience). For instance, there is instant preview of uploaded images and extra information, such as file size.
+For file preview or multiple file uploads, use [UploadGrid](/docs/ui/inputs/UploadGrid) because it has better UX (user experience). For instance, there is instant preview of selected images and extra information, such as file size.
 
 > TODO: [Universal Input API](/docs/ui/inputs#universal-input-api), with input file `format`, `parse`, `normalize` and event action handlers.
 
@@ -51,9 +51,9 @@ For file preview or multiple file uploads, use [UploadGrid](/docs/ui/inputs/Uplo
 
 ### File Dropzone
 
-<CodeExample desc='Squared Dropzone'>
+<CodeExample desc='Squared Dropzone with Placeholder Text'>
   <View className='min-width-mobile'>
-    <Upload square />
+    <Upload square placeholder='Placeholder' />
   </View>
 </CodeExample>
 
