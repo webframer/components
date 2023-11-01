@@ -1,0 +1,122 @@
+import { ips, SIZE_KB } from '@webframer/js'
+import { Icon, Input, Text, Upload, View } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/views/CodeExample.js'
+import PropsTable from '@webframer/ui/views/PropsTable.js'
+
+# Upload
+
+A file input to browse and upload files from local devices, such as computer, laptop, tablet, etc. It has a drag & drop file upload dropzone that can restrict uploadable file types.
+
+For file preview or multiple file uploads, use [UploadGrid](/docs/ui/inputs/UploadGrid) because it has better UX (user experience). For instance, there is instant preview of uploaded images and extra information, such as file size.
+
+> TODO: [Universal Input API](/docs/ui/inputs#universal-input-api), with input file `format`, `parse`, `normalize` and event action handlers.
+
+## Prop Types
+
+<PropsTable component={Upload} />
+
+## Examples
+
+### Basic Usage
+
+<CodeExample>
+  <Upload />
+</CodeExample>
+
+<CodeExample desc='Via Universal Input'>
+  <Input type='upload' />
+</CodeExample>
+
+### Upload Configs
+
+<CodeExample desc='Restrict to PNG Images Only'>
+  <Upload accept='.png' />
+</CodeExample>
+
+<CodeExample desc='Allow Any Image File'>
+  <Upload accept='image/*' />
+</CodeExample>
+
+<CodeExample desc='Allow Uploading Multiple Files'>
+  <Upload multiple />
+</CodeExample>
+
+<CodeExample desc='Maximum 3 Files Validation'>
+  <Upload multiple maxFiles={3} />
+</CodeExample>
+
+<CodeExample desc='Minimum 3kB to Maximum 30kB File Size'>
+  <Upload minSize={3 * SIZE_KB} maxSize={30 * SIZE_KB} />
+</CodeExample>
+
+### File Dropzone
+
+<CodeExample desc='Squared Dropzone'>
+  <View className='min-width-mobile'>
+    <Upload square />
+  </View>
+</CodeExample>
+
+<CodeExample desc='Custom File Dropzone UI'>
+  <Upload children={(
+    <View className='padding center'>
+      <Icon name='io/md-cloud-upload' className='font-largest' />
+      <Text className='bold'>Drag & Drop<br />Files</Text>
+    </View>
+  )} />
+</CodeExample>
+
+<CodeExample desc='Custom Select/Remove Icon'>
+  <Upload iconSelect='md/add' iconRemove='fi/x' />
+</CodeExample>
+
+### Input Sizes
+
+<CodeExample>
+  <View className='gap'>
+    <Upload className='font-smallest' label='smallest' />
+    <Upload className='font-smaller' label='smaller' />
+    <Upload className='font-small' label='small' />
+    <Upload label='base' />
+    <Upload className='font-large' label='large' />
+    <Upload className='font-larger' label='larger' />
+    <Upload className='font-largest gap' label='largest' />
+  </View>
+</CodeExample>
+
+### Input States
+
+<CodeExample desc='Disabled'>
+  <Upload disabled label='disabled' />
+</CodeExample>
+
+<CodeExample desc='Read only'>
+  <Upload readonly label='readonly' />
+</CodeExample>
+
+<CodeExample desc='Loading'>
+  <Upload loading label='loading' />
+</CodeExample>
+
+### Event Handlers
+
+<CodeExample desc='On Change Callback'>
+  <Upload label='Toggle to fire event' onChange={(e, value) => alert(
+    ips('onChange(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
+  )} />
+</CodeExample>
+
+<CodeExample desc='On Focus Callback'>
+  <Upload label='Focus to fire event' onFocus={(e, value) => {
+    // cannot alert() because after alert input gets focus again
+    console.log(ips('onFocus(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value}))
+  }} />
+</CodeExample>
+
+<CodeExample desc='On Blur Callback'>
+  <Upload label='Blur to fire event' onBlur={(e, value) => alert(
+    ips('onBlur(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
+  )} />
+</CodeExample>
+
+Please refer to [Universal File Input](/docs/ui/inputs/Input) for more upload field props.

@@ -86,7 +86,7 @@ Input.defaultProps = {
 
 Input.propTypes = {
   /**
-   * Native input `type` attribute, also a key identifier for delegated input components.
+   * Native input `type` attribute, also a key identifier for delegated input controls.
    * See [input type examples](#input-types).
    */
   type: type.String,

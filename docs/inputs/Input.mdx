@@ -27,11 +27,9 @@ export function InputComponents ({controls}) {
 
 # Input
 
-A universal Input component that handles user inputs of all types, including using your own custom UI.
+A **Universal Input** component that handles user inputs of all types, including using your own custom UI. This component is a thin wrapper that delegates rendering to other input controls.
 
-This component is a thin wrapper that delegates rendering to other input controls.
-
-It supports the [Universal Input API](/docs/ui/inputs#universal-input-api) and adds extra elements, like help info and error messages, for a consistent user experience.
+> It supports [Universal Input API](/docs/ui/inputs#universal-input-api) and adds extra elements, like help info and error messages, for a consistent UX (user experience).
 
 ## Prop Types
 
@@ -88,6 +86,18 @@ It supports the [Universal Input API](/docs/ui/inputs#universal-input-api) and a
   <Input type='number' value={5} />
 </CodeExample>
 
+<CodeExample desc='Date Input'>
+  <Input type='date' />
+</CodeExample>
+
+<CodeExample desc='Date & Time'>
+  <Input type='datetime-local' />
+</CodeExample>
+
+<CodeExample desc='Phone Number'>
+  <Input type='tel' icon='im/phone' placeholder='123-456-7890' pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" />
+</CodeExample>
+
 <CodeExample desc='Select Input'>
   <Input type='select' options={[
     {text: 'Alpha', value: 1},
@@ -96,12 +106,25 @@ It supports the [Universal Input API](/docs/ui/inputs#universal-input-api) and a
   ]} />
 </CodeExample>
 
+<CodeExample desc='File Input'>
+  <Input type='upload' />
+</CodeExample>
+
+<CodeExample desc='Multiple Files Uploader'>
+  <Input type='file' maxFiles={9} />
+</CodeExample>
+
+<CodeExample desc='Range Slider'>
+  <Input type='range'
+         controlProps={{className: 'no-border'}} />
+</CodeExample>
+
 <CodeExample desc='Switch Input'>
   <Input type='switch' value={true} />
 </CodeExample>
 
 <CodeExample desc='Checkbox'>
-  <Input type='checkbox' label='Checkbox' />
+  <Input type='checkbox' label='Checkbox' value={true} />
 </CodeExample>
 
 ### Input Sizes

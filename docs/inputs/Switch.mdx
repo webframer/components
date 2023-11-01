@@ -10,7 +10,7 @@ A toggle input to switch between boolean values (`true` or `false`), or any pair
 
 Switch input can have any internal value assigned to **checked** and **unchecked** states, with optional text labels or custom UI.
 
-It is part of [Universal Input API](/docs/ui/inputs#universal-input-api), with input data `format`, `parse`, `normalize` and event action handlers.
+> Uses [Universal Input API](/docs/ui/inputs#universal-input-api), with input data `format`, `parse`, `normalize` and event action handlers.
 
 ## Prop Types
 
@@ -137,3 +137,5 @@ It is part of [Universal Input API](/docs/ui/inputs#universal-input-api), with i
     ips('onBlur(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
   )} />
 </CodeExample>
+
+With [Universal Switch Input](/docs/ui/inputs/Input) you can add extra props, like help info and error message.

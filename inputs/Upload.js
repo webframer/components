@@ -13,6 +13,7 @@ import { Label } from './Label.js'
 
 /**
  * File Uploader Input component that works with native HTML form submit.
+ * @see https://webframe.app/docs/ui/inputs/Upload
  *
  * Notes:
  *  - Image preview should be delegated to UploadGrid because each Upload slot will be multiple,
@@ -202,7 +203,15 @@ Upload.defaultProps = {
 }
 
 Upload.propTypes = {
-  // Native HTML Comma-separated list of one or more file types allowed for upload
+  /**
+   * A comma-separated list of one or more file types allowed for upload. Examples of valid values:
+   * 1. Filename extension: `.svg`, `.jpg`...
+   * 2. File type wildcard: `image/*`, `video/*`...
+   * 3. MIME type: `image/jpeg`, `application/pdf`...
+   * 4. Any combination of above: `image/*, .pdf`.
+   *
+   * For more details, refer to [**accept** specs](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept#unique_file_type_specifiers).
+   */
   accept: type.String,
   // Custom label to show inside Upload dropzone, default is placeholder Icon or Text
   children: type.NodeOrFunction,
@@ -222,11 +231,11 @@ Upload.propTypes = {
   minSize: type.Byte,
   // Whether to allow upload of more than one file
   multiple: type.Boolean,
-  // Icon name for selecting file upload, default is plus Icon
+  // Icon name for selecting file upload, default style is `plus` Icon for empty string
   iconSelect: type.String,
-  // Icon name for removing file upload, default is cross Icon
+  // Icon name for removing file upload, default style is `cross` Icon for empty string
   iconRemove: type.String,
-  // Whether to add 'squared' CSS class to make the dropzone fill available space as square
+  // Whether to add `squared` CSS class to make the dropzone fill available space as square
   square: type.Boolean,
   // Input files - if passed, becomes a controlled-like component
   value: type.ListOf(type.File),
