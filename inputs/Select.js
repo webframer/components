@@ -23,7 +23,7 @@ import SelectOptions from './SelectOptions.js'
 
 /**
  * Dropdown List of Searchable Select Options and Nested Category Hierarchy.
- *
+ * @see https://webframe.app/docs/ui/inputs/Select
  * Features:
  *    1. Select (with options like `<select/>` element)
  *    2. Multiple select

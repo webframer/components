@@ -24,7 +24,7 @@ It is part of [Universal Input API](/docs/ui/inputs#universal-input-api), with i
   <Switch />
 </CodeExample>
 
-<CodeExample desc='Universal Input'>
+<CodeExample desc='Via Universal Input'>
   <Input type='switch' value={true} />
 </CodeExample>
 
@@ -39,16 +39,15 @@ It is part of [Universal Input API](/docs/ui/inputs#universal-input-api), with i
 </CodeExample>
 
 <CodeExample desc='Toggle Label'>
-  <Switch className='gap' label='Label' />
+  <Switch label='Label' />
 </CodeExample>
 
 <CodeExample desc='Reverse Label'>
-  <Switch className='gap' label='Label' reverse />
+  <Switch label='Label' reverse />
 </CodeExample>
 
 <CodeExample desc='Custom UI Labels'>
-  <Switch className='gap'
-          label={<Text><Icon name='im/switch' /> Switch</Text>}
+  <Switch label={<Text><Icon name='im/switch' /> Switch</Text>}
           checkedLabel={<Text><Icon name='md/light-mode' /> ON</Text>}
           uncheckedLabel={<Text><Icon name='hi2/moon' /> OFF</Text>}
           value={true} />
@@ -92,26 +91,26 @@ It is part of [Universal Input API](/docs/ui/inputs#universal-input-api), with i
 
 <CodeExample desc='Checked Initially'>
   <Switch defaultValue={true}
-          row={false} className='gap' label='Default Value' />
+          row={false} label='Default Value' />
 </CodeExample>
 
 <CodeExample desc='Controlled State'>
   <Switch controlledValue value={true}
-          row={false} className='gap' label='Controlled Value' />
+          row={false} label='Controlled Value' />
 </CodeExample>
 
-<CodeExample desc='Sync Value with Uncontrolled State'>
+<CodeExample desc='Hybrid State (uncontrolled, but updates on `value` changes)'>
   {() => {
     const [value, set] = useState(true)
+    const nextValue = !value
     return (
       <View className='center gap'>
         <Switch value={value}
                 row={false}
-                className='gap'
                 label='Uncontrolled Synced Value'
                 uncheckedLabel='Toggle' />
-        <Button onClick={() => set(!value)}>
-          👆🏽 Toggle Value
+        <Button onClick={() => set(nextValue)}>
+          👆🏽 {nextValue ? 'Check' : 'Uncheck'}
         </Button>
       </View>
     )

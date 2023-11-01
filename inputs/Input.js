@@ -20,6 +20,7 @@ export const inputControls = dynamicImport({
 
 /**
  * Universal Input group that wraps the corresponding Input Control component based on given `type`.
+ * @see https://webframe.app/docs/ui/inputs/Input
  * Features:
  *  - Info/Error node added below delegated component
  *  - Tooltip support (since this wrapper does not have overflow: hidden).

@@ -27,7 +27,7 @@ Select is part of [Universal Input API](/docs/ui/inputs#universal-input-api), wi
   <Select options={options} />
 </CodeExample>
 
-<CodeExample desc='Universal Input'>
+<CodeExample desc='Via Universal Input'>
   <Input type='select' options={options} />
 </CodeExample>
 
@@ -153,7 +153,7 @@ Select is part of [Universal Input API](/docs/ui/inputs#universal-input-api), wi
   <Select controlledValue value={2} options={options} />
 </CodeExample>
 
-<CodeExample desc='Sync Value with Uncontrolled State'>
+<CodeExample desc='Hybrid State (uncontrolled, but updates on `value` changes)'>
   {() => {
     const [value, set] = useState(3)
     const nextValue = options[options.indexOf(value) + 1] || options[0]

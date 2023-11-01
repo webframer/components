@@ -29,7 +29,7 @@ export function InputComponents ({controls}) {
 
 A universal Input component that handles user inputs of all types, including using your own custom UI.
 
-This component is a thin wrapper that delegates rendering to other input components.
+This component is a thin wrapper that delegates rendering to other input controls.
 
 It supports the [Universal Input API](/docs/ui/inputs#universal-input-api) and adds extra elements, like help info and error messages, for a consistent user experience.
 
@@ -163,7 +163,7 @@ It supports the [Universal Input API](/docs/ui/inputs#universal-input-api) and a
 
 ## Custom Input Type
 
-Webframe universal `Input` supports rendering with any custom input component. Add as many components as you like without worrying about the bundle size because Webframe uses automatic code splitting by lazy loading them on client side.
+Webframe universal `Input` supports rendering with any custom input control. Add as many controls as you like without worrying about the bundle size because Webframe uses automatic code splitting that lazy loads them on the client side.
 
 ### Setup
 
@@ -171,6 +171,7 @@ Webframe universal `Input` supports rendering with any custom input component. A
 import { dynamicImport } from '@webframer/js'
 import { Input } from '@webframer/ui'
 
+// Define all custom Input controls in the project for lazy loading
 Input.defaultProps.controls = dynamicImport({
   'MyCustomInput': () => import (`./MyCustomInput.jsx`),
 })
@@ -182,6 +183,8 @@ Input.defaultProps.controls = dynamicImport({
 import { Input } from '@webframer/ui'
 
 function Form () {
+  // Input `type` is case-sensitive, it is recommended
+  // to use CapCase naming convention for custom controls
   return <Input type='MyCustomInput' />
 }
 ```

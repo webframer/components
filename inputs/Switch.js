@@ -8,33 +8,25 @@ import { extractProps } from '../components/View.js'
 import { useExpandCollapse } from '../react.js'
 import { renderProp } from '../react/render.js'
 import { type } from '../types.js'
-import checkbox from './Checkbox.js'
+import { useToggleInputSetup } from './Checkbox.js'
 import { renderInputLabel, useInputSetup } from './InputNative.js'
 import Label from './Label.js'
 
 /**
  * Switch (Toggle) Input Component
+ * @see https://webframe.app/docs/ui/inputs/Switch
  */
 export function Switch ({
+  checkedValue, uncheckedValue,
   className, error, label, checkedLabel, uncheckedLabel, title,
   ...props
 }) {
-  const viewProps = extractProps(props)
+  const viewProps = extractProps(props, {childBefore: false, childAfter: false})
   const {
     active, disabled, loading, readonly, value,
     childBefore, childAfter, id, input, self,
   } = useInputSetup(props, switchEnabledOptions)
-
-  // Event Handler ---------------------------------------------------------------------------------
-  if (!self.changeChecked) self.changeChecked = function (e) {
-    return self.onChange.call(this, e, e.target.checked) // extend the base pattern
-  }
-  input.onChange = self.changeChecked
-
-  // Render Prop -----------------------------------------------------------------------------------
-  const checked = input.checked = value
-  input.type = 'checkbox'
-  delete input.value
+  const {checked} = useToggleInputSetup({checkedValue, uncheckedValue, value, input, self})
 
   return (
     <Row className={cn(className, 'switch', {active, disabled, readonly, loading, error, checked})}
@@ -68,11 +60,21 @@ function ToggleLabels ({checked, checkedLabel, uncheckedLabel, loading, self}) {
 
 const SwitchLabels = React.memo(ToggleLabels)
 
+Switch.defaultProps = {
+  className: 'gap-smaller',
+  checkedValue: true,
+  uncheckedValue: false,
+}
+
 Switch.propTypes = {
   // Whether to lock input value when `value` prop is given
   controlledValue: type.Boolean,
   // Initial value for uncontrolled checked or unchecked state
   defaultValue: type.Any,
+  // Internal value to assign to checked case
+  checkedValue: type.Any,
+  // Internal value to assign to unchecked case
+  uncheckedValue: type.Any,
   // Label to show before the Switch (or after Switch with `reverse` true)
   label: type.NodeOrFunction,
   // UI to show for checked state inside the Switch toggle, defaults to a checkmark icon

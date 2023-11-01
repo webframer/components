@@ -1,0 +1,83 @@
+import { Button, Checkbox, Input, View } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/views/CodeExample.js'
+import PropsTable from '@webframer/ui/views/PropsTable.js'
+import { useState } from 'react'
+
+
+# Checkbox
+
+A native browser checkbox input with label to toggle between two states. Similar to [Switch input](/docs/ui/inputs/Switch), internal **checked** and **unchecked** states can be set to any value, not just boolean `true` or `false`.
+
+## Prop Types
+
+<PropsTable component={Checkbox} />
+
+## Examples
+
+### Basic Usage
+
+<CodeExample>
+  <Checkbox />
+</CodeExample>
+
+<CodeExample desc='Via Universal Input'>
+  <Input type='checkbox' />
+</CodeExample>
+
+<CodeExample desc='Checkbox Label'>
+  <Checkbox label='Label' />
+</CodeExample>
+
+### Checkbox Sizes
+
+<CodeExample>
+  <View className='left gap'>
+    <Checkbox className='font-smallest gap-smaller' label='smallest' />
+    <Checkbox className='font-smaller gap-smaller' label='smaller' />
+    <Checkbox className='font-small gap-smaller' label='small' />
+    <Checkbox label='base' />
+    <Checkbox className='font-large gap-smaller' label='large' />
+    <Checkbox className='font-larger gap-smaller' label='larger' />
+    <Checkbox className='font-largest gap-smaller' label='largest' />
+  </View>
+</CodeExample>
+
+### Input States
+
+<CodeExample desc='Disabled'>
+  <Checkbox disabled label='disabled' />
+</CodeExample>
+
+<CodeExample desc='Read only'>
+  <Checkbox readonly label='readonly' />
+</CodeExample>
+
+<CodeExample desc='Loading'>
+  <Checkbox loading label='loading' />
+</CodeExample>
+
+### Input Values
+
+<CodeExample desc='Checked Initially'>
+  <Checkbox defaultValue={true} label='Default Value' />
+</CodeExample>
+
+<CodeExample desc='Controlled State'>
+  <Checkbox controlledValue value={true} label='Controlled Value' />
+</CodeExample>
+
+<CodeExample desc='Hybrid State (uncontrolled, but updates on `value` changes)'>
+  {() => {
+    const [value, set] = useState(true)
+    const nextValue = !value
+    return (
+      <View className='center gap'>
+        <Checkbox value={value}
+                  label='Uncontrolled Synced Value' />
+        <Button onClick={() => set(nextValue)}>
+          👆🏽 {nextValue ? 'Check' : 'Uncheck'}
+        </Button>
+      </View>
+    )
+  }}
+</CodeExample>

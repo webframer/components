@@ -1,87 +1,90 @@
 import cn from 'classnames'
-import React, { Fragment, useId } from 'react'
+import React from 'react'
+import Loader from '../components/Loader.js'
 import { Row } from '../components/Row.js'
-import Text from '../components/Text.js'
-import View from '../components/View.js'
+import { extractProps } from '../components/View.js'
 import { type } from '../types.js'
+import { useInputSetup } from './InputNative.js'
 import Label from './Label.js'
 
 /**
  * Checkbox Input Component.
+ * @see https://webframe.app/docs/ui/inputs/Checkbox
  */
 export function Checkbox ({
-  value, valueTrue, valueFalse, defaultValue,
-  label, labelTrue = (label != null ? label : valueTrue), labelFalse = (label != null ? label : valueFalse),
-  id = useId(),
-  onChange, type, title, readonly, danger, className,
-  float: _0, // not used
-  initialValues: _1, // not used
+  checkedValue, uncheckedValue,
+  className, error, label, checkedLabel, uncheckedLabel, title,
   ...props
 }) {
-  if (readonly) props.readOnly = readonly // React wants `readonly` to be `readOnly`
-  if (value === valueTrue) value = true
-  if (value === valueFalse) value = false
-  if (value == null) {
-    if (defaultValue != null) props.defaultChecked = !!defaultValue
-  } else {
-    props.checked = !!value
-  }
-  if (!readonly) props.onChange = onChange && ((event) => onChange(
-    event, event.target.checked ? valueTrue : valueFalse, props.name,
-  ))
-  const toggle = type === 'toggle'
+  const viewProps = extractProps(props, {childBefore: false, childAfter: false})
+  let {
+    active, disabled, loading, readonly, value,
+    childBefore, childAfter, id, input, self,
+  } = useInputSetup(props, checkboxEnabledOptions)
+  const {checked} = useToggleInputSetup({checkedValue, uncheckedValue, value, input, self})
+
   return (
-    <Row className={cn('checkbox', className, {toggle})}>
-      <input id={id} type='checkbox' {...props} />
-      <Label htmlFor={id} title={title} className={cn('row middle justify', {danger})}>
-        {toggle
-          ? <Fragment>
-            <Text className='checkbox__true row'>{labelTrue}</Text>
-            <View className='checkbox__button' />
-            <Text className='checkbox__false row'>{labelFalse}</Text>
-          </Fragment>
-          : (label || id)
-        }
-      </Label>
+    <Row className={cn(className, 'checkbox', {active, disabled, readonly, loading, error, checked})}
+         {...viewProps}>
+      {childBefore}
+      <input {...input} />
+      {label != null && (
+        <Label className='checkbox__label' title={title} {...!disabled && !readonly && {htmlFor: id}}>
+          {label}
+        </Label>
+      )}
+      {childAfter}
+      {loading && <Loader loading size='smaller' />}
     </Row>
   )
 }
 
+Checkbox.defaultProps = {
+  className: 'gap-smaller',
+  checkedValue: true,
+  uncheckedValue: false,
+}
+
 Checkbox.propTypes = {
-  // Input type
-  type: type.Enum(['toggle', 'checkbox']),
+  // Text to use for checkbox, uses `id` if not given
+  label: type.String,
   // Unique identifier, default is string created from React.useId()
   id: type.String,
-  // Text to use for type='checkbox', uses `id` if not given
-  label: type.String,
-  // UI to show for checked state of type='toggle'
-  labelTrue: type.Node,
-  // UI to show for unchecked state of type='toggle'
-  labelFalse: type.Node,
-  // Input onChange callback(checked: boolean, name: string, event: Event)
+  // Input onChange callback(event, value: any, name?: string, self: object)
   onChange: type.Function,
   // Internal value for controlled checked or unchecked state
   value: type.Any,
-  // Internal value to assign to checked case
-  valueTrue: type.Any,
-  // Internal value to assign to unchecked case
-  valueFalse: type.Any,
   // Initial value for uncontrolled checked or unchecked state
   defaultValue: type.Any,
-  // Whether Label for unchecked state should have 'danger' CSS class
-  danger: type.Boolean,
+  // Internal value to assign to checked case
+  checkedValue: type.Any,
+  // Internal value to assign to unchecked case
+  uncheckedValue: type.Any,
   // Whether to disable toggling state
   readonly: type.Boolean,
 }
 
-Checkbox.defaultProps = {
-  className: 'gap-smaller',
-  type: 'checkbox',
-  valueTrue: true,
-  valueFalse: false,
-}
 const CheckboxMemo = React.memo(Checkbox)
 CheckboxMemo.name = Checkbox.name
 CheckboxMemo.propTypes = Checkbox.propTypes
 CheckboxMemo.defaultProps = Checkbox.defaultProps
 export default CheckboxMemo
+
+const checkboxEnabledOptions = {childBefore: true, childAfter: true}
+
+// Extends `useInputSetup` props for checked/unchecked input
+export function useToggleInputSetup ({checkedValue, uncheckedValue, value, input, self}) {
+  // Event Handler ---------------------------------------------------------------------------------
+  if (!self.changeChecked) self.changeChecked = function (e) {
+    const value = e.target.checked ? checkedValue : uncheckedValue
+    return self.onChange.call(this, e, value) // extend the base pattern
+  }
+  input.onChange = self.changeChecked
+
+  // Render Prop -----------------------------------------------------------------------------------
+  const checked = input.checked = value === checkedValue
+  input.type = 'checkbox'
+  delete input.value
+
+  return {checked}
+}
