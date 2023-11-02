@@ -1,3 +1,5 @@
+import { Text } from '@webframer/ui'
+import { Steps } from 'nextra/components'
 import Checkbox from 'view/assets/Checkbox.js'
 import Datepicker from 'view/assets/Datepicker.js'
 import Input from 'view/assets/Input.js'
@@ -12,6 +14,7 @@ import AssetLink from 'view/components/AssetLink.jsx'
 import 'view/dist/editor.css'
 
 export const uri = '/docs/ui/inputs/'
+export const style = {width: 240}
 
 # Webframe UI Inputs
 
@@ -21,29 +24,136 @@ Webframe's [Universal Input API](#universal-input-api) allows the use of a singl
 <Row className='full-width gap wrap'>
   <AssetLink component={Input} uri={uri} />
   <AssetLink component={Select} uri={uri} />
+  <AssetLink component={TextArea} uri={uri} />
   <AssetLink pending component={Datepicker} uri={uri} />
   <AssetLink component={Upload} uri={uri} />
-  <AssetLink component={Checkbox} uri={uri} />
   <AssetLink pending component={Radio} uri={uri} />
+  <AssetLink component={Checkbox} uri={uri} />
   <AssetLink component={Switch} uri={uri} />
   <AssetLink pending component={Slider} uri={uri} />
-  <AssetLink component={TextArea} uri={uri} />
 </Row>
 
 ## Universal Input API
 
-### UX Patterns
+Webframe UI Inputs follow a set of standardized props, component behaviors and UI design patterns in order to provide both end users and application developers with a **consistent**, **predictable** and **intuitive** user experience.
 
-### Event Handlers
-#### On Change
-#### On Focus
-#### On Blur
+In order to support Universal Input API, an input control should comply with [UX design best practices](/docs/best-practices/ui-design-patterns), common attributes, input states, event handlers and value functions listed below.
 
-### Value Functions
-#### Format
-#### Parse
-#### Normalize
+### Common Attributes
 
-### Custom Setup
-#### Dynamic Import
-#### Self Instance
+- `compact` - whether to use the minimum width required to fit input content
+- `defaultValue` - the initial **value** to use when input has no value
+- `label` - a text or custom UI that clearly describes the input and appears in all input states
+- `placeholder` - a text or custom UI that only appears when input is unfilled or partially filled
+- `tooltip` - [Tooltip props](/docs/ui/components/Tooltip#prop-types) (or content) to display as popup on interaction with input
+- `type` - this attribute is reserved as identifier key for dynamic import of [input controls](/docs/ui/inputs/Input#custom-input-type)
+- `value` - the internal input value (maybe different from the displayed value) via [value functions](#value-functions).
+
+The remaining attributes are listed in the next sections.
+
+## Input States
+
+<Steps>
+### `disabled`
+
+All user interactions with the input is blocked, with at least two visual cues.
+<Text className='faded'>Example: fade and prevent focus on disabled input</Text>
+<Input disabled value='disabled' style={style} />
+
+### `readonly`
+
+User can read and select input value, but cannot edit it.
+<Text className='faded'>Example: user can select and copy readonly input</Text>
+<Input readonly value='readonly' style={style} />
+
+### `loading`
+
+Similar to **disabled** state, but in addition, has a loading progress indicator.
+<Text className='faded'>Example: user cannot interact with loading input</Text>
+<Input loading value='loading' style={style} />
+</Steps>
+
+## Event Handlers
+
+<Steps>
+### `onChange`
+
+The on change event should fire whenever internal input **value** changes.
+
+### `onFocus`
+
+The on focus event should fire whenever the input field capturing user actions receives focus.
+
+### `onBlur`
+
+The on blur event should fire whenever the input field capturing user actions loses focus.
+</Steps>
+
+```ts filename="Function Signature"
+// `onFocus` and `onBlur` event handlers have the same signature
+function onChange (
+  // Browser or native app event object
+  event: Event,
+  // Internal input value
+  value: any,
+  // Input `name` attribute
+  name: string | undefined,
+  // Input control instance (with interface like React Class Component instance)
+  self: object,
+  // Optional callback that needs to be fired manually when setting `event.preventDefault()`
+  callback?: Function
+) {}
+```
+
+## Value Functions
+
+<Steps>
+### `format`
+
+A function that receives internal input value and returns the displayed value.
+<Text className='faded'>Example: format internal `Date` object into human readable date string</Text>
+```ts filename="Function Signature"
+function format (
+  // Internal input value
+  value: any,
+  // Input `name` attribute
+  name: string | undefined,
+  // Input control instance (with interface like React Class Component instance)
+  self: object
+): any {}
+```
+
+### `parse`
+
+A function that receives internal input value and returns new value for `onChange`, `onFocus` and `onBlur` event handlers without modifying internal state.
+<Text className='faded'>Example: parse a numerical string with locale aware formatting typed in by users into `Number` type</Text>
+```ts filename="Function Signature"
+function parse (
+  // Internal input value
+  value: any,
+  // Input `name` attribute
+  name: string | undefined,
+  // Input control instance (with interface like React Class Component instance)
+  self: object,
+  // Browser or native app event object
+  event: Event,
+): any {}
+```
+
+### `normalize`
+
+A function that receives user inputted value, sanitizes it, and returns internal input value.
+<Text className='faded'>Example: sanitize a phone number typed in by the user to remove invalid characters</Text>
+```ts filename="Function Signature"
+function normalize (
+  // User inputted value
+  value: any,
+  // Input `name` attribute
+  name: string | undefined,
+  // Input control instance (with interface like React Class Component instance)
+  self: object,
+  // Browser or native app event object
+  event: Event,
+): any {}
+```
+</Steps>

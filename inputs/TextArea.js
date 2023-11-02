@@ -9,6 +9,8 @@ import { useInputSetup } from './InputNative.js'
 
 /**
  * Wrapper for Native HTML `<textarea>`.
+ * @see https://webframe.app/docs/ui/inputs/TextArea
+ *
  * Features:
  *  - Label added before textarea
  *  - Icon at the start or end of textarea

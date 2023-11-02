@@ -15,6 +15,7 @@ import { Upload } from './Upload.js'
 
 /**
  * Multiple Files Uploader in Grid Layout with optional File preview.
+ * @see https://webframe.app/docs/ui/inputs/UploadGrid
  *
  * Differences from Upload.jsx component:
  *  - Accepts `initialValues` as `FileInput[]` to sync with backend schema and `final-form`.

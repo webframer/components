@@ -7,7 +7,7 @@ import { useState } from 'react'
 
 export const start = Date.now()
 
-# TextArea
+# Text Area
 
 A browser native text area input with optional icons and auto resizable input height according to content length.
 
@@ -33,16 +33,16 @@ A browser native text area input with optional icons and auto resizable input he
 
 <CodeExample desc='Label & Placeholder Text'>
   <View>
-    <TextArea label='Label' placeholder='Placeholder...' />
+    <TextArea label='Label' placeholder='Placeholder' />
   </View>
 </CodeExample>
 
 <CodeExample desc='Icon at the Start'>
-  <TextArea icon='edit' placeholder='Placeholder...' />
+  <TextArea icon='edit' placeholder='Placeholder' />
 </CodeExample>
 
 <CodeExample desc='Icon at the End'>
-  <TextArea iconEnd='copy' placeholder='Placeholder...' />
+  <TextArea iconEnd='copy' placeholder='Placeholder' />
 </CodeExample>
 
 ### Input Sizes
@@ -101,7 +101,7 @@ A browser native text area input with optional icons and auto resizable input he
     return (
       <View className='center gap'>
         <TextArea value={value} />
-        <Button onClick={() => set('Updated ' + timeSince(start))}>
+        <Button onClick={() => set('Updated ' + timeSince(start) + ' ago')}>
           👆🏽 Update
         </Button>
       </View>
@@ -112,7 +112,7 @@ A browser native text area input with optional icons and auto resizable input he
 ### Event Handlers
 
 <CodeExample desc='On Change Callback'>
-  <TextArea placeholder='Toggle to fire event' onChange={(e, value) => alert(
+  <TextArea placeholder='Edit to fire event' onChange={(e, value) => alert(
     ips('onChange(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
   )} />
 </CodeExample>

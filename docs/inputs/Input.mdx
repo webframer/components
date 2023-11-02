@@ -29,7 +29,7 @@ export function InputComponents ({controls}) {
 
 A **Universal Input** component that handles user inputs of all types, including using your own custom UI. This component is a thin wrapper that delegates rendering to other input controls.
 
-> It supports [Universal Input API](/docs/ui/inputs#universal-input-api) and adds extra elements, like help info and error messages, for a consistent UX (user experience).
+> It supports [Universal Input API](/docs/ui/inputs#universal-input-api) and adds extra elements, like help info, error messages and tooltip popup, for a consistent UX (user experience).
 
 ## Prop Types
 
@@ -98,7 +98,7 @@ A **Universal Input** component that handles user inputs of all types, including
   <Input type='tel' icon='im/phone' placeholder='123-456-7890' pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" />
 </CodeExample>
 
-<CodeExample desc='Select Input'>
+<CodeExample desc='Select Dropdown'>
   <Input type='select' options={[
     {text: 'Alpha', value: 1},
     {text: 'Beta', value: 2},
@@ -106,7 +106,7 @@ A **Universal Input** component that handles user inputs of all types, including
   ]} />
 </CodeExample>
 
-<CodeExample desc='File Input'>
+<CodeExample desc='File Uploads Dropzone'>
   <Input type='upload' />
 </CodeExample>
 
@@ -192,7 +192,7 @@ A **Universal Input** component that handles user inputs of all types, including
 
 ## Custom Input Type
 
-Webframe universal `Input` supports rendering with any custom input control. Add as many controls as you like without worrying about the bundle size because Webframe uses automatic code splitting that lazy loads them on the client side.
+Webframe universal `Input` supports rendering with any custom input control. Add as many controls as you like without worrying about the bundle size because Webframe uses automatic code splitting that lazy loads components on the client side.
 
 ### Setup
 

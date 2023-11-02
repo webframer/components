@@ -655,7 +655,7 @@ Select.propTypes = {
   // Function(value, name?, self, event) => any - Deserializer for onChange/onBlur/onFocus value
   // Select always stores the `value` or `value[]` internally for its logic, like fuzzy search
   parse: type.Function,
-  // Function(query, name?, event, self) => string - search query normalizer to sanitize user input
+  // Function(query, name?, self, event) => string - search query normalizer to sanitize user input
   normalize: type.Function,
   // Whether to always render options, even when closed
   forceRender: type.Boolean,

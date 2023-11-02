@@ -71,14 +71,15 @@ export function InputNative ({className, error, ...props}) {
  * @param {string|object|function} icon - name string, props object, or render function
  * @param {object} self - function Component instance
  * @param {object} [props]:
- *   {string} id - input id
+ * @param {string} props.id - input id
+ * @param {object} props[props] - Label props
  * @returns {JSX.Element}
  */
-export function renderInputIcon (icon, self, {id} = {}) {
+export function renderInputIcon (icon, self, {id, ...props} = {}) {
   return (
-    <Label className='input__icon' {...id != null && {htmlFor: id}}>{(isString(icon)
+    <Label className='input__icon' {...id != null && {htmlFor: id}} {...props}>{(isString(icon)
         ? <Icon name={icon} />
-        : (isObject(icon) ? <Icon {...icon} /> : renderProp(icon, self))
+        : (isObject(icon) && icon.name != null ? <Icon {...icon} /> : renderProp(icon, self))
     )}</Label>
   )
 }
@@ -323,11 +324,11 @@ InputNative.propTypes = {
   label: type.NodeOrFunction,
   // Whether input is loading
   loading: type.Boolean,
-  // Function(value, name?, event?, self) => string - internal value formatter for native input (UI display)
+  // Function(value, name?, self) => string - internal value formatter for native input (UI display)
   format: type.Function,
-  // Function(value, name?, event, self) => any - value parser for onChange/onBlur/onFocus handlers
+  // Function(value, name?, self, event) => any - value parser for onChange/onBlur/onFocus handlers
   parse: type.Function,
-  // Function(value, name?, event, self) => string - internal value normalizer to sanitize user input
+  // Function(value, name?, self, event) => string - internal value normalizer to sanitize user input
   normalize: type.Function,
   // Prefix to show before the Input value text
   prefix: type.NodeOrFunction,
