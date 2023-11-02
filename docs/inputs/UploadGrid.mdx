@@ -84,21 +84,27 @@ A set of file [Upload](/docs/ui/inputs/Upload) inputs with multiple dropzones th
 ### Event Handlers
 
 <CodeExample desc='On Change Callback'>
-  <UploadGrid label='Toggle to fire event' onChange={(e, value) => alert(
+  <UploadGrid placeholder='Upload file to fire event' onChange={(e, value) => alert(
     ips('onChange(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
   )} maxFiles={3} maxColumns={3} />
 </CodeExample>
 
 <CodeExample desc='On Focus Callback'>
-  <UploadGrid label='Focus to fire event' onFocus={(e, value) => {
+  <UploadGrid placeholder='Focus to fire event' onFocus={(e, value) => {
     // cannot alert() because after alert input gets focus again
     console.log(ips('onFocus(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value}))
   }} maxFiles={3} maxColumns={3} />
 </CodeExample>
 
 <CodeExample desc='On Blur Callback'>
-  <UploadGrid label='Blur to fire event' onBlur={(e, value) => alert(
+  <UploadGrid placeholder='Blur to fire event' onBlur={(e, value) => alert(
     ips('onBlur(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
+  )} maxFiles={3} maxColumns={3} />
+</CodeExample>
+
+<CodeExample desc='On Remove Callback'>
+  <UploadGrid placeholder='Upload then remove file to fire event' onRemove={(e, files) => alert(
+    ips('onRemove(\n  event: Event,\n  fileInputs: {files},\n  name?: string,\n  self: object,\n  callback: function,\n) {}', {files})
   )} maxFiles={3} maxColumns={3} />
 </CodeExample>
 

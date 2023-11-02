@@ -1,0 +1,139 @@
+import { ips } from '@webframer/js'
+import { timeSince } from '@webframer/js/time.js'
+import { Button, Input, TextArea, View } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/views/CodeExample.js'
+import PropsTable from '@webframer/ui/views/PropsTable.js'
+import { useState } from 'react'
+
+export const start = Date.now()
+
+# TextArea
+
+A browser native text area input with optional icons and auto resizable input height according to content length.
+
+> Supports [Universal Input API](/docs/ui/inputs#universal-input-api), with text `format`, `parse`, `normalize` and event action handlers.
+
+## Prop Types
+
+<PropsTable component={TextArea} />
+
+## Examples
+
+### Basic Usage
+
+<CodeExample>
+  <TextArea />
+</CodeExample>
+
+<CodeExample desc='Via Universal Input'>
+  <Input type='textarea' />
+</CodeExample>
+
+### Input Customisation
+
+<CodeExample desc='Label & Placeholder Text'>
+  <View>
+    <TextArea label='Label' placeholder='Placeholder...' />
+  </View>
+</CodeExample>
+
+<CodeExample desc='Icon at the Start'>
+  <TextArea icon='edit' placeholder='Placeholder...' />
+</CodeExample>
+
+<CodeExample desc='Icon at the End'>
+  <TextArea iconEnd='copy' placeholder='Placeholder...' />
+</CodeExample>
+
+### Input Sizes
+
+<CodeExample>
+  <View className='gap'>
+    <TextArea className='font-smallest' placeholder='smallest' />
+    <TextArea className='font-smaller' placeholder='smaller' />
+    <TextArea className='font-small' placeholder='small' />
+    <TextArea placeholder='base' />
+    <TextArea className='font-large' placeholder='large' />
+    <TextArea className='font-larger' placeholder='larger' />
+    <TextArea className='font-largest' placeholder='largest' />
+  </View>
+</CodeExample>
+
+<CodeExample desc='Single Row Text Area'>
+  <TextArea rows={1} value='rows={1}' />
+</CodeExample>
+
+<CodeExample desc='Automatically Resize Rows to Fit Content Height'>
+  <TextArea resize value='Add new lines to resize...' />
+</CodeExample>
+
+<CodeExample desc='Compact Text Area Width'>
+  <TextArea compact value='Compact' />
+</CodeExample>
+
+### Input States
+
+<CodeExample desc='Disabled'>
+  <TextArea disabled value='disabled' />
+</CodeExample>
+
+<CodeExample desc='Read only'>
+  <TextArea readonly value='readonly' />
+</CodeExample>
+
+<CodeExample desc='Loading'>
+  <TextArea loading value='loading' />
+</CodeExample>
+
+### Input Values
+
+<CodeExample desc='Default Text Content'>
+  <TextArea defaultValue='Default Value' />
+</CodeExample>
+
+<CodeExample desc='Controlled State'>
+  <TextArea controlledValue value='Controlled Value' />
+</CodeExample>
+
+<CodeExample desc='Hybrid State (uncontrolled, but updates on `value` changes)'>
+  {() => {
+    const [value, set] = useState('Uncontrolled Synced Value')
+    return (
+      <View className='center gap'>
+        <TextArea value={value} />
+        <Button onClick={() => set('Updated ' + timeSince(start))}>
+          👆🏽 Update
+        </Button>
+      </View>
+    )
+  }}
+</CodeExample>
+
+### Event Handlers
+
+<CodeExample desc='On Change Callback'>
+  <TextArea placeholder='Toggle to fire event' onChange={(e, value) => alert(
+    ips('onChange(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
+  )} />
+</CodeExample>
+
+<CodeExample desc='On Focus Callback'>
+  <TextArea placeholder='Focus to fire event' onFocus={(e, value) => {
+    // cannot alert() because after alert input gets focus again
+    console.log(ips('onFocus(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value}))
+  }} />
+</CodeExample>
+
+<CodeExample desc='On Blur Callback'>
+  <TextArea placeholder='Blur to fire event' onBlur={(e, value) => alert(
+    ips('onBlur(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
+  )} />
+</CodeExample>
+
+<CodeExample desc='On Remove Callback'>
+  <TextArea value='Click the cross icon to clear text content' onRemove={(e, value) => alert(
+    ips('onRemove(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
+  )} />
+</CodeExample>
+
+To add validation error message or tooltip, use [Universal TextArea Input](/docs/ui/inputs/Input).

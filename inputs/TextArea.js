@@ -1,5 +1,6 @@
 import cn from 'classnames'
 import React from 'react'
+import Loader from '../components/Loader.js'
 import { Row } from '../components/Row.js'
 import { extractProps } from '../components/View.js'
 import { type } from '../types.js'
@@ -17,10 +18,10 @@ import { useInputSetup } from './InputNative.js'
  *  - Resize textarea with automatic height adjustment
  *  - onRemove handler for removing the input field
  */
-export function TextArea ({className, error, loading, resize, ...props}) {
+export function TextArea ({className, error, resize, ...props}) {
   const viewProps = extractProps(props, {childBefore: false, childAfter: false})
   const {
-    active, compact, disabled, readonly,
+    active, compact, disabled, loading, readonly,
     childBefore, childAfter, icon, iconEnd, input, label, self,
   } = useInputSetup(props)
 
@@ -43,6 +44,7 @@ export function TextArea ({className, error, loading, resize, ...props}) {
       <textarea className={cn('textarea__field', {iconStart: icon, iconEnd})} {...input} ref={self.ref} />
       {iconEnd}
       {childAfter}
+      {loading && <Loader loading size='smaller' />}
     </Row>
   </>)
 }
@@ -52,7 +54,7 @@ export function TextArea ({className, error, loading, resize, ...props}) {
 // }
 
 TextArea.propTypes = {
-  // Whether to use minimal width that fits content, pass number for additional character offset
+  // Whether to use minimal width that fits content, pass a number for additional character offset
   compact: type.OneOf([type.Boolean, type.Number]),
   // Initial value for uncontrolled state
   defaultValue: type.Any,

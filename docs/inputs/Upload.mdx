@@ -80,7 +80,7 @@ For file preview or multiple file uploads, use [UploadGrid](/docs/ui/inputs/Uplo
     <Upload label='base' />
     <Upload className='font-large' label='large' />
     <Upload className='font-larger' label='larger' />
-    <Upload className='font-largest gap' label='largest' />
+    <Upload className='font-largest' label='largest' />
   </View>
 </CodeExample>
 
@@ -101,21 +101,27 @@ For file preview or multiple file uploads, use [UploadGrid](/docs/ui/inputs/Uplo
 ### Event Handlers
 
 <CodeExample desc='On Change Callback'>
-  <Upload label='Toggle to fire event' onChange={(e, value) => alert(
+  <Upload placeholder='Upload file to fire event' onChange={(e, value) => alert(
     ips('onChange(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
   )} />
 </CodeExample>
 
 <CodeExample desc='On Focus Callback'>
-  <Upload label='Focus to fire event' onFocus={(e, value) => {
+  <Upload placeholder='Focus to fire event' onFocus={(e, value) => {
     // cannot alert() because after alert input gets focus again
     console.log(ips('onFocus(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value}))
   }} />
 </CodeExample>
 
 <CodeExample desc='On Blur Callback'>
-  <Upload label='Blur to fire event' onBlur={(e, value) => alert(
+  <Upload placeholder='Blur to fire event' onBlur={(e, value) => alert(
     ips('onBlur(\n  event: Event,\n  value: {value},\n  name?: string,\n  self: object,\n) {}', {value})
+  )} />
+</CodeExample>
+
+<CodeExample desc='On Remove Callback'>
+  <Upload placeholder='Upload then remove file to fire event' onRemove={(e, files) => alert(
+    ips('onRemove(\n  event: Event,\n  removedFiles: {files},\n  name?: string,\n  self: object,\n  callback: function,\n) {}', {files})
   )} />
 </CodeExample>
 
