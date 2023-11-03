@@ -1,11 +1,14 @@
-import { Text, View } from '@webframer/ui'
+import { Text } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
 import PropsTable from '@webframer/ui/views/PropsTable.js'
+import View from 'view/assets/View.js'
+import AssetCard from 'view/components/AssetCard.jsx'
 
 # View
 
-The universal container element to wrap UI views.
-In browsers, it uses HTML `<div>` element. In native mobile apps, like React Native, it uses `<View>`.
+<AssetCard className='float-right margin' component={View} />
+
+The universal container element to wrap UI views. In browsers, it uses HTML `<div>` element. In native mobile apps, like React Native, it uses `<View>`.
 
 Use View component to abstract away framework implementations, so that your app works on all platforms.
 

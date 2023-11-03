@@ -2,8 +2,12 @@ import { FILE, ips } from '@webframer/js'
 import { Icon, Input, Text, UploadGrid, View } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
 import PropsTable from '@webframer/ui/views/PropsTable.js'
+import Upload from 'view/assets/Upload.js'
+import AssetCard from 'view/components/AssetCard.jsx'
 
 # Upload Grid
+
+<AssetCard className='float-right margin' component={Upload} />
 
 UploadGrid is a set of file [Upload](/docs/ui/inputs/Upload) inputs with multiple dropzones in a grid-like layout. Each dropzone can show image preview of selected files, with extra info, such as image resolution and file size.
 

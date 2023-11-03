@@ -1,8 +1,12 @@
-import { Expand, ExpandPanel, ExpandTab, Icon, Text } from '@webframer/ui'
+import { ExpandPanel, ExpandTab, Icon, Text } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
 import PropsTable from '@webframer/ui/views/PropsTable.js'
+import Expand from 'view/assets/Expand.js'
+import AssetCard from 'view/components/AssetCard.jsx'
 
 # Expand
+
+<AssetCard className='float-right margin' component={Expand} />
 
 A component to expand and collapse content along the width or the height.
 It has customisable animation duration, and is SEO friendly (search engines can index collapsed content when `forceRender` is `true`).

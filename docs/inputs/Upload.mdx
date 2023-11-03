@@ -1,9 +1,13 @@
 import { ips, SIZE_KB } from '@webframer/js'
-import { Icon, Input, Text, Upload, View } from '@webframer/ui'
+import { Icon, Input, Text, View } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
 import PropsTable from '@webframer/ui/views/PropsTable.js'
+import Upload from 'view/assets/Upload.js'
+import AssetCard from 'view/components/AssetCard.jsx'
 
 # Upload
+
+<AssetCard className='float-right margin' component={Upload} />
 
 A file input to browse and upload files from local devices, such as computer, laptop, tablet, etc. It has a drag & drop file upload dropzone that can restrict uploadable file types.
 

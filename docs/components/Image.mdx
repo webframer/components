@@ -1,10 +1,15 @@
-import { Image } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
 import PropsTable from '@webframer/ui/views/PropsTable.js'
+import Image from 'view/assets/Image.js'
+import AssetCard from 'view/components/AssetCard.jsx'
 
 # Image
 
+<AssetCard className='float-right margin' component={Image} />
+
 A component to display graphical elements.
+
+It is the native `img` element in the browser, which means you can pass in any props supported by the browser.
 
 ## Prop Types
 

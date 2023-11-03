@@ -21,9 +21,9 @@ import Tooltip from 'view/assets/Tooltip.js'
 import Video from 'view/assets/Video.js'
 import View from 'view/assets/View.js'
 import VirtualList from 'view/assets/VirtualList.js'
-import AssetLink from 'view/components/AssetLink.jsx'
-import 'view/dist/editor.css'
+import AssetCard from 'view/components/AssetCard.jsx'
 
+export const uri = '/docs/ui/components/'
 
 # Webframe UI Components
 
@@ -34,39 +34,39 @@ These UI components do not have any CSS style by default. You can provide your o
 ## Containers
 
 <Row className='full-width gap wrap'>
-  <AssetLink component={View} />
-  <AssetLink component={Row} />
-  <AssetLink component={Scroll} />
-  <AssetLink component={VirtualList} />
-  <AssetLink component={Text} />
+  <AssetCard component={View} uri={uri} />
+  <AssetCard component={Row} uri={uri} />
+  <AssetCard component={Scroll} uri={uri} />
+  <AssetCard component={VirtualList} uri={uri} />
+  <AssetCard component={Text} uri={uri} />
 </Row>
 
 ## Elements
 
 <Row className='full-width gap wrap'>
-  <AssetLink component={Button} />
-  <AssetLink component={Icon} />
-  <AssetLink pending component={Link} />
-  <AssetLink component={Image} />
-  <AssetLink pending component={Video} />
-  <AssetLink pending component={Audio} />
-  <AssetLink pending component={Avatar} />
-  <AssetLink pending component={Iframe} />
-  <AssetLink component={Divider} />
-  <AssetLink component={Spacer} />
+  <AssetCard component={Button} uri={uri} />
+  <AssetCard component={Icon} uri={uri} />
+  <AssetCard pending component={Link} uri={uri} />
+  <AssetCard component={Image} uri={uri} />
+  <AssetCard pending component={Video} uri={uri} />
+  <AssetCard pending component={Audio} uri={uri} />
+  <AssetCard pending component={Avatar} uri={uri} />
+  <AssetCard pending component={Iframe} uri={uri} />
+  <AssetCard component={Divider} uri={uri} />
+  <AssetCard component={Spacer} uri={uri} />
 </Row>
 
 
 ## Widgets
 
 <Row className='full-width gap wrap'>
-  <AssetLink pending component={Accordion} />
-  <AssetLink component={Expand} />
-  <AssetLink component={Badge} />
-  <AssetLink pending component={Carousel} />
-  <AssetLink component={Loader} />
-  <AssetLink pending component={Table} />
-  <AssetLink pending component={Tabs} />
-  <AssetLink component={Tooltip} />
+  <AssetCard pending component={Accordion} uri={uri} />
+  <AssetCard component={Expand} uri={uri} />
+  <AssetCard component={Badge} uri={uri} />
+  <AssetCard pending component={Carousel} uri={uri} />
+  <AssetCard component={Loader} uri={uri} />
+  <AssetCard pending component={Table} uri={uri} />
+  <AssetCard component={Tabs} uri={uri} />
+  <AssetCard component={Tooltip} uri={uri} />
 </Row>
 

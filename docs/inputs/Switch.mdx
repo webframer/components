@@ -1,10 +1,14 @@
 import { ips } from '@webframer/js'
-import { Button, Icon, Input, Spacer, Switch, Text, View } from '@webframer/ui'
+import { Button, Icon, Input, Spacer, Text, View } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
 import PropsTable from '@webframer/ui/views/PropsTable.js'
 import { useState } from 'react'
+import Switch from 'view/assets/Switch.js'
+import AssetCard from 'view/components/AssetCard.jsx'
 
 # Switch
+
+<AssetCard className='float-right margin' component={Switch} />
 
 A toggle input to switch between boolean values (`true` or `false`), or any pair of values with two possible outcomes.
 

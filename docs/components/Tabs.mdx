@@ -1,0 +1,127 @@
+import { Icon, Tab, TabList, TabPanel, Text, View } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/views/CodeExample.js'
+import PropsTable from '@webframer/ui/views/PropsTable.js'
+import Tabs from 'view/assets/Tabs.js'
+import AssetCard from 'view/components/AssetCard.jsx'
+
+# Tabs
+
+<AssetCard className='float-right margin' component={Tabs} />
+
+A component to display content grouped into different sections. Only one section can be displayed at a time - the active tab panel. Each content section is independent and has a corresponding tab element, that when activated, makes the content visible.
+
+Tabs can have horizontal or vertical layouts. To build Tabs, use:
+
+- `Tab` - the tappable element that sets active content to display.
+- `TabList` - an optional element to wrap all tab elements for styling purposes
+- `TabPanel` - the content section to show or hide, depending on the active tab.
+
+## Prop Types
+
+<PropsTable component={Tabs} />
+
+## Examples
+<CodeExample desc='Horizontal Tabs'>
+  <Tabs className='border radius'>
+    <TabList middle>
+      <Tab>Tab 1</Tab>
+      <Tab>Tab 2</Tab>
+    </TabList>
+    <View>
+      <TabPanel className='padding'>
+        Tab Panel 1
+      </TabPanel>
+      <TabPanel className='padding'>
+        Tab Panel 2
+      </TabPanel>
+    </View>
+  </Tabs>
+</CodeExample>
+
+<CodeExample desc='Vertical Tabs with Unordered ID'>
+  <Tabs vertical>
+    <TabList>
+      <Tab id='A'>Tab A</Tab>
+      <Tab id='B'>Tab B</Tab>
+      <Tab id='C'>Tab C</Tab>
+    </TabList>
+    <TabPanel id='B' className='padding bg-shade'>
+      Tab Panel B
+    </TabPanel>
+    <TabPanel id='C' className='padding bg-shade-hard'
+              forceRender>
+      Tab Panel C
+      forceRender
+    </TabPanel>
+    <TabPanel id='A' className='padding bg-shade-soft'>
+      Tab Panel A
+    </TabPanel>
+  </Tabs>
+</CodeExample>
+
+<CodeExample desc='Content Between Tabs'>
+  <Tabs className='border radius'>
+    <TabList middle>
+      <Text className='bg-neutral padding-h'>Before Tab</Text>
+      <Tab>Tab 1</Tab>
+      <Text className='bg-neutral padding-h'>Between Tab</Text>
+      <Tab>Tab 2</Tab>
+      <Text className='bg-neutral padding-h'>After Tab</Text>
+    </TabList>
+    <TabPanel className='padding'>
+      Tab Panel 1
+    </TabPanel>
+    <TabPanel className='padding'>
+      Tab Panel 2
+    </TabPanel>
+  </Tabs>
+</CodeExample>
+
+<CodeExample desc='Custom Tab Style with an Array of Items'>
+  <Tabs defaultId={1} items={[
+    {
+      tab: {
+        className: 'btn',
+        icon: 'heart',
+        text: 'Tab 1',
+      },
+      panel: 'Panel 1 - declared as text',
+    },
+    {
+      tab: 'Tab 2',
+      panel: () => (
+        <Text className='padding bg-shade-soft'>
+          Panel 2 - as Render Function
+        </Text>
+      ),
+    },
+    {
+      tab: <Icon className='btn' name='heart' />,
+      panel: (
+        <Text className='padding'>
+          Panel 3 - declared as Node
+        </Text>
+      ),
+    },
+  ]} />
+</CodeExample>
+
+<CodeExample desc='Controlled Tab State'>
+  <Tabs activeId='C'>
+    <TabList>
+      <Tab id='A'>Tab A</Tab>
+      <Tab id='B'>Tab B</Tab>
+      <Tab id='C'>Tab C</Tab>
+    </TabList>
+    <TabPanel id='B' className='padding'>
+      Tab Panel B
+    </TabPanel>
+    <TabPanel id='C' className='padding border'>
+      Tab Panel C
+      controlled
+    </TabPanel>
+    <TabPanel id='A' className='padding'>
+      Tab Panel A
+    </TabPanel>
+  </Tabs>
+</CodeExample>

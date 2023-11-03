@@ -1,10 +1,16 @@
-import { Button, Icon, Row, Spacer, Text, View } from '@webframer/ui'
+import { Icon, Row, Spacer, Text, View } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
 import PropsTable from '@webframer/ui/views/PropsTable.js'
+import Button from 'view/assets/Button.js'
+import AssetCard from 'view/components/AssetCard.jsx'
 
 # Button
 
-A native button element for `onClick` action handlers.
+<AssetCard className='float-right margin' component={Button} />
+
+A native button element for capturing user taps on touch devices, or mouse clicks on desktop devices with `onClick` action handler.
+
+In browser, you can pass all event handlers supported by the button element.
 
 ## Prop Types
 

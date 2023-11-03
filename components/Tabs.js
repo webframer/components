@@ -17,6 +17,7 @@ export const [
 
 /**
  * Tabs --------------------------------------------------------------------------------------------
+ * @see https://webframe.app/docs/ui/components/Tabs
  * @todo: improve accessibility - set tabIndex={-1} for Tab to enable TAB focus on panel
  *    https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/tabpanel_role
  * @example:

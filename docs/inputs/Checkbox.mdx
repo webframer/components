@@ -1,10 +1,13 @@
-import { Button, Checkbox, Input, View } from '@webframer/ui'
+import { Button, Input, View } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
 import PropsTable from '@webframer/ui/views/PropsTable.js'
 import { useState } from 'react'
-
+import Checkbox from 'view/assets/Checkbox.js'
+import AssetCard from 'view/components/AssetCard.jsx'
 
 # Checkbox
+
+<AssetCard className='float-right margin' component={Checkbox} />
 
 A native browser checkbox input with label to toggle between two states. Similar to [Switch input](/docs/ui/inputs/Switch), internal **checked** and **unchecked** states can be set to any value, not just boolean `true` or `false`.
 

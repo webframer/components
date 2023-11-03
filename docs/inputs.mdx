@@ -10,8 +10,7 @@ import Slider from 'view/assets/Slider.js'
 import Switch from 'view/assets/Switch.js'
 import TextArea from 'view/assets/TextArea.js'
 import Upload from 'view/assets/Upload.js'
-import AssetLink from 'view/components/AssetLink.jsx'
-import 'view/dist/editor.css'
+import AssetCard from 'view/components/AssetCard.jsx'
 
 export const uri = '/docs/ui/inputs/'
 export const style = {width: 240}
@@ -22,15 +21,15 @@ Webframe's [Universal Input API](#universal-input-api) allows the use of a singl
 ## Input Components
 
 <Row className='full-width gap wrap'>
-  <AssetLink component={Input} uri={uri} />
-  <AssetLink component={Select} uri={uri} />
-  <AssetLink component={TextArea} uri={uri} />
-  <AssetLink pending component={Datepicker} uri={uri} />
-  <AssetLink component={Upload} uri={uri} />
-  <AssetLink pending component={Radio} uri={uri} />
-  <AssetLink component={Checkbox} uri={uri} />
-  <AssetLink component={Switch} uri={uri} />
-  <AssetLink pending component={Slider} uri={uri} />
+  <AssetCard component={Input} uri={uri} />
+  <AssetCard component={Select} uri={uri} />
+  <AssetCard component={TextArea} uri={uri} />
+  <AssetCard pending component={Datepicker} uri={uri} />
+  <AssetCard component={Upload} uri={uri} />
+  <AssetCard pending component={Radio} uri={uri} />
+  <AssetCard component={Checkbox} uri={uri} />
+  <AssetCard component={Switch} uri={uri} />
+  <AssetCard pending component={Slider} uri={uri} />
 </Row>
 
 ## Universal Input API

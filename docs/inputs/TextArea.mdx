@@ -1,13 +1,17 @@
 import { ips } from '@webframer/js'
 import { timeSince } from '@webframer/js/time.js'
-import { Button, Input, TextArea, View } from '@webframer/ui'
+import { Button, Input, View } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
 import PropsTable from '@webframer/ui/views/PropsTable.js'
 import { useState } from 'react'
+import TextArea from 'view/assets/TextArea.js'
+import AssetCard from 'view/components/AssetCard.jsx'
 
 export const start = Date.now()
 
 # Text Area
+
+<AssetCard className='float-right margin' component={TextArea} />
 
 A browser native text area input with optional icons and auto resizable input height according to content length.
 

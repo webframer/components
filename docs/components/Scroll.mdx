@@ -1,6 +1,7 @@
-import { Row, Scroll, Text, View } from '@webframer/ui'
+import { Row, Text, View } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
-import { Callout } from 'nextra/components'
+import Scroll from 'view/assets/Scroll.js'
+import AssetCard from 'view/components/AssetCard.jsx'
 
 export const items = Array(13).fill(true).map((v, i) => (
   <Text className={'padding padding-h-largest ' + (i % 2 ? 'bg-tint' : 'bg-shade')}>{i + 1}</Text>
@@ -17,13 +18,13 @@ export const largeItems = (
 
 # Scroll
 
+<AssetCard className='float-right margin' component={Scroll} />
+
 This is [View](/docs/ui/components/View) component with `scroll` prop set to `true` by default to enable scrollbar for overflowing content.
 
-<Callout type='info' emoji='ℹ️️'>
-Because of browser quirks related to flex layout, `View` with scroll mode enabled will have an extra inner `div` element that wraps `children` content.
-</Callout>
-
 Refer to View [Prop Types](/docs/ui/components/View#prop-types) for reference.
+
+> Because of browser quirks related to flex layout, `View` with scroll mode enabled will have an extra inner `div` element that wraps `children` content.
 
 ### When to Use Scroll View?
 

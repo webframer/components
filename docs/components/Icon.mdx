@@ -1,6 +1,8 @@
-import { Icon, Row } from '@webframer/ui'
+import { Row } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
 import PropsTable from '@webframer/ui/views/PropsTable.js'
+import Icon from 'view/assets/Icon.js'
+import AssetCard from 'view/components/AssetCard.jsx'
 import { SelectIconInput } from 'view/components/SelectIconInput.jsx'
 
 export let total = <b id='webframe-total-icons'>{Number(30000).toLocaleString()}+</b>
@@ -13,6 +15,8 @@ export let total = <b id='webframe-total-icons'>{Number(30000).toLocaleString()}
                      document.getElementById('webframe-total-icons').innerText = options.length.toLocaleString()
                    }, 0)
                  }} />
+
+<AssetCard className='float-right margin' component={Icon} />
 
 A lazy loaded component to display graphical elements. It supports: Font Icons, SVG Icons and Image Icons (the default).
 

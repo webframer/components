@@ -1,11 +1,17 @@
-import { Button, Text, Tooltip, View } from '@webframer/ui'
+import { Button, Text, View } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
 import PropsTable from '@webframer/ui/views/PropsTable.js'
 import { Callout } from 'nextra/components'
+import Tooltip from 'view/assets/Tooltip.js'
+import AssetCard from 'view/components/AssetCard.jsx'
 
 # Tooltip
 
+<AssetCard className='float-right margin' component={Tooltip} />
+
 Tooltips display additional information (text, images, or explanations), when users hover over, focus on, click or tap an element.
+
+Tooltip content can be text, or custom UI, which renders inside a popup that appears on user interaction with the element.
 
 ## Prop Types
 

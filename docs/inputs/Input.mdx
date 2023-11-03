@@ -1,8 +1,10 @@
 import Link from '@webframer/kit/router/next/Link.jsx'
-import { Button, Input, inputControls, Text, View } from '@webframer/ui'
+import { Button, inputControls, Text, View } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
 import PropsTable from '@webframer/ui/views/PropsTable.js'
 import { useState } from 'react'
+import Input from 'view/assets/Input.js'
+import AssetCard from 'view/components/AssetCard.jsx'
 
 export function InputComponents ({controls}) {
   const [, forceUpdate] = useState(0)
@@ -24,8 +26,9 @@ export function InputComponents ({controls}) {
   )
 }
 
-
 # Input
+
+<AssetCard className='float-right margin' component={Input} />
 
 A **Universal Input** component that handles user inputs of all types, including using your own custom UI. This component is a thin wrapper that delegates rendering to other input controls.
 

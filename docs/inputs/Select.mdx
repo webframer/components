@@ -1,13 +1,17 @@
 import { ips } from '@webframer/js'
-import { Button, Icon, Input, Select, Text, View } from '@webframer/ui'
+import { Button, Icon, Input, Text, View } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
 import PropsTable from '@webframer/ui/views/PropsTable.js'
 import { useState } from 'react'
+import Select from 'view/assets/Select.js'
+import AssetCard from 'view/components/AssetCard.jsx'
 
 export const options = [1, 2, 3]
 export const optionsText = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon']
 
 # Select
+
+<AssetCard className='float-right margin' component={Select} />
 
 A dropdown menu input with selection of choices. Options are searchable with fuzzy search.
 

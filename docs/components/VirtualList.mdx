@@ -1,7 +1,9 @@
-import { Text, VirtualList } from '@webframer/ui'
+import { Text } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
 import PropsTable from '@webframer/ui/views/PropsTable.js'
 import { Callout } from 'nextra/components'
+import VirtualList from 'view/assets/VirtualList.js'
+import AssetCard from 'view/components/AssetCard.jsx'
 
 export const items10k = Array(10000).fill(true).map((v, i) => (
   <Text className={'padding padding-h-largest ' + (i % 2 ? 'bg-tint' : 'bg-shade')}>{i + 1}</Text>
@@ -14,7 +16,11 @@ export const style = {border: '3px solid var(--primary)'}
 
 # Virtual List
 
+<AssetCard className='float-right margin' component={VirtualList} />
+
 A [View](/docs/ui/components/View) container to display large list of items (thousands) without performance penalty.
+
+VirtualList is a perfect component for implementing **Infinite Scroll** experience because its rendering speed does not depend on the number of items in the list.
 
 ## Prop Types
 
