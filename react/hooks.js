@@ -484,7 +484,7 @@ export function usePreviousValue (value) {
  * Check whether the app has just changed routes
  * @param {object} props - of the Component
  * @param {object} [self] - Component instance
- * @returns [hasChangedRoutes?: boolean, previousChildren?, previousLocation?] true -
+ * @returns [hasChangedRoute?: boolean, previousChildren?, previousLocation?] true -
  *    if route changed, else false, void initially
  */
 export function useRouteChange (props, self = useRef({}).current) {

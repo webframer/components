@@ -1,18 +1,117 @@
-import { Switch, View } from '@webframer/ui'
+import { Icon, Row, Switch, Text, View } from '@webframer/ui'
 import { CodeExample } from '@webframer/ui/views/CodeExample.js'
 import { Callout } from 'nextra/components'
+import CopyToClipboard from 'view/components/CopyToClipboard.jsx'
+
+
+export const FontSize = ({children}) => (
+  <Row className='bg-shade-soft middle padding' style={{paddingInlineEnd: '2.5em'}}>
+    <Text style={{fontSize: `var(${children})`}}>
+      <Icon name='im/sphere' /> {children}
+    </Text>
+    <CopyToClipboard className='position-end btn-transparent padding-smaller appear-on-hover-only' text={children} />
+  </Row>
+)
+
+export const BorderRadius = ({children}) => (
+  <Row className='bg-shade-soft middle padding border border-dark'
+       style={{paddingInlineEnd: '2.5em', borderRadius: `var(${children})`}}>
+    <Text>{children}</Text>
+    <CopyToClipboard className='position-end btn-transparent padding-smaller appear-on-hover-only' text={children} />
+  </Row>
+)
+
+export const Spacing = ({children}) => (
+  <Row className='bg-shade-soft middle'>
+    <View className='bg-stripes bg-primary fill-height'
+          style={{paddingInlineStart: `var(${children})`, '--border-color': 'white'}} />
+    <Text className='padding' style={{paddingInlineEnd: '2.5em'}}>{children}</Text>
+    <CopyToClipboard className='position-end btn-transparent padding-smaller appear-on-hover-only' text={children} />
+  </Row>
+)
 
 # CSS Variables
 
+Webframe UI Styles have human-friendly names to describe variables.
+
+Variable names match the intent so that you can focus on designing beautiful apps, instead of remembering hard to memorize suffixes like most UI frameworks and libraries.
+
+This section provides examples for variables other than [Color variables](/docs/yu/styles/colors).
+
+## Sizes
+
+Variables that can scale to different sizes come with these modifiers:
+
+- `-smallest`
+- `-smaller`
+- `-small`
+- `-base` (the default size, can be omitted sometimes)
+- `-large`
+- `-larger`
+- `-largest`
+
+### Font Sizes
+
+<CodeExample desc='Text & Icon Font Sizes Example'>
+  <View className='gap'>
+    <FontSize>--font-smallest</FontSize>
+    <FontSize>--font-smaller</FontSize>
+    <FontSize>--font-small</FontSize>
+    <FontSize>--font-base</FontSize>
+    <FontSize>--font-large</FontSize>
+    <FontSize>--font-larger</FontSize>
+    <FontSize>--font-largest</FontSize>
+    <FontSize>--font-2x</FontSize>
+  </View>
+</CodeExample>
+
+### Border Radius
+
+<CodeExample desc='Rounded Corner Sizes Example'>
+  <View className='gap'>
+    <BorderRadius>--radius-smallest</BorderRadius>
+    <BorderRadius>--radius-smaller</BorderRadius>
+    <BorderRadius>--radius-small</BorderRadius>
+    <BorderRadius>--radius</BorderRadius>
+    <BorderRadius>--radius-large</BorderRadius>
+    <BorderRadius>--radius-larger</BorderRadius>
+    <BorderRadius>--radius-largest</BorderRadius>
+    <BorderRadius>--radius-round</BorderRadius>
+  </View>
+</CodeExample>
+
 ### Spacing
 
-`--padding` and `--margin` use relative `em` unit so that the entire UI scales dynamically according to the font size.
+<CodeExample desc='Margin & Padding Variables Example'>
+  <Row className='gap wrap'>
+    <View className='gap'>
+      <Spacing>--margin-smallest</Spacing>
+      <Spacing>--margin-smaller</Spacing>
+      <Spacing>--margin-small</Spacing>
+      <Spacing>--margin</Spacing>
+      <Spacing>--margin-large</Spacing>
+      <Spacing>--margin-larger</Spacing>
+      <Spacing>--margin-largest</Spacing>
+    </View>
+    <View className='gap'>
+      <Spacing>--padding-smallest</Spacing>
+      <Spacing>--padding-smaller</Spacing>
+      <Spacing>--padding-small</Spacing>
+      <Spacing>--padding</Spacing>
+      <Spacing>--padding-large</Spacing>
+      <Spacing>--padding-larger</Spacing>
+      <Spacing>--padding-largest</Spacing>
+    </View>
+  </Row>
+</CodeExample>
+
+Webframe `--margin` and `--padding` variables use relative `em` unit so that the entire UI scales dynamically according to the font size.
 
 This is the desired and expected behavior for most use cases, because it eliminates the bloated code required to style all UI Components for different sizes.
 
 For example, in order to scale the [Switch](/docs/ui/inputs/Switch) input, all we have to do is set the font size:
 
-<CodeExample>
+<CodeExample desc='Example of Scaling Content Size'>
   <View className='gap'>
     <Switch className='font-smallest' value={true} />
     <Switch className='font-smaller' value={true} />
