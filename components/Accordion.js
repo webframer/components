@@ -7,7 +7,9 @@ import { View } from './View.js'
 
 /**
  * List of Expandable/Collapsible content sections
- * @see: Expand docs for documentation.
+ * @see https://webframe.app/docs/ui/components/Accordion
+ * @see https://webframe.app/docs/ui/components/Expand
+ *
  * @example:
  *    import { Accordion, Expand, ExpandPanel, ExpandTab } from '@webframer/ui'
  *
@@ -71,14 +73,13 @@ Accordion.propTypes = {
   children: type.NodeOrFunction.isRequired,
   // Expand/Collapse animation duration in milliseconds
   duration: type.Millisecond,
-  // Whether to allow opening multiple Expand components at once
+  // Whether to allow opening multiple Accordion panels at once
   multiple: type.Boolean,
   // Callback(event: Event, open: boolean, id: string, index?: number) when `open` state changes
   onChange: type.Function,
-  // Whether to expand all ExpandPanel content
+  // Whether to have all content expanded by default
   open: type.Boolean,
   // Whether to always render ExpandPanel content (useful for SEO indexing)
-  // @see https://www.semrush.com/blog/html-hide-element/
   forceRender: type.Boolean,
 }
 

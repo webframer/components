@@ -122,7 +122,6 @@ Tabs.propTypes = {
   // Whether to use vertical orientation for Tabs
   vertical: type.Boolean,
   // Whether to always render all Tab Panels - can be set individually (useful for SEO indexing)
-  // @see https://www.semrush.com/blog/html-hide-element/
   forceRender: type.Boolean,
   // Alternative way to define Tabs and Panels as a single array
   items: type.ListOf(type.Obj({
@@ -274,7 +273,6 @@ TabPanel.propTypes = {
   // Tab content
   children: type.NodeOrFunction,
   // Whether to always render the Tab Panel (useful for SEO indexing)
-  // @see https://www.semrush.com/blog/html-hide-element/
   forceRender: type.Boolean,
   // Whether to make Tab Panel scrollable
   scroll: type.Boolean,

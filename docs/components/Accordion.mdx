@@ -1,0 +1,112 @@
+import { Expand, ExpandPanel, ExpandTab, Icon, Text } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/views/CodeExample.js'
+import PropsTable from '@webframer/ui/views/PropsTable.js'
+import Accordion from 'view/assets/Accordion.js'
+import AssetCard from 'view/components/AssetCard.jsx'
+
+export const items = Array(3).fill(true).map((_v, i) => ({
+  question: `Question number ${i + 1}?`,
+  answer: `Answer number ${i + 1}...`,
+}))
+
+# Accordion
+
+<AssetCard className='float-right margin' component={Accordion} />
+
+A component to expand and collapse individual items in a list, similar to the movement of panels in accordions (ex. expandable FAQ section).
+
+To build an `Accordion`, use [Expand](/docs/ui/components/Expand) component to wrap expandable/collapsible content for each accordion panel.
+
+## Prop Types
+
+### Accordion Props
+<PropsTable component={Accordion} />
+
+## Examples
+
+### Accordion Panels
+<CodeExample>
+  <Accordion className='divide-v'>
+    {items.map(({question, answer}) => (
+      <Expand key={question} className='divide-v--wrap'>
+        <ExpandTab row className='middle gap-smaller padding padding-v-smaller'>
+          {({open}) => (<>
+            <Icon className={open ? 'caret--expanded' : 'caret--collapsed'} name='caret' />
+            <Text>{question}</Text>
+          </>)}
+        </ExpandTab>
+        <ExpandPanel className='padding bg-shade-softest'>{answer}</ExpandPanel>
+      </Expand>
+    ))}
+  </Accordion>
+</CodeExample>
+
+### Multiple Expanded Panels
+<CodeExample desc='Allow expansion of more than one item at a time'>
+  <Accordion multiple className='divide-v'>
+    {items.map(({question, answer}) => (
+      <Expand key={question} className='divide-v--wrap'>
+        <ExpandTab row className='middle gap-smaller padding padding-v-smaller'>
+          {({open}) => (<>
+            <Icon className={open ? 'caret--expanded' : 'caret--collapsed'} name='caret' />
+            <Text>{question}</Text>
+          </>)}
+        </ExpandTab>
+        <ExpandPanel className='padding bg-shade-softest'>{answer}</ExpandPanel>
+      </Expand>
+    ))}
+  </Accordion>
+</CodeExample>
+
+### Opened Accordion Panels
+<CodeExample desc='Expanded Content by Default'>
+  <Accordion open multiple className='divide-v'>
+    {items.map(({question, answer}) => (
+      <Expand key={question} className='divide-v--wrap'>
+        <ExpandTab row className='middle gap-smaller padding padding-v-smaller'>
+          {({open}) => (<>
+            <Icon className={open ? 'caret--expanded' : 'caret--collapsed'} name='caret' />
+            <Text>{question}</Text>
+          </>)}
+        </ExpandTab>
+        <ExpandPanel className='padding bg-shade-softest'>{answer}</ExpandPanel>
+      </Expand>
+    ))}
+  </Accordion>
+</CodeExample>
+
+### Rendering Hidden Content
+<CodeExample desc='Collapsed content can be rendered for search engines indexing'>
+  <Accordion forceRender className='divide-v'>
+    {items.map(({question, answer}) => (
+      <Expand key={question} className='divide-v--wrap'>
+        <ExpandTab row className='middle gap-smaller padding padding-v-smaller'>
+          {({open}) => (<>
+            <Icon className={open ? 'caret--expanded' : 'caret--collapsed'} name='caret' />
+            <Text>{question}</Text>
+          </>)}
+        </ExpandTab>
+        <ExpandPanel className='padding bg-shade-softest'>{answer}</ExpandPanel>
+      </Expand>
+    ))}
+  </Accordion>
+</CodeExample>
+
+### Custom Accordion Style
+<CodeExample desc='Add any extra content or custom UI inside the Accordion'>
+  <Accordion forceRender className='bg-shade-soft'>
+    <Text className='padding bg-shade-soft h4'>Accordion Header</Text>
+    {items.map(({question, answer}) => (
+      <Expand key={question} className='border-bottom'>
+        <ExpandTab row className='middle gap-smaller padding padding-v-smaller'>
+          {({open}) => (<>
+            <Icon className={open ? 'caret--expanded' : 'caret--collapsed'} name='caret' />
+            <Text>{question}</Text>
+          </>)}
+        </ExpandTab>
+        <ExpandPanel className='padding bg-shade-softest'>{answer}</ExpandPanel>
+      </Expand>
+    ))}
+    <Text className='padding bg-tint-soft h5'>Accordion Footer</Text>
+  </Accordion>
+</CodeExample>
