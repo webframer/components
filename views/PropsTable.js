@@ -7,6 +7,7 @@ import TypeHelpTooltip, { helpTooltipProps } from './TypeHelpTooltip.js'
 
 /**
  * Component Props Table View.
+ * @see https://webframe.app/docs/ui/views/PropsTable
  * @example:
  *  <PropsTable component={Button} />
  *  ┌────────────────┬───────────────────────┬──────────────┬──────────────────┐

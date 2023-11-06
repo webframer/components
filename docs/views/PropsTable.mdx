@@ -1,0 +1,38 @@
+import { Button } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/views/CodeExample.js'
+import PropsTable from '@webframer/ui/views/PropsTable.js'
+import Table from 'view/assets/Table.js'
+import AssetCard from 'view/components/AssetCard.jsx'
+
+# Props Table
+
+<AssetCard className='float-right margin' component={Table} />
+
+A table that displays all `Component.propTypes` and `Component.defaultProps` with type annotations as [Tooltip](/docs/ui/components/Tooltip) popup.
+
+Component prop types should use Webframe `type` proxy for automatic description from code comments using [webframe-docs](https://www.npmjs.com/package/webframe-docs) CLI.
+
+Prop descriptions can use Markdown syntax and will be parsed, including links.
+
+## Examples
+
+### Button Component
+
+```jsx filename="Button.jsx"
+import { type } from '@webframer/ui'
+
+export function Button (props) {
+  // ...component code
+}
+
+Button.propTypes = {
+  // Button content
+  children: type.NodeOrFunction.isRequired,
+  // ...more props
+}
+```
+
+<CodeExample desc='Button Props Table Demo'>
+  <PropsTable component={Button} />
+</CodeExample>
+

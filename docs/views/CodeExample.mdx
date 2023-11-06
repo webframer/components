@@ -1,0 +1,30 @@
+import { Button } from '@webframer/ui'
+import { CodeExample } from '@webframer/ui/views/CodeExample.js'
+import PropsTable from '@webframer/ui/views/PropsTable.js'
+
+# Code Example
+
+A UI view to display live code example, along with source code used for generating that example.
+
+Webframe documentation uses `CodeExample` to demo component usage, such as [this](/docs/ui/components/View#examples).
+
+All examples have a layout switch to toggle between `LTR` (Left to Right) and `RTL` (Right to Left) directions for testing.
+
+## Prop Types
+
+<PropsTable component={CodeExample} />
+
+## Examples
+
+```mdx filename="Button.mdx"
+import { CodeExample } from '@webframer/ui/views/CodeExample.js'
+
+<CodeExample desc='Button Example'>
+  <Button>Click Me</Button>
+</CodeExample>
+```
+
+<CodeExample desc='Button Example'>
+  <Button>Click Me</Button>
+</CodeExample>
+

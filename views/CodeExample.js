@@ -7,7 +7,8 @@ import Switch from '../inputs/Switch.js'
 import { renderProp } from '../react/render.js'
 
 /**
- * Renders `children` along with its source code representation
+ * Renders `children` along with its source code representation.
+ * @see https://webframe.app/docs/ui/views/CodeExample
  */
 export function CodeExample ({children, className, source = '', desc, ...view}) {
   const [open, setOpen] = useState(false)
