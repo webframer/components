@@ -1,5 +1,5 @@
 import { Current, isFunction, SOUND } from '@webframer/js'
-import React from 'react'
+import * as React from 'react'
 
 /**
  * REACT.JS HELPERS ============================================================

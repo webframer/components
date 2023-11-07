@@ -1,6 +1,6 @@
 import { hasProp, isString, merge, throttle, toCapCase, toUniqueListFast } from '@webframer/js'
 import cn from 'classnames'
-import React from 'react'
+import * as React from 'react'
 import { accessibilitySupport, assignRef, isRef, useInstance, useIsomorphicLayoutEffect } from '../react.js'
 import { renderProp } from '../react/render.js'
 import { type } from '../types.js'

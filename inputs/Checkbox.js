@@ -1,5 +1,5 @@
 import cn from 'classnames'
-import React from 'react'
+import * as React from 'react'
 import Loader from '../components/Loader.js'
 import { Row } from '../components/Row.js'
 import { extractProps } from '../components/View.js'

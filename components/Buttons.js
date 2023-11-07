@@ -1,5 +1,5 @@
 import cn from 'classnames'
-import React from 'react'
+import * as React from 'react'
 import { type } from '../types.js'
 import { Button } from './Button.js'
 import Icon from './Icon.js'

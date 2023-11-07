@@ -1,6 +1,6 @@
 import { hasListValue, isObject } from '@webframer/js'
 import cn from 'classnames'
-import React from 'react'
+import * as React from 'react'
 import { renderProp } from '../react/render.js'
 import { type } from '../types.js'
 import { Row } from './Row.js'

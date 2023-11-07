@@ -1,5 +1,5 @@
 import cn from 'classnames'
-import React from 'react'
+import * as React from 'react'
 import { JSONTree } from 'react-json-tree' // do not use react-json-view because it breaks with recursive JSON and in Node.js
 import { type } from '../types.js'
 import defaultTheme from './JsonView.themes.js'

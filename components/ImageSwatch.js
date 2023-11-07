@@ -1,6 +1,6 @@
 import { FILE } from '@webframer/js'
 import cn from 'classnames'
-import React from 'react'
+import * as React from 'react'
 import { type } from '../types.js'
 import Image from './Image.js'
 import { View } from './View.js'

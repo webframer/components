@@ -1,5 +1,5 @@
 import cn from 'classnames'
-import React from 'react'
+import * as React from 'react'
 import { onPressHoc } from '../react.js'
 import { renderProp } from '../react/render.js'
 import { type } from '../types.js'

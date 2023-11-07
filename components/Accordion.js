@@ -1,5 +1,5 @@
 import cn from 'classnames'
-import React from 'react'
+import * as React from 'react'
 import { useInstance, usePreviousProp } from '../react/hooks.js'
 import { renderProp } from '../react/render.js'
 import { type } from '../types.js'

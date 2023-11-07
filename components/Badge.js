@@ -1,6 +1,6 @@
 import { shortNumber } from '@webframer/js'
 import cn from 'classnames'
-import React from 'react'
+import * as React from 'react'
 import { type } from '../types.js'
 
 function createBadge () {

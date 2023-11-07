@@ -1,4 +1,4 @@
-import React from 'react'
+import * as React from 'react'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import less from 'react-syntax-highlighter/dist/esm/languages/prism/less.js'
 import theme from 'react-syntax-highlighter/dist/esm/styles/prism/atom-dark.js'

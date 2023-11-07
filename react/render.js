@@ -1,5 +1,5 @@
 import { isFunction, isPrimitive } from '@webframer/js'
-import React from 'react'
+import * as React from 'react'
 // IMPORTANT! do not import any UI Component here to avoid circular import
 
 /**

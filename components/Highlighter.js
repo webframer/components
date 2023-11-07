@@ -1,4 +1,4 @@
-import React from 'react'
+import * as React from 'react'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { type } from '../types.js'
 

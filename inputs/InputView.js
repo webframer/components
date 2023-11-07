@@ -1,7 +1,7 @@
 import { debounce, TIME_DURATION_INSTANT } from '@webframer/js'
 import { isPureKeyPress } from '@webframer/js/keyboard.js'
 import cn from 'classnames'
-import React from 'react'
+import * as React from 'react'
 import { View } from '../components/View.js'
 import { useInputValue, useInstance } from '../react/hooks.js'
 import { renderProp } from '../react/render.js'

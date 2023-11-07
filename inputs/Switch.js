@@ -1,5 +1,5 @@
 import cn from 'classnames'
-import React from 'react'
+import * as React from 'react'
 import Icon from '../components/Icon.js'
 import { Loader } from '../components/Loader.js'
 import { Row } from '../components/Row.js'

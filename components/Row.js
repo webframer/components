@@ -1,4 +1,4 @@
-import React from 'react'
+import * as React from 'react'
 import { createView } from './View.js'
 
 export const [Row, RowRef] = createView('row')
