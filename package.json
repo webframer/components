@@ -22,7 +22,7 @@
   ],
   "scripts": {
     "build": "rm -fr dist/* && tsc -p ../../scripts/npm/@ui-tsconfig.json && node ../../scripts/npm/build.js",
-    "push": "npm run build && cd dist && npm publish --access public && cd ../"
+    "push": "npm run build && cd dist && npm publish --access public && cd ../ && rm -fr dist"
   },
   "dependencies": {
     "@webframer/js": "workspace:*",
@@ -35,6 +35,12 @@
     "react-use": "^17.4.0"
   },
   "peerDependencies": {
+    "@types/react": "*",
     "react": "*"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
   }
 }
