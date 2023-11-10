@@ -21,8 +21,10 @@
     "react"
   ],
   "scripts": {
-    "build": "rm -fr dist/* && tsc -p ../../scripts/npm/@ui-tsconfig.json && node ../../scripts/npm/build.js",
-    "push": "npm run build && cd dist && npm publish --access public && cd ../ && rm -fr dist"
+    "build": "rm -fr dist/* && tsc -p ../../scripts/npm/@ui-tsconfig.json",
+    "bundle": "node ../../scripts/npm/build.js",
+    "unbundle": "rm -rf dist/package.json",
+    "push": "pnpm build && pnpm bundle && cd dist && npm publish --access public && cd ../ && pnpm unbundle"
   },
   "dependencies": {
     "@webframer/js": "workspace:*",
@@ -36,7 +38,8 @@
   },
   "peerDependencies": {
     "@types/react": "*",
-    "react": "*"
+    "react": "*",
+    "react-dom": "*"
   },
   "peerDependenciesMeta": {
     "@types/react": {
