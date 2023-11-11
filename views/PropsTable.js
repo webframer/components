@@ -1,8 +1,15 @@
 import { _, extractPrivateProps, isFunction, l, startCase, toJSON, translate } from '@webframer/js'
-import React, { Fragment, useMemo } from 'react'
+import cn from 'classnames'
+import * as React from 'react'
+import { Fragment, useMemo } from 'react'
+import { mdJSX } from '../components/HighlightJSX.js'
+import { Markdown } from '../components/Markdown.js'
+import { Row } from '../components/Row.js'
 import Text from '../components/Text.js'
-import { cn, extractProps, Markdown, mdJSX, Row, Tooltip, type, View } from '../index.js'
-import proptypes from '../propTypes.json'
+import Tooltip from '../components/Tooltip.js'
+import { extractProps, View } from '../components/View.js'
+import proptypes from '../propTypes.json.js'
+import { type } from '../types.js'
 import TypeHelpTooltip, { helpTooltipProps } from './TypeHelpTooltip.js'
 
 /**
@@ -127,7 +134,8 @@ PropsTable.propTypes = {
   manifest: type.Object,
 }
 
-export default React.memo(PropsTable)
+const PropsTableMemo = React.memo(PropsTable)
+export default PropsTableMemo
 
 // Helpers -----------------------------------------------------------------------------------------
 

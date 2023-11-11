@@ -1,10 +1,18 @@
 import { _, l, translate } from '@webframer/js'
-import React, { useCallback, useMemo, useState } from 'react'
+import cn from 'classnames'
+import * as React from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import { Button } from '../components/Button.js'
+import { Expand } from '../components/Expand.js'
+import { mdJSX } from '../components/HighlightJSX.js'
 import Icon from '../components/Icon.js'
+import { Markdown } from '../components/Markdown.js'
+import { Row } from '../components/Row.js'
 import Text from '../components/Text.js'
-import { Button, cn, Expand, extractProps, Markdown, mdJSX, Row, type, View } from '../index.js'
+import { extractProps, View } from '../components/View.js'
 import Switch from '../inputs/Switch.js'
 import { renderProp } from '../react/render.js'
+import { type } from '../types.js'
 
 /**
  * Renders `children` along with its source code representation.
@@ -65,7 +73,8 @@ CodeExample.propTypes = {
   source: type.String,
 }
 
-export default React.memo(CodeExample)
+const CodeExampleMemo = React.memo(CodeExample)
+export default CodeExampleMemo
 
 translate({
   EXAMPLE: {
