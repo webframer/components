@@ -1,7 +1,7 @@
 import { hasProp, isString, merge, throttle, toCapCase, toUniqueListFast } from '@webframer/js'
 import cn from 'classnames'
 import * as React from 'react'
-import { accessibilitySupport, assignRef, isRef, useInstance, useIsomorphicLayoutEffect } from '../react.js'
+import { accessibilitySupport, assignRef, useInstance, useIsomorphicLayoutEffect } from '../react.js'
 import { renderProp } from '../react/render.js'
 import { type } from '../types.js'
 import { applyStyles } from '../utils/css.js'
@@ -10,7 +10,7 @@ import { useTooltip } from './Tooltip.js'
 /**
  * Create a React View - Pure Component.
  * @param {string} [defaultProp] - the prop to make true by default
- * @return {function[]} React function component and forwardRef component
+ * @returns {((props: ViewProps) => JSX.Element)[]} list of View function components
  */
 export function createView (defaultProp) {
   /**
@@ -25,11 +25,11 @@ export function createView (defaultProp) {
     scroll, scrollClass, scrollStyle, scrollAlongDirectionOnly, scrollRef, scrollProps,
     scrollOffset, scrollOverflowProps, scrollReversed,
     ...props
-  }, ref) {
+  }) {
     const [tooltip] = useTooltip(props)
     props = accessibilitySupport(props, sound)
-    if (isRef(ref)) props.ref = ref // forwarded ref may not exist on mount
-    else if (_ref) props.ref = _ref // preferred way to ensure ref exists on mount
+    // if (isRef(ref)) props.ref = ref // forwarded ref may not exist on mount
+    if (_ref) props.ref = _ref // preferred way to ensure ref exists on mount
     if (preventOffset) props._no_offset = ''
 
     // Ordinary View
@@ -228,13 +228,7 @@ export function createView (defaultProp) {
     Object.defineProperty(View, 'name', {
       get () {return toCapCase(defaultProp)},
     })
-  }
-
-  const ViewRef = React.forwardRef(View)
-
-  if (defaultProp) {
     View.defaultProps = {[defaultProp]: true}
-    ViewRef.defaultProps = View.defaultProps
   }
 
   View.propTypes = {
@@ -336,12 +330,10 @@ export function createView (defaultProp) {
     _ref: type.Ref,
   }
 
-  ViewRef.propTypes = View.propTypes
-
-  return [View, ViewRef]
+  return [View]
 }
 
-export const [View, ViewRef] = createView()
+export const [View] = createView()
 
 /**
  * Components, like View will be faster without memoization, whereas Text should be memoized.

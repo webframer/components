@@ -6,17 +6,7 @@ import defaultTheme from './JsonView.themes.js'
 import { View } from './View.js'
 
 /**
- * Json nested Object Renderer - Pure Component.
- *
- * @param {Object|Array} data - collection to render
- * @param {Boolean} [dark] - whether to render inverse background color, default is false
- * @param {Boolean} [open] - whether to expand all nested nodes, default is false
- * @param {Object} [theme] - color definitions
- * @param {String} [className] - css class name
- * @param {Object} [style] - css styles
- * @param {Boolean} [fill] - css styles
- * @param {*} props - other attributes to pass to `<div></div>`
- * @returns {Object} - React Component
+ * JSON Data Renderer for Nested Collections
  */
 export function JsonView ({data, dark, open, theme, className, style, fill, ...props}) {
   if (open) props.shouldExpandNode = expandNode
@@ -30,8 +20,10 @@ export function JsonView ({data, dark, open, theme, className, style, fill, ...p
 const expandNode = () => true
 
 JsonView.propTypes = {
-  // JSON data to show as JavaScript Object
+  // JSON data to display (as `Collection` of values)
   data: type.Collection.isRequired,
+  // Whether to render in dark mode with inverted theme color
+  dark: type.Boolean,
   // Whether to expand all nodes
   open: type.Boolean,
   // Color scheme

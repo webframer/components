@@ -1,6 +1,7 @@
 import { ips, isFunction, isObject, TIME_DURATION_INSTANT, toList, trimSpaces } from '@webframer/js'
 import cn from 'classnames'
-import React, { useCallback, useMemo } from 'react'
+import * as React from 'react'
+import { useCallback, useMemo } from 'react'
 import { Row } from '../components/Row.js'
 import Text from '../components/Text.js'
 import { renderProp } from '../react/render.js'

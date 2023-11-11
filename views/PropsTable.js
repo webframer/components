@@ -41,7 +41,7 @@ export function PropsTable ({component, manifest = proptypes, ...view}) {
         controls: propType.controls,
         defaultValue: toJSON(defaultProps[key]?.v || '', null, 2),
         defaultHelp: defaultProps[key]?.c,
-        description: p[key]?.c || propType.desc, // todo: turn @example: into code blocks
+        description: p[key]?.c || propType['#desc'], // todo: turn @example: into code blocks
         required: propType.required,
       })
     }

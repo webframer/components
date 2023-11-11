@@ -1,6 +1,7 @@
 import { dynamicImport, isObject } from '@webframer/js'
 import cn from 'classnames'
-import React, { useId, useState } from 'react'
+import * as React from 'react'
+import { useId, useState } from 'react'
 import { extractProps, View } from '../components/View.js'
 import { useExpandCollapse, usePreviousProp } from '../react.js'
 import { renderProp } from '../react/render.js'

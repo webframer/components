@@ -1,7 +1,7 @@
 import { FILE } from '@webframer/js'
 import cn from 'classnames'
 import * as React from 'react'
-import { accessibilitySupport, isRef } from '../react.js'
+import { accessibilitySupport } from '../react.js'
 import { type } from '../types.js'
 
 function createIcon () {
@@ -9,10 +9,9 @@ function createIcon () {
    * Icon - Pure Component.
    * @see https://webframe.app/docs/ui/components/Icon
    */
-  function Icon ({name, className, font, path = FILE.PATH_ICONS, _ref, children, ...props}, ref) {
+  function Icon ({name, className, font, path = FILE.PATH_ICONS, _ref, children, ...props}) {
     props = accessibilitySupport(props) // ensures correct focus behavior on click
-    if (isRef(ref)) props.ref = ref
-    else if (_ref) props.ref = _ref
+    if (_ref) props.ref = _ref
 
     let mask
     if (!font && name) {
@@ -26,8 +25,6 @@ function createIcon () {
     )
   }
 
-  const IconRef = React.forwardRef(Icon)
-
   Icon.propTypes = {
     // Icon name, can be empty string to be styled with custom CSS
     name: type.Icon.isRequired,
@@ -37,12 +34,10 @@ function createIcon () {
     style: type.Style,
   }
 
-  IconRef.propTypes = Icon.propTypes
-
-  return [Icon, IconRef]
+  return [Icon]
 }
 
-export const [Icon, IconRef] = createIcon()
+export const [Icon] = createIcon()
 const IconMemo = React.memo(Icon)
 IconMemo.name = Icon.name
 IconMemo.propTypes = Icon.propTypes

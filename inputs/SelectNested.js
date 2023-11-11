@@ -1,6 +1,7 @@
 import { get, isCollection, isEmpty, toList } from '@webframer/js'
 import cn from 'classnames'
-import React, { useMemo } from 'react'
+import * as React from 'react'
+import { useMemo } from 'react'
 import { DropdownMenu } from '../components/DropdownMenu.js'
 import Icon from '../components/Icon.js'
 import Text from '../components/Text.js'

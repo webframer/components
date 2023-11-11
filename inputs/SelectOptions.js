@@ -1,6 +1,7 @@
 import { isNumber } from '@webframer/js'
 import cn from 'classnames'
-import React, { useMemo } from 'react'
+import * as React from 'react'
+import { useMemo } from 'react'
 import { Scroll } from '../components/Scroll.js'
 import { VirtualList } from '../components/VirtualList.js'
 import { renderProp } from '../react/render.js'

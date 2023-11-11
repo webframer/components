@@ -1,6 +1,7 @@
 import { isObject } from '@webframer/js'
 import cn from 'classnames'
-import React, { useCallback, useContext, useEffect, useId } from 'react'
+import * as React from 'react'
+import { useCallback, useContext, useEffect, useId } from 'react'
 import { useInstance } from '../react/hooks.js'
 import { renderProp } from '../react/render.js'
 import { type } from '../types.js'
@@ -174,6 +175,11 @@ export function TabList ({className, ...props}) {
 
   // Do not use Scroll here to avoid potential bugs with parent offset, let user set `scroll`
   return <View className={cn(className, 'tabs__list')} row={!vertical} {...props} />
+}
+
+TabList.propTypes = {
+  className: type.ClassName,
+  role: type.String,
 }
 
 TabList.defaultProps = {

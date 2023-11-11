@@ -41,7 +41,11 @@ export function Spinner ({
 
 Spinner.propTypes = {
   size: type.SizeModifier,
-  color: type.Enum(['primary', 'secondary', 'tertiary', 'light', 'dark', 'white', 'black']),
+  color: type.Enum([
+    'primary', 'secondary', 'accent',
+    'info', 'success', 'warning', 'error',
+    'dark', 'grey', 'light', 'neutral',
+  ]),
   className: PropTypes.string,
 }
 

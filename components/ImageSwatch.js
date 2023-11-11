@@ -36,8 +36,8 @@ ImageSwatch.propTypes = {
   src: type.UrlOrBase64OrPreview.isRequired,
   small: type.Boolean,
   large: type.Boolean,
-  className: type.String,
-  style: type.Object,
+  className: type.ClassName,
+  style: type.Style,
 }
 
 const ImageSwatchMemo = React.memo(ImageSwatch)

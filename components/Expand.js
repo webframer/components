@@ -4,7 +4,7 @@ import { useContext, useId, useMemo, useRef } from 'react'
 import { useExpandCollapse } from '../react/hooks.js'
 import { renderProp } from '../react/render.js'
 import { type } from '../types.js'
-import { View, ViewRef } from './View.js'
+import { View } from './View.js'
 
 const ExpandInstance = React.createContext({})
 const ExpandState = React.createContext({})
@@ -187,10 +187,10 @@ export function ExpandPanel ({className, forceRender, ...props}) {
 
   // Resolve children
   props.children = renderProp(props.children, expand)
-  props.ref = ref
+  props._ref = ref
 
   // Do not use Scroll here so user can have a choice of explicitly passing `scroll` attribute
-  return <ViewRef className={cn(className, 'expand__panel', {open, animating})} {...props} />
+  return <View className={cn(className, 'expand__panel', {open, animating})} {...props} />
 }
 
 ExpandPanel.propTypes = {

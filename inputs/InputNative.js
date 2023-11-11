@@ -1,6 +1,7 @@
 import { __CLIENT__, isEqual, isObject, isString, numericPattern, parseNumberLocale } from '@webframer/js'
 import cn from 'classnames'
-import React, { useId, useState } from 'react'
+import * as React from 'react'
+import { useId, useState } from 'react'
 import Icon from '../components/Icon.js'
 import Loader from '../components/Loader.js'
 import { Row } from '../components/Row.js'
@@ -19,7 +20,7 @@ import Label from './Label.js'
  *  1. format and parse functions
  *  2. Label added before input
  *  3. Icon at the start or end of input
- *  4. Input prefix/suffix (ex.'$' prefix or 'USD' suffix for number input)
+ *  4. Input prefix/suffix (ex.currency prefix or suffix for number input)
  *  5. Loading state (with spinner icon and temporarily readonly input)
  *  6. Controlled or uncontrolled input value state
  *  7. Compact input with automatic width adjustment

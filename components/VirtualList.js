@@ -1,6 +1,7 @@
 import { debounce, last, throttle, TIME_DURATION_INSTANT, toListAvg } from '@webframer/js'
 import cn from 'classnames'
-import React, { useMemo } from 'react'
+import * as React from 'react'
+import { useMemo } from 'react'
 import { assignRef, useInstance, useIsomorphicLayoutEffect, usePreviousProp } from '../react.js'
 import { renderProp } from '../react/render.js'
 import { type } from '../types.js'
@@ -317,6 +318,11 @@ VirtualListMemo.propTypes = VirtualList.propTypes
 VirtualListMemo.defaultProps = VirtualList.defaultProps
 export default VirtualListMemo
 
+/**
+ * Function Component to render each item in the Virtual List
+ * @param {object} props
+ * @returns {JSX.Element | null}
+ */
 function VirtualListItem ({children}) {
   return renderProp(children)
 }

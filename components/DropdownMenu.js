@@ -1,6 +1,7 @@
 import { TIME_DURATION_INSTANT } from '@webframer/js'
 import cn from 'classnames'
-import React, { useEffect } from 'react'
+import * as React from 'react'
+import { useEffect } from 'react'
 import { useInstance } from '../react/hooks.js'
 import { renderProp } from '../react/render.js'
 import { TooltipPropTypes, type } from '../types.js'

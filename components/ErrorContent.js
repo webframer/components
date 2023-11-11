@@ -1,5 +1,6 @@
 import { hasListValue } from '@webframer/js'
-import React, { Fragment } from 'react'
+import * as React from 'react'
+import { Fragment } from 'react'
 import { ErrorTable } from './ErrorTable.js'
 import View from './View.js'
 

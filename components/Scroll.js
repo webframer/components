@@ -51,7 +51,7 @@ import { createView } from './View.js'
  *      -> this problem is recursive, and gets very complex in different row/col layouts.
  *    - Scrollbar outside the scrollable area, because of issues above (usually only .fill works).
  */
-export const [Scroll, ScrollRef] = createView('scroll')
+export const [Scroll] = createView('scroll')
 const ScrollMemo = React.memo(Scroll)
 ScrollMemo.name = Scroll.name
 ScrollMemo.propTypes = Scroll.propTypes

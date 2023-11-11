@@ -1,5 +1,9 @@
 import { Current } from '@webframer/js/_envs.js'
 import PropTypes from 'prop-types'
+import * as React from 'react'
+
+// This is needed for the `ts` compiler to resolve types in types.d.ts
+export { React }
 
 /**
  * PROPTYPES PROXY =================================================================================
@@ -27,6 +31,8 @@ const {defineCreator, defineBase, defineCommon, defineExtended, defineComponent}
  * @example:
  *  type.Enum(['a', 5])
  *  >>> 'a' | 5
+ *
+ * @type {(...args) => typeof args[number]}
  */
 type.Enum = PropTypes.oneOf
 
@@ -35,6 +41,8 @@ type.Enum = PropTypes.oneOf
  * @example:
  *  type.InstanceOf(Date),
  *  >>> Mon Jun 06 2022 03:33:33 GMT+0000 (London Standard Time)
+ *
+ * @type {(T) => T}
  */
 type.InstanceOf = PropTypes.instanceOf
 
@@ -43,6 +51,8 @@ type.InstanceOf = PropTypes.instanceOf
  * @example:
  *  type.ListOf(type.Number)
  *  >>> number[]
+ *
+ * @type {(T) => T[]}
  */
 type.ListOf = PropTypes.arrayOf
 
@@ -62,6 +72,8 @@ type.MapOf = PropTypes.objectOf
  * @example:
  *  type.OneOf([type.String, type.Number])
  *  >>> string | number
+ *
+ * @type {(...args: any[]) => typeof args[number]}
  */
 type.OneOf = PropTypes.oneOfType
 
@@ -106,13 +118,22 @@ if (typeof defineCreator === 'function') defineCreator(type)
 // Any value type
 type.Any = PropTypes.any
 
-// Big Integer value
+/**
+ * Big Integer value
+ * @type {bigint}
+ */
 type.BigInt = PropTypes.number
 
-// True or False value
+/**
+ * True or False value
+ * @type {boolean}
+ */
 type.Boolean = PropTypes.bool
 
-// Floating point number
+/**
+ * Floating point number
+ * @type {number}
+ */
 type.Float = PropTypes.number
 
 /**
@@ -124,37 +145,67 @@ type.Float = PropTypes.number
  *      open: type.Boolean,
  *    }),
  *  ], type.Node),
+ *
+ * @type {Function}
  */
 type.Function = PropTypes.func
 
-// React JSX element (eg. `<View/>`)
+/**
+ * React JSX element (eg. `<View/>`)
+ * @type {JSX.Element}
+ */
 type.JSXElement = PropTypes.element
 
-// React JSX element type (eg. `View`)
+/**
+ * React JSX element type (eg. `View`)
+ * @type {ElementType}
+ */
 type.JSXElementType = PropTypes.elementType
 
-// A whole number value
+/**
+ * A whole number value
+ * @type {number}
+ */
 type.Integer = PropTypes.number
 
-// Array value
+/**
+ * Array value
+ * @type {array}
+ */
 type.List = PropTypes.array
 
 // Map value
 type.Map = PropTypes.object
 
-// An element or an array (or fragment) of elements that can be rendered (ie. `[type.JSXElement]`)
+/**
+ * A `string`, `number`, `boolean`, `null`, `undefined`,
+ * element or an array (or fragment) of elements (ie. `[type.JSXElement]`) that can be rendered.
+ * @type {React.ReactNode}
+ */
 type.Node = PropTypes.node
 
-// Number value (Integer or Float)
+/**
+ * Number value (Integer or Float)
+ * @type {number}
+ */
 type.Number = PropTypes.number
 
-// Object value (eg. `{}`)
+/**
+ * Object value (eg. `{}`)
+ * @type {object}
+ */
 type.Object = PropTypes.object
 
-// A single type from React Component.propTypes object (eg. `type.Number`)
+/**
+ * A single type from React Component.propTypes object (eg. `type.Number`)
+ * @type {Function}
+ */
 type.PropType = PropTypes.func
 
-// String value
+/**
+ * Text value
+ * @type {string}
+ */
 type.String = PropTypes.string
 
 // String object (eg. `new String(value)`)
@@ -163,11 +214,23 @@ type.StringObject = PropTypes.object
 // Javascript getter function (eg. `{get () {return ''}}`)
 type.StringGetter = PropTypes.string
 
-// Symbol value
+/**
+ * Symbol value
+ * @type {symbol}
+ */
 type.Symbol = PropTypes.symbol
 
-// A positive whole number
+/**
+ * A positive whole number
+ * @type {number}
+ */
 type.UnsignedInteger = PropTypes.number
+
+/**
+ * A dynamic type that can be any of the existing type in the project
+ * @type {?}
+ */
+type.Unknown = PropTypes.any
 
 // This can be used to attach input controls or custom validators to types defined above
 if (typeof defineBase === 'function') defineBase(type)
@@ -182,7 +245,9 @@ type.Base64 = type.String
 // Data size number equivalent to 8 Bits
 type.Byte = type.UnsignedInteger
 
-// CSS class names string, separated by space
+/**
+ * CSS class names string, separated by space
+ */
 type.ClassName = type.String
 
 // CSS length string, such as `10%`, `2em`, etc.
@@ -229,11 +294,12 @@ type.Mm = type.Number
 // A floating number that is to be multiplied with
 type.Multiplier = type.Number
 
-// Anything that can be rendered: numbers, strings, elements, an array, or function
-// (or fragment) containing these types.
+/**
+ * Anything that can be rendered: number, string, element, fragment, an array,
+ * or function returning one of these types (to be called by `renderProp` function).
+ * @type {ReactNode|((self: object) => ReactNode)}
+ */
 type.NodeOrFunction = type.OneOf([
-  type.String,
-  type.Number,
   type.Node,
   type.Function,
 ])
@@ -432,7 +498,7 @@ type.Control = type.Obj({
   // ...other props to pass to `<Input/>` component
 })
 
-// type.PropType converted to controls
+// type.PropType with controls attached
 type.ControlType = type.Obj({
   controls: type.ListOf(type.Control),
   controlOptions: type.Options,

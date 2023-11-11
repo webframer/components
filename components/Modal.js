@@ -1,13 +1,14 @@
 import cn from 'classnames'
 import * as React from 'react'
+import { type } from '../types.js'
 import View from './View.js'
 
 /**
- * Modal - Pure Component
+ * Modal to overlay content with a closable popup screen
  */
 export function Modal ({
   open,
-  canClose = true,
+  canClose,
   onClose,
   className,
   children,
@@ -24,6 +25,19 @@ export function Modal ({
         </View>}
     </View>
   )
+}
+
+Modal.defaultProps = {
+  canClose: true,
+}
+
+Modal.propTypes = {
+  // Whether to allow closing of the Modal
+  canClose: type.Boolean,
+  // Whether to open the Modal (i.e. set it to `active`)
+  open: type.Boolean,
+  // Callback (e: Event) => void  for Modal close event
+  onClose: type.Function,
 }
 
 const ModalMemo = React.memo(Modal)

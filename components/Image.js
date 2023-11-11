@@ -1,7 +1,7 @@
 import { FILE, fileNameWithoutExt } from '@webframer/js'
 import cn from 'classnames'
 import * as React from 'react'
-import { accessibilitySupport, isRef } from '../react.js'
+import { accessibilitySupport } from '../react.js'
 import { type } from '../types.js'
 
 function createImage () {
@@ -15,18 +15,15 @@ function createImage () {
     className,
     _ref,
     ...props
-  }, ref) {
+  }) {
     props = accessibilitySupport(props)
-    if (isRef(ref)) props.ref = ref
-    else if (_ref) props.ref = _ref
+    if (_ref) props.ref = _ref
 
     if (props.src == null) props.src = imageSrc({name, dir})
     if (props.alt == null) props.alt = fileNameWithoutExt(name)
 
     return <img className={cn('img', className)} {...props} />
   }
-
-  const ImageRef = React.forwardRef(Image)
 
   Image.defaultProps = {
     // Placeholder image to prevent error and for better UX
@@ -50,16 +47,14 @@ function createImage () {
     style: type.Style,
   }
 
-  ImageRef.propTypes = Image.propTypes
-  ImageRef.defaultProps = Image.defaultProps
-  return [Image, ImageRef]
+  return [Image]
 }
 
 export function imageSrc ({avatar, src, name = '', dir = FILE.PATH_IMAGES}) {
   return avatar || src || (dir + name.replace(/\s/g, '-').toLowerCase())
 }
 
-export const [Image, ImageRef] = createImage()
+export const [Image] = createImage()
 const ImageMemo = React.memo(Image)
 ImageMemo.name = Image.name
 ImageMemo.propTypes = Image.propTypes

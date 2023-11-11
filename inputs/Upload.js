@@ -1,6 +1,7 @@
 import { _, __CLIENT__, hasListValue, ips, l, shortNumber, SIZE_KB, toListTotal, translate } from '@webframer/js'
 import cn from 'classnames'
-import React, { useId } from 'react'
+import * as React from 'react'
+import { useId } from 'react'
 import Icon from '../components/Icon.js'
 import Loader from '../components/Loader.js'
 import Text from '../components/Text.js'

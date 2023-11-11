@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { createView } from './View.js'
 
-export const [Row, RowRef] = createView('row')
+export const [Row] = createView('row')
 /**
  * @see https://webframe.app/docs/ui/components/Row
  */
