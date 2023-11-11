@@ -11,11 +11,12 @@ import {
   update,
 } from '@webframer/js'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useIsomorphicLayoutEffect } from 'react-use'
+import * as reactUse from 'react-use'
 import { resizeWidth } from '../utils/element.js'
 import { getUIState, saveUIState, setUIState } from '../utils/storage.js'
 import { animateSize } from './animations.js'
 
+const {useIsomorphicLayoutEffect} = reactUse.default || reactUse
 export * from 'react-use'
 export { useIsomorphicLayoutEffect }
 

@@ -19,7 +19,8 @@ export function TypeHelpTooltip ({_type, text, desc}) {
   return <Tooltip {...helpTooltipProps} children={children} />
 }
 
-export default React.memo(TypeHelpTooltip)
+const TypeHelpTooltipMemo = React.memo(TypeHelpTooltip)
+export default TypeHelpTooltipMemo
 
 export const helpTooltipProps = {
   className: 'max-width-400',

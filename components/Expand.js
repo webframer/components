@@ -1,5 +1,6 @@
 import cn from 'classnames'
-import React, { useContext, useId, useMemo, useRef } from 'react'
+import * as React from 'react'
+import { useContext, useId, useMemo, useRef } from 'react'
 import { useExpandCollapse } from '../react/hooks.js'
 import { renderProp } from '../react/render.js'
 import { type } from '../types.js'

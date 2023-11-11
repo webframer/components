@@ -10,7 +10,7 @@ import { useTooltip } from './Tooltip.js'
 // with other object and autocompletes with incorrect props. Possibly because of ref
 function createButton () {
   /**
-   * Button - Pure Component.
+   * Button - Pure Component
    * @see https://webframe.app/docs/ui/components/Button
    */
   function Button ({
