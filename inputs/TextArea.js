@@ -68,10 +68,12 @@ TextArea.propTypes = {
   onFocus: type.Function,
   // Handler(event, value: any, name?: string, self) on textarea blur
   onBlur: type.Function,
-  // Handler(event, value: any, name?: string, self) on textarea removal.
-  // `onChange` handler will fire after with `null` as value, unless event.preventDefault().
-  // To let `onChange` update form instance first before removing the field,
-  // use setTimeout to execute code inside `onRemove` handler.
+  /**
+   * Handler(event, value: any, name?: string, self) on textarea removal.
+   * `onChange` handler will fire after with `null` as value, unless event.preventDefault().
+   * To let `onChange` update form instance first before removing the field,
+   * use setTimeout to execute code inside `onRemove` handler.
+   */
   onRemove: type.Function,
   // Label to show before the textarea (or after with `reverse` true)
   label: type.NodeOrFunction,

@@ -1,25 +1,12 @@
-import {
-  __CLIENT__,
-  cloneDeep,
-  debounce,
-  Id,
-  isEqual,
-  isFunction,
-  objChanges,
-  subscribeTo,
-  unsubscribeFrom,
-  update,
-} from '@webframer/js'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import * as reactUse from 'react-use'
+import { __CLIENT__, debounce, Id, isEqual, isFunction, subscribeTo, unsubscribeFrom } from '@webframer/js'
+import { cloneDeep, objChanges, update } from '@webframer/js/object.js'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { resizeWidth } from '../utils/element.js'
 import { getUIState, saveUIState, setUIState } from '../utils/storage.js'
 import { animateSize } from './animations.js'
 
-const {useIsomorphicLayoutEffect} = reactUse.default || reactUse
-export * from 'react-use'
-export { useIsomorphicLayoutEffect }
-
+// 'react-use' package has import issues in Node environment - do not use it
+export const useIsomorphicLayoutEffect = __CLIENT__ ? useLayoutEffect : useEffect
 export const useAnimatedHeight = hookAnimatedSize('height')
 export const useAnimatedWidth = hookAnimatedSize('width')
 const useAnimatedSize = {
