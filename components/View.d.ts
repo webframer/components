@@ -143,7 +143,7 @@ export interface ViewProps extends React.HTMLAttributes<HTMLElement> {
     onMount?: Function;
     theme?: string;
     /**
-     * CSS class names as string, separated by space
+     * CSS class names separated by space
      */
     tooltipClass?: string;
   };
@@ -184,25 +184,25 @@ export interface ViewProps extends React.HTMLAttributes<HTMLElement> {
   scrollOverflowProps?: {
     top?: {
       /**
-       * CSS class names as string, separated by space
+       * CSS class names separated by space
        */
       className?: string;
     };
     bottom?: {
       /**
-       * CSS class names as string, separated by space
+       * CSS class names separated by space
        */
       className?: string;
     };
     left?: {
       /**
-       * CSS class names as string, separated by space
+       * CSS class names separated by space
        */
       className?: string;
     };
     right?: {
       /**
-       * CSS class names as string, separated by space
+       * CSS class names separated by space
        */
       className?: string;
     };

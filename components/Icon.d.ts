@@ -9,7 +9,7 @@ export interface IconProps extends React.HTMLAttributes<HTMLElement> {
    */
   font?: boolean;
   /**
-   * CSS class names as string, separated by space
+   * CSS class names separated by space
    */
   className?: string;
   style?: unknown;

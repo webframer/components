@@ -7,7 +7,7 @@ export interface ImageSwatchProps extends React.HTMLAttributes<HTMLElement> {
   small?: boolean;
   large?: boolean;
   /**
-   * CSS class names as string, separated by space
+   * CSS class names separated by space
    */
   className?: string;
   style?: unknown;

@@ -232,7 +232,7 @@ export function createView (defaultProp) {
   }
 
   View.propTypes = {
-    // CSS class names string, separated by space
+    // CSS class names separated by space
     className: type.ClassName,
     // CSS style object with camelCase attribute keys
     style: type.Style,

@@ -2,7 +2,7 @@
 export interface SpacerProps extends React.HTMLAttributes<HTMLElement> {
   size?: 'smallest' | 'smaller' | 'small' | 'base' | 'large' | 'larger' | 'largest';
   /**
-   * CSS class names as string, separated by space
+   * CSS class names separated by space
    */
   className?: string;
   style?: unknown;

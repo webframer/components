@@ -17,7 +17,7 @@ export interface LoaderProps extends React.HTMLAttributes<HTMLElement> {
    */
   iconClass?: string;
   /**
-   * CSS class names as string, separated by space
+   * CSS class names separated by space
    */
   className?: string;
   style?: unknown;

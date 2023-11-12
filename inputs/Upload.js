@@ -200,7 +200,7 @@ Upload.defaultProps = {
   loading: false,
   iconSelect: '',
   iconRemove: '',
-  onError: (e, errors) => alert(errors.map(e => e.message).join('\n')),
+  onError: (e, errs) => alert(errs.map(e => e.message).join('\n')),
 }
 
 Upload.propTypes = {

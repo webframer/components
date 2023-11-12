@@ -32,7 +32,7 @@ const {defineCreator, defineBase, defineCommon, defineExtended, defineComponent}
  *  type.Enum(['a', 5])
  *  >>> 'a' | 5
  *
- * @type {(...args) => typeof args[number]}
+ * @type {(...args: unknown[]) => typeof args[number]}
  */
 type.Enum = PropTypes.oneOf
 
@@ -73,7 +73,7 @@ type.MapOf = PropTypes.objectOf
  *  type.OneOf([type.String, type.Number])
  *  >>> string | number
  *
- * @type {(...args: any[]) => typeof args[number]}
+ * @type {(...args: unknown[]) => typeof args[number]}
  */
 type.OneOf = PropTypes.oneOfType
 

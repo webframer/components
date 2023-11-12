@@ -25,7 +25,7 @@ export interface ImageProps extends React.HTMLAttributes<HTMLElement> {
   loading?: 'eager' | 'lazy';
   decoding?: 'auto' | 'async' | 'sync';
   /**
-   * CSS class names as string, separated by space
+   * CSS class names separated by space
    */
   className?: string;
   style?: unknown;

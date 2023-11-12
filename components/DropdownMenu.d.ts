@@ -14,7 +14,7 @@ export interface DropdownMenuProps extends React.HTMLAttributes<HTMLElement> {
    */
   btnProps?: {
     /**
-     * CSS class names as string, separated by space
+     * CSS class names separated by space
      */
     className?: string;
     active?: boolean;
@@ -39,7 +39,7 @@ export interface DropdownMenuProps extends React.HTMLAttributes<HTMLElement> {
       onMount?: Function;
       theme?: string;
       /**
-       * CSS class names as string, separated by space
+       * CSS class names separated by space
        */
       tooltipClass?: string;
     };
@@ -55,7 +55,7 @@ export interface DropdownMenuProps extends React.HTMLAttributes<HTMLElement> {
   iconProps?: {
     font?: boolean;
     /**
-     * CSS class names as string, separated by space
+     * CSS class names separated by space
      */
     className?: string;
   };
@@ -82,7 +82,7 @@ export interface DropdownMenuProps extends React.HTMLAttributes<HTMLElement> {
     onMount?: Function;
     theme?: string;
     /**
-     * CSS class names as string, separated by space
+     * CSS class names separated by space
      */
     tooltipClass?: string;
   };
@@ -91,7 +91,7 @@ export interface DropdownMenuProps extends React.HTMLAttributes<HTMLElement> {
    */
   onMount?: Function;
   /**
-   * CSS class names as string, separated by space
+   * CSS class names separated by space
    */
   className?: string;
   style?: unknown;

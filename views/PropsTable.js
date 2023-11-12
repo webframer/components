@@ -38,8 +38,8 @@ export function PropsTable ({component, manifest = proptypes, ...view}) {
 
       result.push({
         key,
-        controls: propType.controls,
-        defaultValue: toJSON(defaultProps[key]?.v || '', null, 2),
+        controlsOrPropTypes: propType['#_type'] === Symbol.for('Any') ? [propType] : propType.controls,
+        defaultValue: toJSON(escapeValue(defaultProps[key]?.v || ''), null, 2),
         defaultHelp: defaultProps[key]?.c,
         description: p[key]?.c || propType['#desc'], // todo: turn @example: into code blocks
         required: propType.required,
@@ -53,6 +53,12 @@ export function PropsTable ({component, manifest = proptypes, ...view}) {
   return (
     <View className={cn('PropsTable table-wrap scrollable')} {...extractProps(view)}>
       <table className='table striped padded'>
+        <colgroup>
+          <col className='PropsTable__prop-column' />
+          <col className='PropsTable__type-column' />
+          <col className='PropsTable__default-column' />
+          <col className='PropsTable__description-column' />
+        </colgroup>
         <thead>
         <tr>
           <th className='text-align-start'>{_.PROP}</th>
@@ -62,17 +68,18 @@ export function PropsTable ({component, manifest = proptypes, ...view}) {
         </tr>
         </thead>
         <tbody>
-        {props.map(({key, controls, defaultValue, defaultHelp, description, required}) => {
+        {props.map(({key, controlsOrPropTypes, defaultValue, defaultHelp, description, required}) => {
           return (
             <tr key={key}>
               <td><Text className={cn('PropsTable__key', {required})}>{key}</Text></td>
               <td className='text-center'>
                 <Row className='center middle wrap'>
-                  {controls.map((control, i, arr) => {
-                    const {_type, text, desc, color} = extractPrivateProps(control, {mutate: false})
-                    let type, style
-
+                  {controlsOrPropTypes.map((control) => {
+                    const type = startCase(getTypeFrom(control)?.description)
+                    const {_type, text = type, desc, color} = extractPrivateProps(control, {mutate: false})
+                    const style = color != null && !isFunction(color) ? {color} : undefined
                     // // Enumerable
+                    // let type, style
                     // if (_type === Symbol.for('Enum') && hasListValue(control.options)) {
                     //   type = control.options.map(({value}, i, arr) => {
                     //     value = toText(value)
@@ -86,20 +93,20 @@ export function PropsTable ({component, manifest = proptypes, ...view}) {
                     //   })
                     //   // Other types
                     // } else {
-                    style = color != null && !isFunction(color) ? {color} : undefined
-                    type = <Text style={style}>{startCase(getTypeFrom(control)?.description)}</Text>
                     // }
-
-                    return (
+                    return {_type, text, desc, color, style, type}
+                  })
+                    .filter(({type}, i, arr) => arr.findIndex(v => v.type === type) === i)
+                    .map(({_type, text, desc, style, type}, i, arr) => (
                       <Fragment key={text}>
                         <Row className='inline-flex middle wrap'>
-                          {type}
+                          <Text style={style}>{type}</Text>
                           <TypeHelpTooltip {...{_type, text, desc}} />
                         </Row>
                         {i < arr.length - 1 && pipe}
                       </Fragment>
-                    )
-                  })}
+                    ))
+                  }
                 </Row>
               </td>
               <td className='text-center'>
@@ -156,6 +163,12 @@ translate({
     [l.ENGLISH]: 'Type',
   },
 })
+
+function escapeValue (string) {
+  return string
+    .replace(/('.*)\n(.*')/g, '$1\\n$2')
+    .replace(/('.*)\t(.*')/g, '$1\\t$2')
+}
 
 /**
  * Get type symbol from Control config

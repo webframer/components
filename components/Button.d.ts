@@ -6,7 +6,7 @@ export interface ButtonProps extends React.HTMLAttributes<HTMLElement> {
    */
   children: string | number | boolean | Function;
   /**
-   * CSS class names as string, separated by space
+   * CSS class names separated by space
    */
   className?: string;
   style?: unknown;
@@ -44,7 +44,7 @@ export interface ButtonProps extends React.HTMLAttributes<HTMLElement> {
     onMount?: Function;
     theme?: string;
     /**
-     * CSS class names as string, separated by space
+     * CSS class names separated by space
      */
     tooltipClass?: string;
   };

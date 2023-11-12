@@ -344,9 +344,9 @@ InputNative.propTypes = {
   // Custom UI to render after input node (inside .input wrapper with focus state)
   childAfter: type.NodeOrFunction,
   // Custom Icon name or props to render before input node
-  icon: type.OneOf([type.String, type.Object, type.Boolean, type.NodeOrFunction]),
+  icon: type.OneOf([type.String, type.Boolean, type.Object, type.NodeOrFunction]),
   // Custom Icon name or props to render after input node (if `onRemove` not defined)
-  iconEnd: type.OneOf([type.String, type.Object, type.Boolean, type.NodeOrFunction]),
+  iconEnd: type.OneOf([type.String, type.Boolean, type.Object, type.NodeOrFunction]),
   // ...other native HTML `<input/>` props
 }
 

@@ -1358,6 +1358,19 @@ export function PropsTable({ component, manifest, ...view }: {
                 };
             };
         };
+        TypeHelpTooltip: {
+            propTypes: {
+                _type: {
+                    c: string;
+                };
+                text: {
+                    c: string;
+                };
+                desc: {
+                    c: string;
+                };
+            };
+        };
     } | undefined;
 }): JSX.Element | null;
 
@@ -2704,6 +2717,19 @@ declare const PropsTableMemo: React.NamedExoticComponent<{
                     c: string;
                 };
                 manifest: {
+                    c: string;
+                };
+            };
+        };
+        TypeHelpTooltip: {
+            propTypes: {
+                _type: {
+                    c: string;
+                };
+                text: {
+                    c: string;
+                };
+                desc: {
                     c: string;
                 };
             };

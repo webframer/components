@@ -604,9 +604,9 @@ Select.propTypes = {
   // Custom Icon name or props to render before input node.
   // Default is 'dropdown' icon at the end, or 'search' icon at the start if `search = true`
   // and icons are undefined or null.
-  icon: type.OneOf([type.String, type.Object, type.Boolean, type.NodeOrFunction]),
+  icon: type.OneOf([type.String, type.Boolean, type.Object, type.NodeOrFunction]),
   // Custom Icon name or props to render after input node
-  iconEnd: type.OneOf([type.String, type.Object, type.Boolean, type.NodeOrFunction]),
+  iconEnd: type.OneOf([type.String, type.Boolean, type.Object, type.NodeOrFunction]),
   // Whether to allow multiple selections and store values as array
   multiple: type.Boolean,
   // Whether to set options with position fixed on open to remain visible inside Scroll

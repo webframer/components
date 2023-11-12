@@ -99,7 +99,7 @@ export function Tabs(props: TabsProps): JSX.Element;
 
 export interface TabListProps extends React.HTMLAttributes<HTMLElement> {
   /**
-   * CSS class names as string, separated by space
+   * CSS class names separated by space
    */
   className?: string;
   role?: string;

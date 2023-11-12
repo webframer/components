@@ -52,7 +52,7 @@ export interface InputProps extends React.HTMLAttributes<HTMLElement> {
     onMount?: Function;
     theme?: string;
     /**
-     * CSS class names as string, separated by space
+     * CSS class names separated by space
      */
     tooltipClass?: string;
   };
