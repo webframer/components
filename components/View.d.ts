@@ -49,7 +49,7 @@ export function hasScrollElement(parentElement: Element, scrollElement?: Element
 export function maxSizeScrollOffset(parentElement: Element, side?: string | boolean | undefined, className?: string | undefined, attr?: string | undefined): string | void;
 export interface ViewProps extends React.HTMLAttributes<HTMLElement> {
   /**
-   * CSS class names string, separated by space
+   * CSS class names separated by space
    */
   className?: string;
   /**

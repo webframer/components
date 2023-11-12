@@ -104,11 +104,11 @@ export interface SelectProps extends React.HTMLAttributes<HTMLElement> {
    * 
    * and icons are undefined or null.
    */
-  icon?: string | object | boolean | number | Function;
+  icon?: string | boolean | object | number | Function;
   /**
    * Custom Icon name or props to render after input node
    */
-  iconEnd?: string | object | boolean | number | Function;
+  iconEnd?: string | boolean | object | number | Function;
   /**
    * Whether to allow multiple selections and store values as array
    */

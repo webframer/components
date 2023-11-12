@@ -1,6 +1,6 @@
 {
   "name": "@webframer/ui",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "description": "Headless UI Components Library",
   "license": "MIT",
   "type": "module",
@@ -21,10 +21,12 @@
     "react"
   ],
   "scripts": {
-    "build": "rm -fr dist/* && tsc -p ../../scripts/npm/@ui-tsconfig.json",
+    "build": "rm -fr dist/* && tsc -p ../../scripts/npm/@ui-tsconfig.json && npm run dts:compile && npm run dts:copy",
+    "dts:compile": "cd ../../ && webframe-docs compile -dts && cd apps/@ui",
+    "dts:copy": "rsync -R *.d.ts components/*.d.ts inputs/*.d.ts views/*.d.ts dist",
     "bundle": "node ../../scripts/npm/build.js",
-    "unbundle": "rm -rf dist/package.json",
-    "push": "pnpm build && pnpm bundle && cd dist && npm publish --access public && cd ../ && pnpm unbundle"
+    "unbundle": "rm -rf dist",
+    "push": "npm run build && npm run bundle && cd dist && npm publish --access public && cd ../ && npm run unbundle"
   },
   "dependencies": {
     "@webframer/js": "workspace:*",

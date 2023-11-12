@@ -85,11 +85,11 @@ export interface InputNativeProps extends React.HTMLAttributes<HTMLElement> {
   /**
    * Custom Icon name or props to render before input node
    */
-  icon?: string | object | boolean | number | Function;
+  icon?: string | boolean | object | number | Function;
   /**
    * Custom Icon name or props to render after input node (if `onRemove` not defined)
    */
-  iconEnd?: string | object | boolean | number | Function;
+  iconEnd?: string | boolean | object | number | Function;
 }
 /**
  * Wrapper for Native HTML Input, such as: 'text', 'number', 'email', etc. where value is text.
