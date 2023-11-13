@@ -269,12 +269,19 @@ function noop (e) {
 
 // Set Input value to given list of Files
 function setInputFiles (inputNode, files) {
-  if (!__CLIENT__) return
-  const dataTransfer = new DataTransfer()
-  for (const file of files)
-    dataTransfer.items.add(file)
-  inputNode.files = dataTransfer.files
+  if (!__CLIENT__ || !hasDataTransferAPI) return
+  try {
+    const dataTransfer = new DataTransfer()
+    for (const file of files)
+      dataTransfer.items.add(file)
+    inputNode.files = dataTransfer.files
+  } catch (err) {
+    hasDataTransferAPI = false
+    console.error('This browser does not support DataTransfer API', err)
+  }
 }
+
+let hasDataTransferAPI = true
 
 translate({
   DO_YOU_WANT_TO_REMOVE___file___: {
