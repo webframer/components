@@ -24,10 +24,20 @@ This `self` instance exposes public methods for manipulating its internal compon
 
 - ES6 compatible project, or must set this package to be transpiled.
 
+## Installation
+
+```bash
+npm i @webframer/ui react react-dom
+```
+
 ## Usage
 
 ```jsx
 import { Scroll } from '@webframer/ui'
+
+// Do not use this demo.css in production!
+// @see https://webframe.app/docs/ui#getting-started
+import '@webframer/ui/demo.css'
 
 //... later in the code
 return (
@@ -39,4 +49,5 @@ return (
 
 ## Documentation
 
-Go to [Webframe UI Docs](https://webframe.app/docs/ui) for complete API documentation.
+Go to [Webframe UI Docs](https://webframe.app/docs/ui) for complete API documentation, including instructions on how to
+setup default UI Theme or custom styling with Tailwind CSS.
