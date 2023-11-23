@@ -10,16 +10,6 @@ function createText () {
    * Text View - Pure Component
    * (to be used as replacement for `<span></span>` for cross platform integration).
    * @see https://webframe.app/docs/ui/components/Text
-   *
-   * @param {string} [className] - optional css class name
-   * @param {Function} [onClick] - callback to fire on click or Enter press (if `onKeyPress` not given)
-   * @param {Boolean} [fill] - whether to make the view fill up available height and width
-   * @param {Boolean} [reverse] - whether to reverse order of rendering
-   * @param {Boolean} [rtl] - whether to use right to left direction
-   * @param {Object} [sound] - new Audio(URL) sound file
-   * @param {function|React.MutableRefObject} [_ref] - from React.useRef() or React.createRef()
-   * @param {*} props - other attributes to pass to `<div></div>`
-   * @returns {object|JSX.Element} - React Component
    */
   function Text ({
     small, smaller, smallest, large, larger, largest,

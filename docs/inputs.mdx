@@ -1,5 +1,5 @@
 import { Text } from '@webframer/ui'
-import { Steps } from 'nextra/components'
+import { Callout, Steps } from 'nextra/components'
 import Checkbox from 'view/assets/Checkbox.js'
 import Datepicker from 'view/assets/Datepicker.js'
 import Input from 'view/assets/Input.js'
@@ -72,6 +72,16 @@ Similar to **disabled** state, but in addition, has a loading progress indicator
 <Input loading value='loading' style={style} />
 </Steps>
 
+### Controlled vs. Uncontrolled Value
+
+The default behavior is to only update input `value` when the prop changes, allowing input to be editable in between the changes.
+
+This behavior is the most common use case where backend API populates the form inputs, because:
+
+- Users can make edits, and click on the save button to update values - the developer does not need to create custom form update logic.
+- Individual inputs can have `autoSubmit` enabled with debounce, which behaves like partially auto-saved form, with highly customisable use cases.
+- `controlledValue` prop can force the input to use a fixed value (ie. locking input value to given prop).
+
 ## Event Handlers
 
 <Steps>
@@ -125,7 +135,7 @@ function format (
 ### `parse`
 
 A function that receives internal input value and returns new value for `onChange`, `onFocus` and `onBlur` event handlers without modifying internal state.
-<Text className='faded'>Example: parse a numerical string with locale aware formatting typed in by users into `Number` type</Text>
+<Text className='faded'>Example: parse a numerical string with locale aware formatting typed in by users into `Number` type. See [Unicode CLDR](https://github.com/globalizejs/globalize) for more info about localising numbers.</Text>
 ```ts filename="Function Signature"
 function parse (
   // Internal input value
@@ -142,6 +152,9 @@ function parse (
 ### `normalize`
 
 A function that receives user inputted value, sanitizes it, and returns internal input value.
+<Text className='faded'>
+Note: **normalize** intercepts the **onChange** handler, and compares changed value against existing internal state. If normalized value **isEqual** (using [lodash](https://lodash.com/docs/4.17.15#isEqual) function) to existing state, **onChange** event will not fire.
+</Text>
 <Text className='faded'>Example: sanitize a phone number typed in by the user to remove invalid characters</Text>
 ```ts filename="Function Signature"
 function normalize (
@@ -156,3 +169,10 @@ function normalize (
 ): any {}
 ```
 </Steps>
+
+<Callout type='info'>
+  - To achieve a behavior similar to `normalize` but receive all `onChange` events, use `parse` function and set **controlledValue** to true. However, this may cause cursor jumping to the end.
+  - `null` value is reserved for removal of input field (ie. deletion of value in the backend).
+</Callout>
+
+Value functions allow for flexible and highly customisable use cases, while keeping clear separation of concerns, and modular composable inputs.
