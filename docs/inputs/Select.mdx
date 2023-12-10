@@ -13,7 +13,7 @@ export const optionsText = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon']
 
 <AssetCard className='float-right margin' component={Select} />
 
-A dropdown menu input with selection of choices. Options are searchable with fuzzy search.
+An **AutoComplete** input with a dropdown menu listing predefined choices. Selectable options are searchable with fuzzy search.
 
 Select input can have any internal value assigned to each option, with text or custom UI labels. It supports multiple selections and can render large list of options using [Virtual List](/docs/ui/components/VirtualList).
 
@@ -69,7 +69,7 @@ Select input can have any internal value assigned to each option, with text or c
   <Select multiple options={optionsText} value={['Alpha', 'Beta']} />
 </CodeExample>
 
-<CodeExample desc='Search Selection'>
+<CodeExample desc='Search AutoComplete'>
   <Select search options={optionsText} />
 </CodeExample>
 

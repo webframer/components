@@ -22,14 +22,15 @@ import Video from 'view/assets/Video.js'
 import View from 'view/assets/View.js'
 import VirtualList from 'view/assets/VirtualList.js'
 import AssetCard from 'view/components/AssetCard.jsx'
+import { inputs } from './inputs.mdx'
 
 export const uri = '/docs/ui/components/'
 
 # Webframe UI Components
 
-A collection of pure React function components - the building blocks of user interfaces.
+A collection of pure unstyled React function components - the building blocks of user interfaces.
 
-These UI components do not have any CSS style by default. You can provide your own UI theme, or use built-in Webframe [styles](/docs/ui/styles) like this documentation, which should work for over 80% of web apps.
+These UI components are headless - they have no CSS style by default. You can use custom UI theme, or built-in Webframe [styles](/docs/ui/styles) like this documentation, which should work for over 80% of web apps.
 
 ## Containers
 
@@ -56,6 +57,9 @@ These UI components do not have any CSS style by default. You can provide your o
   <AssetCard component={Spacer} uri={uri} />
 </Row>
 
+## Inputs
+
+{inputs}
 
 ## Widgets
 

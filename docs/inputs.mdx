@@ -14,23 +14,26 @@ import AssetCard from 'view/components/AssetCard.jsx'
 
 export const uri = '/docs/ui/inputs/'
 export const style = {width: 240}
+export const inputs = (
+  <Row className='full-width gap wrap'>
+    <AssetCard component={Input} uri={uri} />
+    <AssetCard component={Select} uri={uri} />
+    <AssetCard component={TextArea} uri={uri} />
+    <AssetCard pending component={Datepicker} uri={uri} />
+    <AssetCard component={Upload} uri={uri} />
+    <AssetCard pending component={Radio} uri={uri} />
+    <AssetCard component={Checkbox} uri={uri} />
+    <AssetCard component={Switch} uri={uri} />
+    <AssetCard pending component={Slider} uri={uri} />
+  </Row>
+)
 
 # Webframe UI Inputs
 
 Webframe's [Universal Input API](#universal-input-api) allows the use of a single unified [Input](/docs/ui/inputs/Input) component for all user inputs.
 ## Input Components
 
-<Row className='full-width gap wrap'>
-  <AssetCard component={Input} uri={uri} />
-  <AssetCard component={Select} uri={uri} />
-  <AssetCard component={TextArea} uri={uri} />
-  <AssetCard pending component={Datepicker} uri={uri} />
-  <AssetCard component={Upload} uri={uri} />
-  <AssetCard pending component={Radio} uri={uri} />
-  <AssetCard component={Checkbox} uri={uri} />
-  <AssetCard component={Switch} uri={uri} />
-  <AssetCard pending component={Slider} uri={uri} />
-</Row>
+{inputs}
 
 ## Universal Input API
 
